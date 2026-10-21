@@ -23,15 +23,6 @@
       background: linear-gradient(145deg, #161920, #0f1115);
       border: 1px solid #2d3139;
     }
-    .noir-gold-border {
-      border: 1px solid #c5a059;
-    }
-    .text-gold {
-      color: #d4af37;
-    }
-    .bg-gold {
-      background-color: #d4af37;
-    }
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
     }
@@ -39,28 +30,43 @@
       background: #2d3139;
       border-radius: 3px;
     }
+    .pulse-border {
+      animation: pulseBorder 2s infinite;
+    }
+    @keyframes pulseBorder {
+      0%, 100% { border-color: rgba(217, 119, 6, 0.4); }
+      50% { border-color: rgba(217, 119, 6, 1); }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-900 selection:text-white">
 
   <!-- 상단 네비게이션 헤더 -->
-  <header class="border-b border-[#2d3139] bg-[#0f1115]/80 backdrop-blur px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+  <header class="border-b border-[#2d3139] bg-[#0f1115]/90 backdrop-blur px-6 py-3 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center space-x-3">
       <i class="fa-solid fa-feather-pointed text-amber-500 text-xl"></i>
       <div>
         <h1 class="font-title text-base sm:text-lg font-bold tracking-wider text-amber-200">WINCHESTER MANOR</h1>
-        <p class="text-xs text-neutral-400">1926년 10월 21일 폭풍우 치는 밤의 살인</p>
+        <p class="text-[11px] text-neutral-400">1926년 10월 21일 폭풍우 치는 밤의 살인 (2~5인용)</p>
       </div>
     </div>
-    <div class="flex items-center space-x-4">
-      <div id="statusBadge" class="hidden text-xs px-3 py-1 rounded-full border border-amber-600/40 text-amber-400 bg-amber-950/20">
-        <i class="fa-solid fa-wifi mr-1 animate-pulse"></i> <span id="roomStatusText">동기화 중</span>
-      </div>
+    <div class="flex items-center space-x-3">
+      <button id="btnOpenRules" class="text-xs px-3 py-1.5 rounded border border-amber-600/60 bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 font-semibold transition">
+        <i class="fa-solid fa-book-open mr-1"></i> 게임 룰북
+      </button>
       <button id="bgmToggleBtn" class="text-xs px-3 py-1.5 rounded border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-300">
         <i class="fa-solid fa-cloud-rain mr-1"></i> <span id="bgmLabel">효과음 ON</span>
       </button>
     </div>
   </header>
+
+  <!-- 디스코드 보이스 이동 명령 강제 배너 (상단 동적 알림) -->
+  <div id="discordCommandBanner" class="hidden bg-gradient-to-r from-indigo-950 via-purple-950 to-indigo-950 border-b border-indigo-500 px-4 py-2.5 text-center text-xs text-indigo-200 sticky top-[57px] z-30 shadow-lg">
+    <div class="flex items-center justify-center space-x-2">
+      <i class="fa-brands fa-discord text-indigo-400 text-base animate-bounce"></i>
+      <span id="discordCommandText" class="font-bold tracking-wide"></span>
+    </div>
+  </div>
 
   <!-- 메인 뷰 컨테이너 -->
   <main class="flex-1 flex flex-col items-center justify-center p-4 max-w-5xl mx-auto w-full">
@@ -72,14 +78,13 @@
           <i class="fa-solid fa-mask text-amber-400 text-2xl"></i>
         </div>
         <h2 class="text-2xl font-bold text-amber-100 mb-1">폭풍우 치는 윈체스터 별장</h2>
-        <p class="text-xs text-neutral-400">실시간 멀티플레이어 온라인 머더 미스터리 (2~4인)</p>
+        <p class="text-xs text-neutral-400">디스코드 음성 연동 머더 미스터리 (2~5인)</p>
       </div>
 
-      <div class="p-3 mb-5 rounded bg-black/40 border border-neutral-800 text-xs text-neutral-400 leading-relaxed">
-        <p class="font-semibold text-amber-300 mb-1"><i class="fa-solid fa-tower-broadcast mr-1"></i> 멀티플레이 안내</p>
-        <p>• 각자 스마트폰이나 PC로 같은 방 코드에 접속합니다.</p>
-        <p>• 선착순으로 서로 다른 용의자 역할을 1명씩 선택합니다.</p>
-        <p>• 모든 행동, 증거, 밀담 공개가 전원의 화면에 실시간 동기화됩니다.</p>
+      <div class="p-3 mb-5 rounded bg-black/40 border border-neutral-800 text-xs text-neutral-400 leading-relaxed space-y-1">
+        <p class="font-semibold text-amber-300"><i class="fa-solid fa-headset mr-1"></i> 디스코드 음성 플레이 권장</p>
+        <p>• 디스코드에 <strong>[토론방(전체)]</strong>과 <strong>[밀담방 1, 2]</strong> 통화방을 개설해 두세요.</p>
+        <p>• 라운드 진행 및 시간 초과 시 시스템이 음성 채널 이동 명령을 내립니다.</p>
       </div>
 
       <div class="space-y-4">
@@ -106,22 +111,30 @@
     </div>
 
     <!-- [VIEW 2: 캐릭터 선택 및 대기실] -->
-    <div id="viewCharacterSelect" class="w-full max-w-4xl hidden space-y-6">
+    <div id="viewCharacterSelect" class="w-full max-w-4xl hidden space-y-5">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-neutral-900/70 border border-neutral-800 rounded-lg p-4">
         <div>
           <span class="text-xs text-neutral-400">초대 코드:</span>
           <span id="displayRoomCode" class="ml-2 font-mono text-lg font-bold text-amber-400 tracking-wider">------</span>
+          <span id="scenarioModeBadge" class="ml-3 text-[11px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">시나리오 모드 계산 중</span>
         </div>
         <div class="mt-2 sm:mt-0 text-xs text-neutral-400">
-          접속 인원: <span id="playerCount" class="font-bold text-neutral-200">0</span> / 4명
+          접속 인원: <span id="playerCount" class="font-bold text-neutral-200">0</span> / 최대 5명
         </div>
       </div>
 
+      <div class="bg-amber-950/20 border border-amber-700/40 rounded-lg p-3 flex items-center justify-between">
+        <div class="text-xs text-amber-200">
+          <i class="fa-solid fa-circle-info mr-1 text-amber-400"></i> 캐릭터를 고르기 전, 상단의 <strong>[게임 룰북]</strong> 버튼을 눌러 규칙을 숙지하세요!
+        </div>
+        <button id="btnReadRulesQuick" class="text-xs text-amber-400 underline hover:text-amber-300">규칙 보기</button>
+      </div>
+
       <div>
-        <h3 class="text-lg font-bold text-amber-200 mb-1">용의자 선택</h3>
-        <p class="text-xs text-neutral-400 mb-4">플레이할 인물을 1명 선택하세요. (이미 선택된 인물은 중복 선택할 수 없습니다)</p>
-        <div id="characterCardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- 캐릭터 카드 4개 동적 생성 -->
+        <h3 class="text-lg font-bold text-amber-200 mb-1">용의자 선택 (2~5인)</h3>
+        <p class="text-xs text-neutral-400 mb-4">플레이할 인물을 1명 선택하세요. 인원수에 맞춰 시나리오 단서가 자동 조정됩니다.</p>
+        <div id="characterCardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- 5명의 캐릭터 카드 동적 렌더링 -->
         </div>
       </div>
 
@@ -133,7 +146,7 @@
     </div>
 
     <!-- [VIEW 3: 메인 게임 인게임 대시보드] -->
-    <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-5">
+    <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-4">
       
       <!-- 인게임 상단 바: 라운드, 타이머, 내 역할 정보 -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -150,7 +163,7 @@
             <span class="text-xs text-neutral-400 block">남은 토론 시간</span>
             <span id="gameTimer" class="font-mono text-xl font-bold text-amber-400">10:00</span>
           </div>
-          <button id="btnNextPhase" class="text-xs px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded font-semibold">
+          <button id="btnNextPhase" class="text-xs px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded font-semibold transition">
             다음 단계로
           </button>
         </div>
@@ -167,19 +180,19 @@
       </div>
 
       <!-- 메인 조작 3단 탭 레이아웃 -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         <!-- 좌측: 내 개인 시크릿 시트 & 타임라인 -->
-        <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-4">
+        <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-sm font-bold text-amber-300"><i class="fa-solid fa-user-secret mr-1.5"></i> 나의 비밀 & 타임라인</h4>
-            <span class="text-[10px] bg-red-950/60 text-red-400 border border-red-900/50 px-1.5 py-0.5 rounded">화면 노출 주의</span>
+            <span class="text-[10px] bg-red-950 text-red-400 border border-red-900/50 px-1.5 py-0.5 rounded">화면 노출 금지</span>
           </div>
-          <div id="mySecretContent" class="text-xs text-neutral-300 space-y-3 custom-scroll max-h-[420px] overflow-y-auto pr-1"></div>
+          <div id="mySecretContent" class="text-xs text-neutral-300 space-y-3 custom-scroll max-h-[440px] overflow-y-auto pr-1"></div>
         </div>
 
         <!-- 중앙: 블라인드 알리바이 조사 & 2R/4R 밀담실 액션 -->
-        <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-4">
+        <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 알리바이 조사 & 밀담</h4>
             <span id="alibiCountBadge" class="text-xs px-2 py-0.5 rounded font-semibold">조사 진행</span>
@@ -187,7 +200,7 @@
 
           <!-- 알리바이 카드 조사 버튼 영역 -->
           <div class="space-y-2">
-            <p id="alibiGuideText" class="text-xs text-neutral-400">타인의 숨겨진 알리바이 카드를 1장 몰래 조사합니다. (라운드당 1장)</p>
+            <p id="alibiGuideText" class="text-xs text-neutral-400 leading-tight">타인의 숨겨진 알리바이 카드를 1장 조사합니다. (라운드당 1장)</p>
             <div id="alibiInvestigateButtons" class="grid grid-cols-2 gap-2"></div>
           </div>
 
@@ -198,18 +211,18 @@
               <span id="whisperStatus" class="text-[10px] text-neutral-500">대기 중</span>
             </div>
             <p class="text-[11px] text-neutral-400 leading-tight">
-              밀담 중일 때만 소지한 타인의 알리바이 카드를 멤버들에게 <strong>실물로 공개(Show)</strong>할 수 있습니다.
+              파트너 선택 시 <strong>디스코드 [밀담방]으로 즉시 이동</strong> 명령이 발동되며, 이 안에서만 카드를 실물로 보여줄 수 있습니다.
             </p>
             <div class="flex items-center space-x-2">
               <select id="selectWhisperTarget" class="flex-1 bg-black border border-neutral-700 text-xs text-neutral-200 rounded px-2 py-1.5 focus:outline-none">
                 <option value="">밀담 상대 선택...</option>
               </select>
               <button id="btnRequestWhisper" class="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-xs text-neutral-200 rounded border border-neutral-700">
-                밀담 요청
+                밀담 시작
               </button>
             </div>
             <div id="whisperActiveArea" class="hidden pt-2 border-t border-neutral-800">
-              <span class="text-xs text-amber-300 block mb-1">밀담 파트너에게 내 알리바이 카드 공개하기:</span>
+              <span class="text-xs text-amber-300 block mb-1">밀담 상대에게 카드 실물 보여주기:</span>
               <div id="whisperCardsList" class="space-y-1"></div>
             </div>
           </div>
@@ -223,13 +236,13 @@
         </div>
 
         <!-- 우측: 내가 확보한 알리바이 및 증거물품 보관함 -->
-        <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-4">
+        <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-sm font-bold text-amber-300"><i class="fa-solid fa-briefcase mr-1.5"></i> 내 단서 보관함</h4>
             <span id="totalInventoryCount" class="text-xs text-neutral-400">총 0건</span>
           </div>
 
-          <div class="space-y-3 custom-scroll max-h-[420px] overflow-y-auto pr-1">
+          <div class="space-y-3 custom-scroll max-h-[440px] overflow-y-auto pr-1">
             <div>
               <span class="text-xs font-semibold text-neutral-400 block mb-1.5">확보한 타인 알리바이 카드</span>
               <div id="myAlibiCardsList" class="space-y-2">
@@ -287,9 +300,73 @@
 
   </main>
 
+  <!-- [모달 1: 전체 룰북 가이드 모달] -->
+  <div id="rulesModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="noir-card border border-amber-600/60 max-w-2xl w-full rounded-xl p-6 max-h-[85vh] overflow-y-auto custom-scroll space-y-4">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <h3 class="text-lg font-bold text-amber-300"><i class="fa-solid fa-scroll mr-2"></i> 윈체스터 별장 게임 규칙서</h3>
+        <button id="btnCloseRules" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="text-xs text-neutral-300 space-y-3 leading-relaxed">
+        <div class="p-3 bg-amber-950/20 border border-amber-800/40 rounded">
+          <strong class="text-amber-200 block mb-1">🎯 게임의 목표</strong>
+          참가자 중 1명은 대부호 에드워드를 독살한 <strong>진범</strong>입니다. 시민들은 5라운드 동안 서로의 알리바이와 저택 증거를 모아 진범을 밝혀내야 하며, 범인은 자신의 정체를 숨기고 타인에게 누명을 씌워야 합니다.
+        </div>
+
+        <div>
+          <strong class="text-amber-400 block mb-1">1. 블라인드 알리바이 카드 규칙</strong>
+          • 각 플레이어 앞에는 4장의 알리바이 카드가 뒷면으로 숨겨져 있습니다. (본인은 절대 볼 수 없습니다)<br>
+          • 매 라운드마다 다른 플레이어의 알리바이 카드 1장을 뽑아 본인만 확인합니다.<br>
+          • <strong>전체 토론 시간에는 오직 '입으로만' 설명</strong>할 수 있으며, 거짓말을 하거나 왜곡해서 말할 수도 있습니다.
+        </div>
+
+        <div>
+          <strong class="text-amber-400 block mb-1">2. 디스코드 음성 이동 & 밀담 시간 (2R & 4R)</strong>
+          • <strong>일반 토론 시간:</strong> 전원 디스코드 <strong>[메인 토론방]</strong>에서 대화합니다.<br>
+          • <strong>2R / 4R 밀담 시간:</strong> 2~3명씩 짝을 지어 디스코드 <strong>[밀담방]</strong>으로 이동합니다.<br>
+          • <strong>핵심 룰:</strong> 소지하고 있는 타인의 알리바이 카드 원본 실물은 <strong>오직 밀담 시간에만 상대에게 '실물 공개(Show)'</strong>할 수 있습니다.
+        </div>
+
+        <div>
+          <strong class="text-amber-400 block mb-1">3. 라운드 종료 현장 수색</strong>
+          • 라운드가 끝날 때마다 저택 구석구석을 수색하여 24종의 물리적 증거물(황동 촛대, 약병, 협박장 등) 중 1장을 획득합니다.
+        </div>
+
+        <div>
+          <strong class="text-amber-400 block mb-1">4. 5라운드 최종 투표 & 엔딩</strong>
+          • 5라운드 최후 변론 후 모든 플레이어가 진범을 지목합니다.<br>
+          • 진범 검거 성공 여부 및 최다 득표자에 따라 다른 엔딩과 캐릭터별 후속 에필로그가 출력됩니다.
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-neutral-800 text-right">
+        <button id="btnConfirmRules" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">
+          규칙을 이해했습니다
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- [모달 2: 디스코드 채널 이동 팝업 경고] -->
+  <div id="discordMoveModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="noir-card border-2 border-indigo-500 max-w-md w-full rounded-xl p-6 text-center space-y-4 shadow-2xl">
+      <div class="w-16 h-16 bg-indigo-950 border border-indigo-500 rounded-full flex items-center justify-center mx-auto">
+        <i class="fa-brands fa-discord text-indigo-400 text-3xl animate-bounce"></i>
+      </div>
+      <div>
+        <h3 id="discordModalTitle" class="text-lg font-bold text-indigo-200 mb-1">디스코드 이동 명령</h3>
+        <p id="discordModalDesc" class="text-xs text-neutral-300 leading-relaxed"></p>
+      </div>
+      <button id="btnDismissDiscordModal" class="w-full py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-bold rounded transition">
+        확인 (이동 완료)
+      </button>
+    </div>
+  </div>
+
   <!-- 하단 푸터 -->
   <footer class="border-t border-[#2d3139] px-6 py-3 text-center text-[11px] text-neutral-600 bg-[#0b0c10]">
-    Winchester Manor Murder Mystery Online • Real-time Boardgame Platform
+    Winchester Manor Murder Mystery Online • Up to 5 Players • Discord Voice Synced
   </footer>
 
   <!-- Firebase v9 Modular SDK -->
@@ -315,6 +392,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    // [5인 용의자 캐릭터 전체 데이터셋]
     const CHARACTERS = {
       arthur: {
         id: "arthur",
@@ -399,6 +477,27 @@
           { id: "v3", title: "협박 편지 원본", desc: "비올라의 화장대 비밀 서랍에서 '아서, 남편이 눈치챘어. 당장 손을 쓰지 않으면 우린 끝이야'라는 편지가 발견되었다." },
           { id: "v4", title: "21:05의 증언", desc: "비올라는 21:05에 서재 문을 두드렸을 때 안에서 무언가 긁는 듯한 신음 소리를 들었다고 진술했다." }
         ]
+      },
+      victor: {
+        id: "victor",
+        name: "빅터 반스",
+        role: "사설 탐정 / 초대받지 않은 손님 (5인 전용)",
+        avatar: "빅",
+        color: "border-indigo-600",
+        publicDesc: "폭풍우를 피해 저택에 묵게 되었다고 주장하는 사설 탐정. 날카로운 눈썰미로 저택의 비밀을 파헤침.",
+        timeline: [
+          { time: "19:50", text: "자동차가 진흙탕에 빠져 도움을 요청하며 저택에 도착함." },
+          { time: "20:25", text: "피해자 에드워드와 응접실 옆 서재 복도에서 은밀히 짧은 대화를 나눔." },
+          { time: "20:45", text: "손님방에서 짐을 풀고 저택 복도를 거닐며 담배를 피움." },
+          { time: "21:30", text: "비명 소리를 듣고 가장 먼저 사건 현장 통제를 시도함." }
+        ],
+        secret: "우연히 온 것이 아닙니다! 실은 며칠 전 피해자 에드워드로부터 '내 아내와 장남, 주치의의 비리를 비밀리에 조사해달라'는 거액의 의뢰를 받고 저택에 잠입한 상태였습니다. 에드워드의 비밀 보고서 파일이 유출되면 의뢰비 정산이 불가능해집니다.",
+        alibis: [
+          { id: "b1", title: "조사 파일 수첩", desc: "빅터의 품속 수첩에 저택 모든 거주자들의 약점과 이동 경로가 빼곡히 메모되어 있다." },
+          { id: "b2", title: "젖은 장화와 우비", desc: "빅터의 우비 끝에 묻은 진흙이 서재 테라스 창틀의 진흙 성분과 일치한다." },
+          { id: "b3", title: "에드워드의 선금 수표", desc: "빅터의 지갑에서 오늘 아침 에드워드가 발행한 5,000파운드의 수표가 발견되었다." },
+          { id: "b4", title: "도청용 청진 장비", desc: "빅터의 가방에서 벽에 대고 소리를 엿들을 수 있는 사설 탐정용 도청 컵 장비가 발견되었다." }
+        ]
       }
     };
 
@@ -436,7 +535,8 @@
     let localInventory = { alibis: [], clues: [] };
     let audioCtx = null;
     let isRainPlaying = false;
-    let timerInterval = null; // 방장 타이머 인터벌
+    let timerInterval = null;
+    let lastNotifiedPhase = null;
 
     const viewLobby = document.getElementById("viewLobby");
     const viewCharacterSelect = document.getElementById("viewCharacterSelect");
@@ -450,6 +550,31 @@
     const characterCardGrid = document.getElementById("characterCardGrid");
     const btnStartGame = document.getElementById("btnStartGame");
     const statusBadge = document.getElementById("statusBadge");
+
+    // 룰북 모달 제어
+    const rulesModal = document.getElementById("rulesModal");
+    document.getElementById("btnOpenRules").onclick = () => rulesModal.classList.remove("hidden");
+    document.getElementById("btnReadRulesQuick").onclick = () => rulesModal.classList.remove("hidden");
+    document.getElementById("btnCloseRules").onclick = () => rulesModal.classList.add("hidden");
+    document.getElementById("btnConfirmRules").onclick = () => rulesModal.classList.add("hidden");
+
+    // 디스코드 이동 안내 모달 제어
+    const discordMoveModal = document.getElementById("discordMoveModal");
+    const discordModalTitle = document.getElementById("discordModalTitle");
+    const discordModalDesc = document.getElementById("discordModalDesc");
+    const discordCommandBanner = document.getElementById("discordCommandBanner");
+    const discordCommandText = document.getElementById("discordCommandText");
+
+    document.getElementById("btnDismissDiscordModal").onclick = () => discordMoveModal.classList.add("hidden");
+
+    function triggerDiscordMoveAlert(title, desc) {
+      discordModalTitle.textContent = title;
+      discordModalDesc.textContent = desc;
+      discordMoveModal.classList.remove("hidden");
+
+      discordCommandBanner.classList.remove("hidden");
+      discordCommandText.textContent = `[명령] ${desc}`;
+    }
 
     function ensureAuthenticatedUser() {
       return new Promise((resolve, reject) => {
@@ -471,9 +596,7 @@
     }
 
     document.getElementById("bgmToggleBtn").onclick = () => {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (isRainPlaying) {
         audioCtx.suspend();
         isRainPlaying = false;
@@ -490,9 +613,7 @@
       const bufferSize = audioCtx.sampleRate * 2;
       const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
+      for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
       const whiteNoise = audioCtx.createBufferSource();
       whiteNoise.buffer = noiseBuffer;
       whiteNoise.loop = true;
@@ -524,10 +645,9 @@
       try {
         currentUser = await ensureAuthenticatedUser();
       } catch (err) {
-        console.error("인증 실패:", err);
         btnCreateRoom.disabled = false;
         btnCreateRoom.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> 새 방 만들기 (방장)';
-        return alert("Firebase 인증 실패! Authentication -> 익명 로그인이 사용 설정되어 있는지 확인해주세요.");
+        return alert("Firebase 인증 실패! Authentication의 익명 로그인이 사용 설정되어 있는지 확인하세요.");
       }
 
       const code = makeRoomCode();
@@ -551,13 +671,15 @@
           arthur: null,
           elena: null,
           charles: null,
-          viola: null
+          viola: null,
+          victor: null
         },
         alibiPool: {
           arthur: ["a1", "a2", "a3", "a4"],
           elena: ["e1", "e2", "e3", "e4"],
           charles: ["c1", "c2", "c3", "c4"],
-          viola: ["v1", "v2", "v3", "v4"]
+          viola: ["v1", "v2", "v3", "v4"],
+          victor: ["b1", "b2", "b3", "b4"]
         },
         clueDeck: [...CLUE_DECK].sort(() => Math.random() - 0.5),
         roundActions: {
@@ -571,10 +693,9 @@
         await setDoc(doc(db, "rooms", code), roomData);
         listenRoom(code);
       } catch (err) {
-        console.error("DB 생성 에러:", err);
         btnCreateRoom.disabled = false;
         btnCreateRoom.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> 새 방 만들기 (방장)';
-        alert("Firestore 저장 실패! 데이터베이스 규칙이 테스트 모드인지 확인해주세요.");
+        alert("Firestore 쓰기 실패! 데이터베이스 규칙을 확인하세요.");
       }
     };
 
@@ -596,6 +717,13 @@
           return alert("존재하지 않는 방 코드입니다.");
         }
 
+        const currentPlayers = snap.data().players || {};
+        if (Object.keys(currentPlayers).length >= 5) {
+          btnJoinRoom.disabled = false;
+          btnJoinRoom.innerText = "참가";
+          return alert("방이 꽉 찼습니다 (최대 5인).");
+        }
+
         currentRoomCode = code;
         await updateDoc(doc(db, "rooms", code), {
           [`players.${currentUser.uid}`]: {
@@ -606,23 +734,18 @@
         });
         listenRoom(code);
       } catch (err) {
-        console.error("방 참가 에러:", err);
         btnJoinRoom.disabled = false;
         btnJoinRoom.innerText = "참가";
-        alert("방 참가 중 오류가 발생했습니다: " + err.message);
+        alert("방 참가 오류: " + err.message);
       }
     };
 
     function listenRoom(code) {
       if (roomUnsubscribe) roomUnsubscribe();
-      statusBadge.classList.remove("hidden");
-
       roomUnsubscribe = onSnapshot(doc(db, "rooms", code), (snap) => {
         if (!snap.exists()) return;
         const data = snap.data();
         renderRoomState(data);
-      }, (err) => {
-        console.error("동기화 에러:", err);
       });
     }
 
@@ -641,7 +764,7 @@
         viewEnding.classList.add("hidden");
         viewGame.classList.remove("hidden");
         renderGameDashboard(room);
-        setupHostTimer(room); // 방장 주도 타이머 동기화
+        setupHostTimer(room);
       } else if (room.status === "ENDED") {
         if (timerInterval) clearInterval(timerInterval);
         viewGame.classList.add("hidden");
@@ -650,16 +773,17 @@
       }
     }
 
-    // 방장 기기에서 1초마다 Firestore의 timerSeconds 차감
+    // 타이머 및 시간 오버 시 디스코드 토론방 복귀 명령 동기화
     function setupHostTimer(room) {
       if (room.hostUid !== currentUser.uid) return;
-      if (timerInterval) return; // 이미 실행 중이면 중복 방지
+      if (timerInterval) return;
 
       timerInterval = setInterval(async () => {
         if (!currentRoomCode) return;
         const snap = await getDoc(doc(db, "rooms", currentRoomCode));
         if (!snap.exists()) return;
         const rData = snap.data();
+
         if (rData.status !== "PLAYING") {
           clearInterval(timerInterval);
           timerInterval = null;
@@ -670,6 +794,11 @@
           await updateDoc(doc(db, "rooms", currentRoomCode), {
             timerSeconds: rData.timerSeconds - 1
           });
+        } else if (rData.timerSeconds === 0) {
+          // 시간 초과 시 다음 페이즈 또는 복귀 처리
+          if (rData.phase === "WHISPER") {
+            advanceGamePhase(rData, true); // 밀담 시간 오버 -> 토론 복귀
+          }
         }
       }, 1000);
     }
@@ -679,8 +808,13 @@
       const owners = room.characterOwners || {};
       const myInfo = players[currentUser.uid];
       mySelectedChar = myInfo ? myInfo.charId : null;
+      const count = Object.keys(players).length;
 
-      document.getElementById("playerCount").textContent = Object.keys(players).length;
+      document.getElementById("playerCount").textContent = count;
+      const modeBadge = document.getElementById("scenarioModeBadge");
+      modeBadge.textContent = count <= 3 ? "2~3인 모드 (공용 조사 풀 활성화)" :
+                              count === 4 ? "4인 정통 미스터리 모드" : "5인 탐정 확장 시나리오 모드";
+
       characterCardGrid.innerHTML = "";
 
       Object.keys(CHARACTERS).forEach(cid => {
@@ -691,7 +825,7 @@
         const ownerName = isTakenByOther && players[ownerUid] ? players[ownerUid].nickname : "";
 
         const card = document.createElement("div");
-        card.className = `p-4 rounded-xl border flex flex-col justify-between transition-all ${
+        card.className = `p-3 rounded-xl border flex flex-col justify-between transition-all ${
           isTakenByMe ? 'bg-amber-950/40 border-amber-500 ring-2 ring-amber-500' :
           isTakenByOther ? 'bg-neutral-900/40 border-neutral-800 opacity-50 cursor-not-allowed' :
           'bg-[#13161c] border-neutral-700 hover:border-neutral-500 cursor-pointer'
@@ -702,7 +836,7 @@
             <div class="flex items-center space-x-2 mb-2">
               <span class="w-7 h-7 rounded-full bg-neutral-800 flex items-center justify-center font-bold text-xs text-amber-300 border border-neutral-600">${c.avatar}</span>
               <div>
-                <h4 class="text-sm font-bold text-neutral-100">${c.name}</h4>
+                <h4 class="text-xs font-bold text-neutral-100">${c.name}</h4>
                 <span class="text-[10px] text-amber-500 block">${c.role}</span>
               </div>
             </div>
@@ -712,7 +846,7 @@
             ${
               isTakenByMe ? `<button class="w-full py-1.5 text-xs bg-amber-600 text-white rounded font-bold">선택 완료</button>` :
               isTakenByOther ? `<div class="text-[11px] text-center text-neutral-500 py-1">선택됨 (${ownerName})</div>` :
-              `<button class="btnSelectChar w-full py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded font-semibold">이 역할 맡기</button>`
+              `<button class="btnSelectChar w-full py-1.5 text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded font-semibold">선택하기</button>`
             }
           </div>
         `;
@@ -731,7 +865,7 @@
         btnStartGame.className = chosenCount >= 2 
           ? "px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold rounded cursor-pointer"
           : "px-6 py-2.5 bg-neutral-800 text-neutral-500 text-sm font-bold rounded cursor-not-allowed";
-        btnStartGame.textContent = chosenCount >= 2 ? `게임 시작 (${chosenCount}명 완료)` : "인원 대기 중 (최소 2인 선택 필요)";
+        btnStartGame.textContent = chosenCount >= 2 ? `게임 시작 (${chosenCount}명 참여)` : "인원 대기 중 (최소 2인 필요)";
         btnStartGame.onclick = () => startGameSession(room);
       } else {
         btnStartGame.disabled = true;
@@ -743,12 +877,9 @@
       if (!currentRoomCode) return;
       const roomRef = doc(db, "rooms", currentRoomCode);
       const snap = await getDoc(roomRef);
-      const data = snap.data();
-      const owners = data.characterOwners;
+      const owners = snap.data().characterOwners;
 
-      if (owners[cid] && owners[cid] !== currentUser.uid) {
-        return alert("방금 다른 플레이어가 먼저 선택했습니다!");
-      }
+      if (owners[cid] && owners[cid] !== currentUser.uid) return alert("이미 다른 플레이어가 선택했습니다!");
 
       const updates = {};
       Object.keys(owners).forEach(k => {
@@ -785,12 +916,36 @@
         room.phase === "WHISPER" ? "밀담 단계 (카드 실물 공개)" :
         room.phase === "SEARCH" ? "현장 단서 수색" : "최종 투표 진행 중";
 
-      // 타이머 실시간 반영
+      // 타이머 포맷 및 시간 오버 감지
       const m = Math.floor(room.timerSeconds / 60);
       const s = room.timerSeconds % 60;
-      document.getElementById("gameTimer").textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      const timerEl = document.getElementById("gameTimer");
+      timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
-      // 좌측 시크릿 시트 채우기
+      if (room.timerSeconds <= 30 && room.timerSeconds > 0) {
+        timerEl.classList.add("text-red-500", "animate-pulse");
+      } else {
+        timerEl.classList.remove("text-red-500", "animate-pulse");
+      }
+
+      // 디스코드 이동 알림 체크 (단계 변경 감지 시 1회 발동)
+      const currentPhaseKey = `${room.round}_${room.phase}`;
+      if (lastNotifiedPhase !== currentPhaseKey) {
+        lastNotifiedPhase = currentPhaseKey;
+        if (room.phase === "DISCUSSION") {
+          triggerDiscordMoveAlert(
+            `📢 ${room.round}라운드 전체 토론 시작`,
+            "전원 디스코드 [메인 토론방] 음성 채널로 집결하여 토론 준비를 완료하세요!"
+          );
+        } else if (room.phase === "WHISPER") {
+          triggerDiscordMoveAlert(
+            `🤫 ${room.round}라운드 밀담 시간 개시`,
+            "파트너를 정한 플레이어들은 즉시 디스코드 [밀담방 1 / 2] 음성 채널로 이동하세요!"
+          );
+        }
+      }
+
+      // 좌측 시크릿 시트
       const secretBox = document.getElementById("mySecretContent");
       secretBox.innerHTML = `
         <div class="p-2.5 rounded bg-black/40 border border-neutral-800">
@@ -808,7 +963,7 @@
         </div>
       `;
 
-      // 중앙 타인 알리바이 조사 버튼 (라운드당 1회 제한 확인)
+      // 중앙 타인 알리바이 조사 버튼
       const curRoundActions = room.roundActions?.[room.round] || {};
       const hasDrawnAlibiThisRound = !!curRoundActions.alibiDrawn?.[currentUser.uid];
       const hasDrawnClueThisRound = !!curRoundActions.clueDrawn?.[currentUser.uid];
@@ -816,7 +971,7 @@
       const badge = document.getElementById("alibiCountBadge");
       const guideText = document.getElementById("alibiGuideText");
       if (hasDrawnAlibiThisRound) {
-        badge.textContent = "이번 라운드 조사 완료";
+        badge.textContent = "이번 라운드 완료";
         badge.className = "text-xs px-2 py-0.5 rounded font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800";
         guideText.textContent = "이미 이번 라운드 알리바이 조사를 마쳤습니다. 다음 라운드에 다시 조사할 수 있습니다.";
       } else {
@@ -826,23 +981,19 @@
       }
 
       renderInvestigateButtons(room, myCharId, hasDrawnAlibiThisRound);
-
-      // 밀담실 제어 (2R, 4R)
       renderWhisperSection(room, myCharId);
-
-      // 우측 인벤토리 목록 렌더링
       renderInventoryList();
 
-      // 라운드 조작 (방장 전용)
+      // 방장 전용 라운드 넘김 버튼
       const btnNext = document.getElementById("btnNextPhase");
       if (room.hostUid === currentUser.uid) {
         btnNext.classList.remove("hidden");
-        btnNext.onclick = () => advanceGamePhase(room);
+        btnNext.onclick = () => advanceGamePhase(room, false);
       } else {
         btnNext.classList.add("hidden");
       }
 
-      // 증거물 수색 버튼 (라운드당 1회)
+      // 증거물 수색 버튼 제어
       const btnDrawClue = document.getElementById("btnDrawClue");
       if (hasDrawnClueThisRound) {
         btnDrawClue.disabled = true;
@@ -855,7 +1006,7 @@
         btnDrawClue.onclick = () => drawClueCard(room);
       }
 
-      // 5라운드 투표 처리
+      // 5라운드 투표
       if (room.round === 5 && room.phase === "VOTING") {
         document.getElementById("finalVoteSection").classList.remove("hidden");
         renderVoteButtons(room, myCharId);
@@ -864,16 +1015,14 @@
       }
     }
 
-    // 타 캐릭터 알리바이 조사 버튼 렌더링 (라운드 1회 제한 적용)
     function renderInvestigateButtons(room, myCharId, hasDrawnThisRound) {
       const container = document.getElementById("alibiInvestigateButtons");
       container.innerHTML = "";
 
       Object.keys(CHARACTERS).forEach(cid => {
-        if (cid === myCharId) return; // 본인 카드는 조사 불가
+        if (cid === myCharId) return;
         const c = CHARACTERS[cid];
         const pool = room.alibiPool[cid] || [];
-
         const isAvailable = (pool.length > 0) && !hasDrawnThisRound;
 
         const btn = document.createElement("button");
@@ -890,24 +1039,18 @@
           <span class="text-[10px] text-neutral-500 block truncate">${c.role}</span>
         `;
 
-        if (isAvailable) {
-          btn.onclick = () => investigateAlibi(cid, room.round);
-        }
+        if (isAvailable) btn.onclick = () => investigateAlibi(cid, room.round);
         container.appendChild(btn);
       });
     }
 
-    // 알리바이 카드 1장 비공개 인출
     async function investigateAlibi(targetCharId, round) {
       if (!currentRoomCode) return;
       const roomRef = doc(db, "rooms", currentRoomCode);
       const snap = await getDoc(roomRef);
       const data = snap.data();
       
-      // 이미 이번 라운드에 뽑았는지 서버 상태 재검증
-      if (data.roundActions?.[round]?.alibiDrawn?.[currentUser.uid]) {
-        return alert("이미 이번 라운드에 알리바이 카드를 1장 조사하셨습니다!");
-      }
+      if (data.roundActions?.[round]?.alibiDrawn?.[currentUser.uid]) return alert("이미 이번 라운드에 알리바이를 조사했습니다!");
 
       const pool = data.alibiPool[targetCharId] || [];
       if (pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
@@ -923,16 +1066,12 @@
       const targetChar = CHARACTERS[targetCharId];
       const cardObj = targetChar.alibis.find(a => a.id === cardId);
       if (cardObj) {
-        localInventory.alibis.push({
-          ownerName: targetChar.name,
-          ...cardObj
-        });
-        alert(`[알리바이 입수 완료]\n${targetChar.name}의 카드: "${cardObj.title}"\n${cardObj.desc}\n\n※ 이번 라운드 조사를 완료했습니다. 다음 라운드에 추가 조사가 가능합니다.`);
+        localInventory.alibis.push({ ownerName: targetChar.name, ...cardObj });
+        alert(`[알리바이 입수 완료]\n${targetChar.name}의 카드: "${cardObj.title}"\n${cardObj.desc}\n\n※ 이번 라운드 조사를 마쳤습니다.`);
         renderInventoryList();
       }
     }
 
-    // 24종 현장 증거 덱에서 1장 드로우 (라운드당 1회)
     async function drawClueCard(room) {
       if (!currentRoomCode) return;
       const round = room.round;
@@ -940,12 +1079,10 @@
       const snap = await getDoc(roomRef);
       const data = snap.data();
 
-      if (data.roundActions?.[round]?.clueDrawn?.[currentUser.uid]) {
-        return alert("이미 이번 라운드 현장 수색을 마치셨습니다!");
-      }
+      if (data.roundActions?.[round]?.clueDrawn?.[currentUser.uid]) return alert("이미 이번 라운드 수색을 마쳤습니다!");
 
       const deck = data.clueDeck || [];
-      if (deck.length === 0) return alert("저택의 모든 증거물품이 이미 수색되었습니다.");
+      if (deck.length === 0) return alert("더 이상 남은 증거가 없습니다.");
 
       const drawnClue = deck[0];
       const remaining = deck.slice(1);
@@ -960,7 +1097,6 @@
       renderInventoryList();
     }
 
-    // 밀담실 제어 (2R, 4R)
     function renderWhisperSection(room, myCharId) {
       const select = document.getElementById("selectWhisperTarget");
       const isWhisperRound = (room.round === 2 || room.round === 4);
@@ -987,7 +1123,8 @@
 
       document.getElementById("btnRequestWhisper").onclick = async () => {
         const targetCid = select.value;
-        if (!targetCid) return alert("상대를 선택하세요!");
+        if (!targetCid) return alert("밀담 상대를 선택하세요!");
+
         await updateDoc(doc(db, "rooms", currentRoomCode), {
           whisperRoom: {
             initiator: myCharId,
@@ -995,6 +1132,11 @@
             revealedCards: []
           }
         });
+
+        triggerDiscordMoveAlert(
+          "🤫 디스코드 [밀담방] 이동 명령",
+          `${CHARACTERS[myCharId].name}님과 ${CHARACTERS[targetCid].name}님은 지금 즉시 디스코드 [밀담방 1] 음성 채널로 이동하여 단독 대화를 진행하세요!`
+        );
       };
 
       const wRoom = room.whisperRoom;
@@ -1007,7 +1149,7 @@
         listDiv.innerHTML = "";
 
         if (localInventory.alibis.length === 0) {
-          listDiv.innerHTML = `<p class="text-[11px] text-neutral-500">공개할 수 있는 타인의 알리바이 카드가 없습니다.</p>`;
+          listDiv.innerHTML = `<p class="text-[11px] text-neutral-500">공개할 타인의 알리바이 카드가 없습니다.</p>`;
         } else {
           localInventory.alibis.forEach(card => {
             const row = document.createElement("div");
@@ -1023,7 +1165,7 @@
                   ...card
                 })
               });
-              alert("상대방에게 카드 실물을 확인시켰습니다!");
+              alert("상대방에게 카드 원본 실물을 확인시켰습니다!");
             };
             listDiv.appendChild(row);
           });
@@ -1064,8 +1206,8 @@
       }
     }
 
-    // 다음 페이즈 및 라운드 전환 (방장 전용)
-    async function advanceGamePhase(room) {
+    // 페이즈 전환 및 디스코드 복귀/이동 명령 분기
+    async function advanceGamePhase(room, isTimeout = false) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       let nextRound = room.round;
       let nextPhase = room.phase;
@@ -1082,14 +1224,19 @@
       } else if (room.phase === "WHISPER") {
         nextPhase = "SEARCH";
         newTimer = 180;
+        // 시간 초과 또는 밀담 종료 시 디스코드 토론방 복귀 명령
+        triggerDiscordMoveAlert(
+          "⏰ 밀담 시간 종료! 디스코드 [메인 토론방] 복귀",
+          "밀담 시간이 끝났습니다! 모든 인원은 즉시 디스코드 [메인 토론방] 음성 채널로 복귀하세요!"
+        );
       } else if (room.phase === "SEARCH") {
         if (room.round === 5) {
           nextPhase = "VOTING";
-          newTimer = 300; // 최종 투표 5분
+          newTimer = 300;
         } else {
           nextRound = room.round + 1;
           nextPhase = "DISCUSSION";
-          newTimer = 600; // 새 라운드 10분
+          newTimer = 600;
         }
       }
 
@@ -1114,20 +1261,20 @@
 
       Object.keys(CHARACTERS).forEach(cid => {
         if (cid === myCharId) return;
+        if (!room.characterOwners[cid]) return; // 실제 참가자만 투표 대상
+
         const c = CHARACTERS[cid];
         const btn = document.createElement("button");
         btn.className = "px-4 py-2 bg-neutral-900 hover:bg-amber-950 border border-amber-600/50 text-amber-200 rounded text-xs font-bold transition cursor-pointer";
         btn.textContent = `${c.name} (${c.role})`;
-        btn.onclick = () => submitVote(cid, room);
+        btn.onclick = () => submitVote(cid);
         grid.appendChild(btn);
       });
     }
 
-    async function submitVote(targetCid, room) {
+    async function submitVote(targetCid) {
       const roomRef = doc(db, "rooms", currentRoomCode);
-      await updateDoc(roomRef, {
-        [`votes.${currentUser.uid}`]: targetCid
-      });
+      await updateDoc(roomRef, { [`votes.${currentUser.uid}`]: targetCid });
 
       const snap = await getDoc(roomRef);
       const data = snap.data();
@@ -1142,9 +1289,7 @@
     function renderEndingView(room) {
       const votes = room.votes || {};
       const tally = {};
-      Object.values(votes).forEach(cid => {
-        tally[cid] = (tally[cid] || 0) + 1;
-      });
+      Object.values(votes).forEach(cid => { tally[cid] = (tally[cid] || 0) + 1; });
 
       let maxVotes = -1;
       let accused = null;
@@ -1172,7 +1317,7 @@
       document.getElementById("endingTruthText").innerHTML = `
         <strong>진범: 주치의 엘레나 바스커빌</strong><br>
         엘레나는 과거 자신의 치명적인 의료과실을 빌미로 평생 자신을 협박해 온 피해자 에드워드에게 20:10 정기 진통제 주사 시 치사량의 지연성 청산가리를 투여했습니다. 
-        에드워드는 20:50경 독이 온몸에 퍼져 고통 속에 쓰러지며 테이블을 쳤고, 21:00경 금고를 털러 온 장남 아서는 쓰러진 부친을 보고 기겁해 도망쳤습니다. 노집사 찰스는 자신의 몫을 지키기 위해 새 유언장을 숨겼고, 비올라는 아서와의 불륜 관계를 숨기려 했습니다.
+        에드워드는 20:50경 독이 온몸에 퍼져 고통 속에 쓰러졌으며, 용의자들은 각자의 치부와 비밀(절도, 유언장 은닉, 불륜, 비밀 조사)을 감추기 위해 서로를 의심했습니다.
         <br><br>
         ${isSuccess ? '용의자들의 날카로운 추리와 알리바이 교차 검증을 통해 엘레나의 독극물 파편과 관리대장 조작이 명백히 입증되었으며, 엘레나는 경찰에 체포되었습니다.' : `엉뚱하게도 <strong>${CHARACTERS[accused]?.name || '무고한 인물'}</strong>이(가) 최다 득표를 받아 살인범으로 누명을 쓰고 체포되었으며, 엘레나는 유유히 저택을 빠져나와 증거를 불태웠습니다.`}
       `;
@@ -1180,19 +1325,23 @@
       document.getElementById("endingEpilogues").innerHTML = `
         <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
           <span class="font-bold text-blue-400 block mb-1">아서 윈체스터</span>
-          <p class="text-neutral-400">살인 누명은 벗었으나 가문의 유산 분배가 동결되었고, 사채업자들의 빗발치는 추심을 피해 저택을 버리고 야반도주합니다.</p>
+          <p class="text-neutral-400">살인 누명은 벗었으나 유산이 동결되었고, 빚쟁이들을 피해 야반도주합니다.</p>
         </div>
         <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
           <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
-          <p class="text-neutral-400">유언장 은닉 혐의로 가벼운 처벌을 받게 되었으나, 30년간 청춘을 바쳐 관리해 온 저택을 눈물로 등진 채 쓸쓸히 은퇴합니다.</p>
+          <p class="text-neutral-400">유언장 은닉 혐의로 가벼운 처벌을 받고 30년간 지켜온 저택을 떠납니다.</p>
         </div>
         <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
           <span class="font-bold text-purple-400 block mb-1">비올라 윈체스터</span>
-          <p class="text-neutral-400">아서와의 밀회 편지가 세간에 공개되며 사회적 지탄을 받게 되었고, 유언장이 무효화되면서 위자료 한 푼 없이 빈손으로 쫓겨납니다.</p>
+          <p class="text-neutral-400">아서와의 밀회 편지가 공개되어 지탄을 받고 위자료 한 푼 없이 쫓겨납니다.</p>
         </div>
         <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
           <span class="font-bold text-emerald-400 block mb-1">엘레나 바스커빌</span>
-          <p class="text-neutral-400">${isSuccess ? '교도소에 수감되어 죗값을 치르게 되었으나, 마침내 에드워드의 협박에서 벗어났다며 후련한 미소를 짓습니다.' : '협박 편지와 진료 장부를 완벽히 소각하고 막대한 진료비를 챙겨 유유히 해외로 떠났습니다.'}</p>
+          <p class="text-neutral-400">${isSuccess ? '교도소에 수감되었으나 에드워드의 악랄한 협박에서 벗어났다며 미소를 짓습니다.' : '협박 편지와 진료 장부를 태우고 막대한 돈을 챙겨 해외로 도주했습니다.'}</p>
+        </div>
+        <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
+          <span class="font-bold text-indigo-400 block mb-1">빅터 반스 (탐정)</span>
+          <p class="text-neutral-400">${isSuccess ? '사건 해결의 결정적 자문을 제공하여 명탐정으로 이름을 날리게 됩니다.' : '의뢰인을 지키지 못하고 엉뚱한 사람을 지목해 탐정 사무소 문을 닫게 됩니다.'}</p>
         </div>
       `;
     }
