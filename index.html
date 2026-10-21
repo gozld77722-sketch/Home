@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>폭풍우 치는 윈체스터 별장: 사라진 유언장 ver.10</title>
+  <title>폭풍우 치는 윈체스터 별장: 사라진 유언장 ver.11</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -40,7 +40,7 @@
       <i class="fa-solid fa-feather-pointed text-amber-500 text-lg sm:text-xl"></i>
       <div>
         <h1 class="font-title text-sm sm:text-lg font-bold tracking-wider text-amber-200">WINCHESTER MANOR</h1>
-        <p class="text-[10px] sm:text-xs text-neutral-400">1926 폭풍우 치는 밤의 살인 (ver.10)</p>
+        <p class="text-[10px] sm:text-xs text-neutral-400">1926 폭풍우 치는 밤의 살인 (ver.11)</p>
       </div>
     </div>
     <div class="flex items-center space-x-2">
@@ -180,7 +180,7 @@
         </div>
       </div>
 
-      <!-- 5R 최후 변론 알림 배너 (변론 중일 때만 상단에 띄움) -->
+      <!-- 5R 최후 변론 알림 배너 -->
       <div id="defenseTopNotice" class="hidden noir-card p-3 rounded-lg border border-red-600/70 bg-red-950/30 text-center">
         <h4 class="text-sm font-bold text-red-300"><i class="fa-solid fa-scale-unbalanced-flip mr-1.5"></i> 5R 최후의 무죄 변론 (3분) 진행 중</h4>
         <p class="text-xs text-neutral-300">소지한 비밀과 확보한 단서들을 확인하며 디스코드에서 마지막 무죄를 주장하세요!</p>
@@ -198,7 +198,7 @@
           <div id="mySecretContent" class="text-xs text-neutral-300 space-y-3 custom-scroll max-h-[380px] sm:max-h-[440px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- 중앙: 알리바이 조사 & 듀얼 밀담실 & 현장 증거 수색 (ver.10 상시 오픈) -->
+        <!-- 중앙: 알리바이 조사 & 듀얼 밀담실 & 현장 증거 수색 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 알리바이 조사 & 밀담</h4>
@@ -237,7 +237,7 @@
                   </button>
                 </div>
 
-                <div class="p-2 bg-neutral-900/90 rounded border border-neutral-700">
+                <div class="p-2 bg-neutral-900/90 rounded border border-indigo-700">
                   <span class="text-[11px] font-bold text-indigo-400 block mb-1">밀담룸 2 배정</span>
                   <div id="whisperRoom2Checkboxes" class="space-y-1"></div>
                   <button id="btnAssignRoom2" class="w-full mt-2 py-1 bg-indigo-800 hover:bg-indigo-700 text-[10px] font-bold text-white rounded">
@@ -253,10 +253,10 @@
             </div>
           </div>
 
-          <!-- 현장 증거물품 수색 버튼 (ver.10: 토론 시간 동안 상시 오픈) -->
+          <!-- 현장 증거물품 수색 버튼 (ver.11: 괄호 삭제 및 문구 간소화) -->
           <div class="pt-2 border-t border-neutral-800">
             <button id="btnDrawClue" class="w-full py-2 bg-neutral-900 text-neutral-500 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed">
-              <i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 현장 증거 수색 대기 중 <span id="clueRemainCount" class="font-mono ml-1">(24/24)</span>
+              <i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 현장 증거 수색 대기 중
             </button>
           </div>
         </div>
@@ -336,7 +336,7 @@
   <div id="rulesModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
     <div class="noir-card border border-amber-600/60 max-w-2xl w-full rounded-xl p-5 sm:p-6 max-h-[85vh] overflow-y-auto custom-scroll space-y-4">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-2.5">
-        <h3 class="text-base sm:text-lg font-bold text-amber-300"><i class="fa-solid fa-scroll mr-2"></i> 윈체스터 별장 게임 규칙서 (ver.10)</h3>
+        <h3 class="text-base sm:text-lg font-bold text-amber-300"><i class="fa-solid fa-scroll mr-2"></i> 윈체스터 별장 게임 규칙서 (ver.11)</h3>
         <button id="btnCloseRules" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -431,14 +431,14 @@
 
   <!-- 하단 푸터 -->
   <footer class="border-t border-[#2d3139] px-4 py-2.5 text-center text-[10px] text-neutral-600 bg-[#0b0c10]">
-    Winchester Manor Murder Mystery Online • Multi-Device Discord Synced (ver.10)
+    Winchester Manor Murder Mystery Online • Multi-Device Discord Synced (ver.11)
   </footer>
 
   <!-- Firebase v9 Modular SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { 
-      getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, arrayUnion 
+      getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, arrayUnion, runTransaction
     } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { 
       getAuth, signInAnonymously, onAuthStateChanged 
@@ -724,7 +724,6 @@
       const code = makeRoomCode();
       currentRoomCode = code;
 
-      // [ver.10] 통합 토론 및 수색 페이즈: ROUND_MAIN
       const roomData = {
         code: code,
         hostUid: currentUser.uid,
@@ -1047,7 +1046,6 @@
       await updateDoc(roomRef, updates);
     }
 
-    // [ver.10] 시작 페이즈를 ROUND_MAIN(통합 토론 & 수색)으로 설정
     async function startGameSession(room) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       await updateDoc(roomRef, {
@@ -1055,6 +1053,8 @@
         round: 1,
         phase: "ROUND_MAIN",
         timerSeconds: 300,
+        roundCluesDrawn: {},
+        roundAlibisDrawn: {},
         globalNotice: "📢 [1R: 토론 및 조사 (5분)] 음성 토론을 진행하면서 알리바이 조사와 현장 증거 수색을 자유롭게 진행하세요!"
       });
     }
@@ -1140,13 +1140,16 @@
         </div>
       `;
 
-      // 알리바이 조사 횟수 및 수색 체크
+      // 알리바이 조사 횟수 및 수색 체크 (현재 라운드 기준)
       const totalPlayers = Object.keys(room.players).length;
       const maxDrawsThisRound = totalPlayers <= 2 ? 2 : 1;
       
-      const alibiKey = `${room.round}_${currentUser.uid}`;
+      const currentRound = room.round;
+      const alibiKey = `${currentRound}_${currentUser.uid}`;
+      const clueKey = `${currentRound}_${currentUser.uid}`;
+
       const alibiDrawnCount = room.roundAlibisDrawn?.[alibiKey] || 0;
-      const hasDrawnClueThisRound = !!room.roundCluesDrawn?.[alibiKey];
+      const hasDrawnClueThisRound = !!room.roundCluesDrawn?.[clueKey];
 
       const badge = document.getElementById("alibiCountBadge");
       const guideText = document.getElementById("alibiGuideText");
@@ -1166,30 +1169,29 @@
       renderInventoryList();
       handlePhaseVoteStatus(room);
 
-      // [ver.10 핵심 변경]: ROUND_MAIN 페이즈 동안 현장 증거 수색 상시 활성화
+      // [ver.11 수정]: 괄호 및 숫자 삭제, 순수 '현장 증거 수색하기'로 변경 & 라운드별 수색 상태 처리
       const remainClues = room.clueDeck?.length || 0;
-      document.getElementById("clueRemainCount").textContent = `(${remainClues}/24)`;
       const btnDrawClue = document.getElementById("btnDrawClue");
       
       if (room.phase === "ROUND_MAIN") {
         if (hasDrawnClueThisRound) {
           btnDrawClue.disabled = true;
           btnDrawClue.className = "w-full py-2 bg-neutral-900 text-neutral-600 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed";
-          btnDrawClue.innerHTML = `<i class="fa-solid fa-check mr-1.5 text-emerald-500"></i> 이번 라운드 증거 수색 완료 <span class="font-mono ml-1">(${remainClues}/24)</span>`;
+          btnDrawClue.innerHTML = `<i class="fa-solid fa-check mr-1.5 text-emerald-500"></i> 이번 라운드 증거 수색 완료`;
         } else if (remainClues === 0) {
           btnDrawClue.disabled = true;
           btnDrawClue.className = "w-full py-2 bg-neutral-900 text-neutral-600 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed";
-          btnDrawClue.innerHTML = `<i class="fa-solid fa-box-open mr-1.5 text-neutral-600"></i> 현장 증거 소진됨 <span class="font-mono ml-1">(0/24)</span>`;
+          btnDrawClue.innerHTML = `<i class="fa-solid fa-box-open mr-1.5 text-neutral-600"></i> 현장 증거 소진됨`;
         } else {
           btnDrawClue.disabled = false;
           btnDrawClue.className = "w-full py-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-amber-100 text-xs font-bold rounded border border-amber-500 cursor-pointer shadow-lg animate-pulse";
-          btnDrawClue.innerHTML = `<i class="fa-solid fa-box-archive mr-1.5 text-amber-300"></i> 현장 증거물품 수색하기 (라운드 1회) <span class="text-amber-200 font-mono ml-1">(${remainClues}/24)</span>`;
-          btnDrawClue.onclick = () => drawClueCard(room);
+          btnDrawClue.innerHTML = `<i class="fa-solid fa-box-archive mr-1.5 text-amber-300"></i> 현장 증거 수색하기`;
+          btnDrawClue.onclick = () => drawClueCard();
         }
       } else {
         btnDrawClue.disabled = true;
         btnDrawClue.className = "w-full py-2 bg-neutral-900 text-neutral-500 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed";
-        btnDrawClue.innerHTML = `<i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 수색 시간 종료 (토론 라운드에만 수색 가능) <span class="font-mono ml-1">(${remainClues}/24)</span>`;
+        btnDrawClue.innerHTML = `<i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 수색 시간 종료 (토론 라운드에만 수색 가능)`;
       }
     }
 
@@ -1220,68 +1222,108 @@
           <span class="text-[10px] text-neutral-500 block truncate">${c.role}</span>
         `;
 
-        if (isAvailable) btn.onclick = () => investigateAlibi(cid, room.round);
+        if (isAvailable) btn.onclick = () => investigateAlibi(cid);
         container.appendChild(btn);
       });
     }
 
-    async function investigateAlibi(targetCharId, round) {
+    // [ver.11 수정]: 트랜잭션 기반 확실한 라운드 알리바이 조사
+    async function investigateAlibi(targetCharId) {
       if (!currentRoomCode) return;
       const roomRef = doc(db, "rooms", currentRoomCode);
-      const snap = await getDoc(roomRef);
-      const data = snap.data();
 
-      const alibiKey = `${round}_${currentUser.uid}`;
-      const totalPlayers = Object.keys(data.players).length;
-      const maxDraws = totalPlayers <= 2 ? 2 : 1;
-      const currentDrawn = data.roundAlibisDrawn?.[alibiKey] || 0;
+      try {
+        let pickedCard = null;
+        let targetChar = null;
 
-      if (currentDrawn >= maxDraws) return alert("이번 라운드 조사 횟수를 모두 소진했습니다!");
+        await runTransaction(db, async (tx) => {
+          const snap = await tx.get(roomRef);
+          if (!snap.exists()) return;
+          const data = snap.data();
 
-      const pool = data.alibiPool[targetCharId] || [];
-      if (pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
+          const activeRound = data.round;
+          const alibiKey = `${activeRound}_${currentUser.uid}`;
+          const totalPlayers = Object.keys(data.players || {}).length;
+          const maxDraws = totalPlayers <= 2 ? 2 : 1;
+          const currentDrawn = data.roundAlibisDrawn?.[alibiKey] || 0;
 
-      const cardId = pool[0];
-      const remaining = pool.slice(1);
+          if (currentDrawn >= maxDraws) {
+            throw new Error("이번 라운드 조사 횟수를 모두 소진했습니다!");
+          }
 
-      await updateDoc(roomRef, {
-        [`alibiPool.${targetCharId}`]: remaining,
-        [`roundAlibisDrawn.${alibiKey}`]: currentDrawn + 1
-      });
+          const pool = data.alibiPool?.[targetCharId] || [];
+          if (pool.length === 0) {
+            throw new Error("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
+          }
 
-      const targetChar = CHARACTERS[targetCharId];
-      const cardObj = targetChar.alibis.find(a => a.id === cardId);
-      if (cardObj) {
-        localInventory.alibis.push({ ownerName: targetChar.name, ...cardObj });
-        alert(`[알리바이 입수 완료]\n${targetChar.name}의 카드: "${cardObj.title}"\n${cardObj.desc}`);
-        renderInventoryList();
+          const cardId = pool[0];
+          const remaining = pool.slice(1);
+
+          targetChar = CHARACTERS[targetCharId];
+          pickedCard = targetChar.alibis.find(a => a.id === cardId);
+
+          tx.update(roomRef, {
+            [`alibiPool.${targetCharId}`]: remaining,
+            [`roundAlibisDrawn.${alibiKey}`]: currentDrawn + 1
+          });
+        });
+
+        if (pickedCard && targetChar) {
+          localInventory.alibis.push({ ownerName: targetChar.name, ...pickedCard });
+          alert(`[알리바이 입수 완료]\n${targetChar.name}의 카드: "${pickedCard.title}"\n${pickedCard.desc}`);
+          renderInventoryList();
+        }
+      } catch (err) {
+        alert(err.message);
       }
     }
 
-    async function drawClueCard(room) {
+    // [ver.11 핵심 수정]: 2R, 3R, 4R 수색 불능 버그 해결 (트랜잭션 기반 DB 라운드 직결 검사)
+    async function drawClueCard() {
       if (!currentRoomCode) return;
-      const round = room.round;
-      const alibiKey = `${round}_${currentUser.uid}`;
       const roomRef = doc(db, "rooms", currentRoomCode);
-      const snap = await getDoc(roomRef);
-      const data = snap.data();
 
-      if (data.roundCluesDrawn?.[alibiKey]) return alert("이미 이번 라운드 수색을 마쳤습니다!");
+      try {
+        let drawnClue = null;
 
-      const deck = data.clueDeck || [];
-      if (deck.length === 0) return alert("더 이상 남은 증거가 없습니다.");
+        await runTransaction(db, async (tx) => {
+          const snap = await tx.get(roomRef);
+          if (!snap.exists()) return;
+          const data = snap.data();
 
-      const drawnClue = deck[0];
-      const remaining = deck.slice(1);
+          if (data.phase !== "ROUND_MAIN") {
+            throw new Error("수색 가능한 라운드 토론 시간이 아닙니다.");
+          }
 
-      await updateDoc(roomRef, { 
-        clueDeck: remaining,
-        [`roundCluesDrawn.${alibiKey}`]: true
-      });
+          const activeRound = data.round;
+          const clueKey = `${activeRound}_${currentUser.uid}`;
 
-      localInventory.clues.push(drawnClue);
-      alert(`[현장 증거 발견!]\n품목: "${drawnClue.name}"\n상세: ${drawnClue.desc}`);
-      renderInventoryList();
+          if (data.roundCluesDrawn && data.roundCluesDrawn[clueKey]) {
+            throw new Error("이미 이번 라운드 수색을 마쳤습니다!");
+          }
+
+          const deck = data.clueDeck || [];
+          if (deck.length === 0) {
+            throw new Error("더 이상 남은 증거가 없습니다.");
+          }
+
+          drawnClue = deck[0];
+          const remaining = deck.slice(1);
+
+          tx.update(roomRef, { 
+            clueDeck: remaining,
+            [`roundCluesDrawn.${clueKey}`]: true
+          });
+        });
+
+        if (drawnClue) {
+          localInventory.clues.push(drawnClue);
+          alert(`[현장 증거 발견!]\n품목: "${drawnClue.name}"\n상세: ${drawnClue.desc}`);
+          renderInventoryList();
+        }
+      } catch (err) {
+        alert(err.message);
+      }
     }
 
     function renderDualWhisperSection(room, myCharId) {
@@ -1557,7 +1599,7 @@
       }
     }
 
-    // [ver.10 핵심 변경]: 페이즈 분리 제거 및 라운드 전환 단순화
+    // [ver.11 수정]: 다음 라운드 진입 시 확실한 동기화 및 notice 처리
     async function advanceGamePhaseDirectly(room, isTimeout) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       let nextRound = room.round;
@@ -1565,34 +1607,28 @@
       let newTimer = 300;
       let notice = "";
 
-      // 1) 토론 및 수색 페이즈(ROUND_MAIN) 종료 시
       if (room.phase === "ROUND_MAIN") {
         if (room.round === 2 || room.round === 4) {
-          // 2R, 4R -> 토론 종료 후 듀얼 밀담룸 오픈 (5분)
           nextPhase = "WHISPER";
           newTimer = 300;
           notice = `🤫 [${room.round}R 듀얼 밀담 오픈 (5분)] 방장이 밀담룸 1, 2를 배정 중입니다. 디스코드 밀담방으로 이동 준비를 하세요!`;
         } else if (room.round === 5) {
-          // 5R -> 최후의 무죄 변론 (3분)
           nextPhase = "FINAL_DEFENSE";
           newTimer = 180;
           notice = "⚖️ [5R 최후의 변론 (3분)] 마지막 결백 주장과 의심되는 용의자에 대한 최후 변론을 진행하세요!";
         } else {
-          // 1R, 3R -> 즉시 다음 라운드로 전환
           nextRound = room.round + 1;
           nextPhase = "ROUND_MAIN";
           newTimer = 300;
-          notice = `📢 [${nextRound}R: 토론 및 조사 (5분)] 전원 메인 토론방에서 새로운 라운드를 시작하세요! (알리바이 및 증거 수색 동시 오픈)`;
+          notice = `📢 [${nextRound}R: 토론 및 수색 (5분)] 전원 메인 토론방에서 새로운 라운드를 시작하세요!`;
         }
       } 
-      // 2) 듀얼 밀담룸(WHISPER) 종료 시 -> 즉시 다음 라운드로 전환
       else if (room.phase === "WHISPER") {
         nextRound = room.round + 1;
         nextPhase = "ROUND_MAIN";
         newTimer = 300;
-        notice = `📢 [${nextRound}R: 토론 및 조사 (5분)] 밀담이 종료되었습니다. 전원 메인 토론방으로 복귀하여 토론과 수색을 진행하세요!`;
+        notice = `📢 [${nextRound}R: 토론 및 수색 (5분)] 밀담이 종료되었습니다. 전원 메인 토론방으로 복귀하여 토론과 수색을 진행하세요!`;
       } 
-      // 3) 최후의 변론 종료 시 -> 최후 지목 투표
       else if (room.phase === "FINAL_DEFENSE") {
         nextPhase = "VOTING";
         newTimer = 300;
