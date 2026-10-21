@@ -182,12 +182,12 @@
         <div class="noir-card p-4 rounded-xl border border-neutral-800 space-y-4">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 알리바이 조사 & 밀담</h4>
-            <span id="alibiCountBadge" class="text-xs text-neutral-400">조사 진행</span>
+            <span id="alibiCountBadge" class="text-xs px-2 py-0.5 rounded font-semibold">조사 진행</span>
           </div>
 
           <!-- 알리바이 카드 조사 버튼 영역 -->
           <div class="space-y-2">
-            <p class="text-xs text-neutral-400">타인의 숨겨진 알리바이 카드를 1장 몰래 조사합니다. (본인 카드는 조사 불가)</p>
+            <p id="alibiGuideText" class="text-xs text-neutral-400">타인의 숨겨진 알리바이 카드를 1장 몰래 조사합니다. (라운드당 1장)</p>
             <div id="alibiInvestigateButtons" class="grid grid-cols-2 gap-2"></div>
           </div>
 
@@ -371,7 +371,7 @@
           { time: "21:10", text: "2층 복도에서 주치의 엘레나와 마주쳐 인사를 나누고 차를 대접함." },
           { time: "21:30", text: "비명을 듣고 달려와 잠겨 있던 서재 문을 집사용 마스터키로 개방함." }
         ],
-        secret: "피해자가 전 재산을 가족이 아닌 외부 종교 보육원에 전액 기부하겠다는 새 유언장을 작성 중인 것을 알고 있었습니다. 자신이 받을 퇴직 퇴직금과 하인들의 생계가 날아갈까 봐, 21:30 문을 열자마자 책상 위의 새 유언장 초안을 슬쩍 품속에 숨겼습니다.",
+        secret: "피해자가 전 재산을 가족이 아닌 외부 종교 보육원에 전액 기부하겠다는 새 유언장을 작성 중인 것을 알고 있었습니다. 자신이 받을 퇴직금과 하인들의 생계가 날아갈까 봐, 21:30 문을 열자마자 책상 위의 새 유언장 초안을 슬쩍 품속에 숨겼습니다.",
         alibis: [
           { id: "c1", title: "핏자국 묻은 면장갑", desc: "보일러실 석탄 더미 뒤편에서 집사용 흰 면장갑에 핏방울이 튄 것이 발견되었다." },
           { id: "c2", title: "홍차 잔의 검은 침전물", desc: "에드워드의 책상 위에 놓여 있던 홍차 잔 바닥에 완전히 녹지 않은 검은 가루가 남아 있다." },
@@ -405,7 +405,7 @@
     const CLUE_DECK = [
       { name: "부러진 황동 촛대", desc: "서재 바닥에 뒹굴고 있던 무거운 황동 촛대. 머리를 가격할 수 있는 크기다." },
       { name: "빈 청산가리 유리병", desc: "약품 보관함 뒤편에서 발견된 치사량의 청산가리가 들어있던 갈색 병." },
-      { name: "금고 앞 진흙 발자국", desc: "서재 내부 벽면 비밀 금고 바로 앞에 남겨진 비에젖은 진흙 구두 자국." },
+      { name: "금고 앞 진흙 발자국", desc: "서재 내부 벽면 비밀 금고 바로 앞에 남겨진 비에 젖은 진흙 구두 자국." },
       { name: "사채업자의 독촉장", desc: "장남 아서 앞으로 청구된 5만 파운드의 긴급 변제 독촉 서류." },
       { name: "생명보험 증서", desc: "피해자 사망 시 부인 비올라에게 거액이 지급되도록 최근 변경된 보험 계약서." },
       { name: "타고 남은 양피지 조각", desc: "서재 벽난로 재 속에서 발견된 '유언장' 머리말이 적힌 불탄 종이." },
@@ -436,6 +436,7 @@
     let localInventory = { alibis: [], clues: [] };
     let audioCtx = null;
     let isRainPlaying = false;
+    let timerInterval = null; // 방장 타이머 인터벌
 
     const viewLobby = document.getElementById("viewLobby");
     const viewCharacterSelect = document.getElementById("viewCharacterSelect");
@@ -450,7 +451,6 @@
     const btnStartGame = document.getElementById("btnStartGame");
     const statusBadge = document.getElementById("statusBadge");
 
-    // 확실한 인증 사용자 획득 보장 함수
     function ensureAuthenticatedUser() {
       return new Promise((resolve, reject) => {
         if (auth.currentUser) {
@@ -470,7 +470,6 @@
       });
     }
 
-    // 오디오 효과음
     document.getElementById("bgmToggleBtn").onclick = () => {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -515,7 +514,6 @@
       return code;
     }
 
-    // 새 방 만들기 (방장)
     btnCreateRoom.onclick = async () => {
       const name = inputNickname.value.trim();
       if (!name) return alert("닉네임을 입력해주세요!");
@@ -529,7 +527,7 @@
         console.error("인증 실패:", err);
         btnCreateRoom.disabled = false;
         btnCreateRoom.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> 새 방 만들기 (방장)';
-        return alert("Firebase 인증 실패! Firebase 콘솔에서 Authentication -> 익명 로그인이 켜져 있는지 확인해주세요.");
+        return alert("Firebase 인증 실패! Authentication -> 익명 로그인이 사용 설정되어 있는지 확인해주세요.");
       }
 
       const code = makeRoomCode();
@@ -562,6 +560,9 @@
           viola: ["v1", "v2", "v3", "v4"]
         },
         clueDeck: [...CLUE_DECK].sort(() => Math.random() - 0.5),
+        roundActions: {
+          1: { alibiDrawn: {}, clueDrawn: {} }
+        },
         whisperRoom: null,
         votes: {}
       };
@@ -573,11 +574,10 @@
         console.error("DB 생성 에러:", err);
         btnCreateRoom.disabled = false;
         btnCreateRoom.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> 새 방 만들기 (방장)';
-        alert("Firestore 저장 실패! Firestore Database 규칙이 '테스트 모드'인지 확인해주세요.");
+        alert("Firestore 저장 실패! 데이터베이스 규칙이 테스트 모드인지 확인해주세요.");
       }
     };
 
-    // 방 참가하기
     btnJoinRoom.onclick = async () => {
       const name = inputNickname.value.trim();
       const code = inputRoomCode.value.trim().toUpperCase();
@@ -613,7 +613,6 @@
       }
     };
 
-    // 실시간 방 데이터 수신 리스너
     function listenRoom(code) {
       if (roomUnsubscribe) roomUnsubscribe();
       statusBadge.classList.remove("hidden");
@@ -642,11 +641,37 @@
         viewEnding.classList.add("hidden");
         viewGame.classList.remove("hidden");
         renderGameDashboard(room);
+        setupHostTimer(room); // 방장 주도 타이머 동기화
       } else if (room.status === "ENDED") {
+        if (timerInterval) clearInterval(timerInterval);
         viewGame.classList.add("hidden");
         viewEnding.classList.remove("hidden");
         renderEndingView(room);
       }
+    }
+
+    // 방장 기기에서 1초마다 Firestore의 timerSeconds 차감
+    function setupHostTimer(room) {
+      if (room.hostUid !== currentUser.uid) return;
+      if (timerInterval) return; // 이미 실행 중이면 중복 방지
+
+      timerInterval = setInterval(async () => {
+        if (!currentRoomCode) return;
+        const snap = await getDoc(doc(db, "rooms", currentRoomCode));
+        if (!snap.exists()) return;
+        const rData = snap.data();
+        if (rData.status !== "PLAYING") {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          return;
+        }
+
+        if (rData.timerSeconds > 0) {
+          await updateDoc(doc(db, "rooms", currentRoomCode), {
+            timerSeconds: rData.timerSeconds - 1
+          });
+        }
+      }, 1000);
     }
 
     function renderCharacterSelectView(room) {
@@ -760,10 +785,12 @@
         room.phase === "WHISPER" ? "밀담 단계 (카드 실물 공개)" :
         room.phase === "SEARCH" ? "현장 단서 수색" : "최종 투표 진행 중";
 
+      // 타이머 실시간 반영
       const m = Math.floor(room.timerSeconds / 60);
       const s = room.timerSeconds % 60;
       document.getElementById("gameTimer").textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
+      // 좌측 시크릿 시트 채우기
       const secretBox = document.getElementById("mySecretContent");
       secretBox.innerHTML = `
         <div class="p-2.5 rounded bg-black/40 border border-neutral-800">
@@ -781,10 +808,32 @@
         </div>
       `;
 
-      renderInvestigateButtons(room, myCharId);
+      // 중앙 타인 알리바이 조사 버튼 (라운드당 1회 제한 확인)
+      const curRoundActions = room.roundActions?.[room.round] || {};
+      const hasDrawnAlibiThisRound = !!curRoundActions.alibiDrawn?.[currentUser.uid];
+      const hasDrawnClueThisRound = !!curRoundActions.clueDrawn?.[currentUser.uid];
+
+      const badge = document.getElementById("alibiCountBadge");
+      const guideText = document.getElementById("alibiGuideText");
+      if (hasDrawnAlibiThisRound) {
+        badge.textContent = "이번 라운드 조사 완료";
+        badge.className = "text-xs px-2 py-0.5 rounded font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800";
+        guideText.textContent = "이미 이번 라운드 알리바이 조사를 마쳤습니다. 다음 라운드에 다시 조사할 수 있습니다.";
+      } else {
+        badge.textContent = "조사 가능 (1장)";
+        badge.className = "text-xs px-2 py-0.5 rounded font-semibold bg-amber-950/80 text-amber-400 border border-amber-800";
+        guideText.textContent = "타인의 숨겨진 알리바이 카드를 1장 몰래 조사합니다. (라운드당 1장)";
+      }
+
+      renderInvestigateButtons(room, myCharId, hasDrawnAlibiThisRound);
+
+      // 밀담실 제어 (2R, 4R)
       renderWhisperSection(room, myCharId);
+
+      // 우측 인벤토리 목록 렌더링
       renderInventoryList();
 
+      // 라운드 조작 (방장 전용)
       const btnNext = document.getElementById("btnNextPhase");
       if (room.hostUid === currentUser.uid) {
         btnNext.classList.remove("hidden");
@@ -793,8 +842,20 @@
         btnNext.classList.add("hidden");
       }
 
-      document.getElementById("btnDrawClue").onclick = () => drawClueCard(room);
+      // 증거물 수색 버튼 (라운드당 1회)
+      const btnDrawClue = document.getElementById("btnDrawClue");
+      if (hasDrawnClueThisRound) {
+        btnDrawClue.disabled = true;
+        btnDrawClue.className = "w-full py-2 bg-neutral-900 text-neutral-600 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed";
+        btnDrawClue.innerHTML = `<i class="fa-solid fa-check mr-1.5 text-emerald-500"></i> 이번 라운드 증거 수색 완료`;
+      } else {
+        btnDrawClue.disabled = false;
+        btnDrawClue.className = "w-full py-2 bg-gradient-to-r from-neutral-800 to-neutral-700 hover:from-neutral-700 hover:to-neutral-600 text-neutral-200 text-xs font-semibold rounded border border-neutral-600 cursor-pointer";
+        btnDrawClue.innerHTML = `<i class="fa-solid fa-box-archive mr-1.5 text-amber-400"></i> 현장 증거물품 수색 (라운드당 1개)`;
+        btnDrawClue.onclick = () => drawClueCard(room);
+      }
 
+      // 5라운드 투표 처리
       if (room.round === 5 && room.phase === "VOTING") {
         document.getElementById("finalVoteSection").classList.remove("hidden");
         renderVoteButtons(room, myCharId);
@@ -803,50 +864,60 @@
       }
     }
 
-    function renderInvestigateButtons(room, myCharId) {
+    // 타 캐릭터 알리바이 조사 버튼 렌더링 (라운드 1회 제한 적용)
+    function renderInvestigateButtons(room, myCharId, hasDrawnThisRound) {
       const container = document.getElementById("alibiInvestigateButtons");
       container.innerHTML = "";
 
       Object.keys(CHARACTERS).forEach(cid => {
-        if (cid === myCharId) return;
+        if (cid === myCharId) return; // 본인 카드는 조사 불가
         const c = CHARACTERS[cid];
         const pool = room.alibiPool[cid] || [];
 
+        const isAvailable = (pool.length > 0) && !hasDrawnThisRound;
+
         const btn = document.createElement("button");
-        btn.disabled = pool.length === 0;
-        btn.className = pool.length > 0
-          ? "p-2 rounded bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-left transition"
+        btn.disabled = !isAvailable;
+        btn.className = isAvailable
+          ? "p-2 rounded bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-left transition cursor-pointer"
           : "p-2 rounded bg-neutral-900 border border-neutral-800 text-neutral-600 cursor-not-allowed text-left";
 
         btn.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="font-bold text-xs text-neutral-200">${c.name}</span>
+            <span class="font-bold text-xs ${isAvailable ? 'text-neutral-200' : 'text-neutral-600'}">${c.name}</span>
             <span class="text-[10px] text-amber-500">${pool.length}장 남음</span>
           </div>
-          <span class="text-[10px] text-neutral-400 block truncate">${c.role}</span>
+          <span class="text-[10px] text-neutral-500 block truncate">${c.role}</span>
         `;
 
-        if (pool.length > 0) {
-          btn.onclick = () => investigateAlibi(cid);
+        if (isAvailable) {
+          btn.onclick = () => investigateAlibi(cid, room.round);
         }
         container.appendChild(btn);
       });
     }
 
-    async function investigateAlibi(targetCharId) {
+    // 알리바이 카드 1장 비공개 인출
+    async function investigateAlibi(targetCharId, round) {
       if (!currentRoomCode) return;
       const roomRef = doc(db, "rooms", currentRoomCode);
       const snap = await getDoc(roomRef);
       const data = snap.data();
-      const pool = data.alibiPool[targetCharId] || [];
+      
+      // 이미 이번 라운드에 뽑았는지 서버 상태 재검증
+      if (data.roundActions?.[round]?.alibiDrawn?.[currentUser.uid]) {
+        return alert("이미 이번 라운드에 알리바이 카드를 1장 조사하셨습니다!");
+      }
 
+      const pool = data.alibiPool[targetCharId] || [];
       if (pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
 
       const cardId = pool[0];
       const remaining = pool.slice(1);
 
       await updateDoc(roomRef, {
-        [`alibiPool.${targetCharId}`]: remaining
+        [`alibiPool.${targetCharId}`]: remaining,
+        [`roundActions.${round}.alibiDrawn.${currentUser.uid}`]: true
       });
 
       const targetChar = CHARACTERS[targetCharId];
@@ -856,30 +927,40 @@
           ownerName: targetChar.name,
           ...cardObj
         });
-        alert(`[알리바이 입수]\n${targetChar.name}의 카드: "${cardObj.title}"\n${cardObj.desc}`);
+        alert(`[알리바이 입수 완료]\n${targetChar.name}의 카드: "${cardObj.title}"\n${cardObj.desc}\n\n※ 이번 라운드 조사를 완료했습니다. 다음 라운드에 추가 조사가 가능합니다.`);
         renderInventoryList();
       }
     }
 
+    // 24종 현장 증거 덱에서 1장 드로우 (라운드당 1회)
     async function drawClueCard(room) {
       if (!currentRoomCode) return;
+      const round = room.round;
       const roomRef = doc(db, "rooms", currentRoomCode);
       const snap = await getDoc(roomRef);
       const data = snap.data();
-      const deck = data.clueDeck || [];
 
+      if (data.roundActions?.[round]?.clueDrawn?.[currentUser.uid]) {
+        return alert("이미 이번 라운드 현장 수색을 마치셨습니다!");
+      }
+
+      const deck = data.clueDeck || [];
       if (deck.length === 0) return alert("저택의 모든 증거물품이 이미 수색되었습니다.");
 
       const drawnClue = deck[0];
       const remaining = deck.slice(1);
 
-      await updateDoc(roomRef, { clueDeck: remaining });
+      await updateDoc(roomRef, { 
+        clueDeck: remaining,
+        [`roundActions.${round}.clueDrawn.${currentUser.uid}`]: true
+      });
 
       localInventory.clues.push(drawnClue);
       alert(`[현장 증거 발견!]\n품목: "${drawnClue.name}"\n상세: ${drawnClue.desc}`);
       renderInventoryList();
     }
 
+    // 밀담실 제어 (2R, 4R)
     function renderWhisperSection(room, myCharId) {
       const select = document.getElementById("selectWhisperTarget");
       const isWhisperRound = (room.round === 2 || room.round === 4);
@@ -983,27 +1064,39 @@
       }
     }
 
+    // 다음 페이즈 및 라운드 전환 (방장 전용)
     async function advanceGamePhase(room) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       let nextRound = room.round;
       let nextPhase = room.phase;
+      let newTimer = 600;
 
       if (room.phase === "DISCUSSION") {
-        nextPhase = (room.round === 2 || room.round === 4) ? "WHISPER" : "SEARCH";
+        if (room.round === 2 || room.round === 4) {
+          nextPhase = "WHISPER";
+          newTimer = 300; // 밀담 5분
+        } else {
+          nextPhase = "SEARCH";
+          newTimer = 180;
+        }
       } else if (room.phase === "WHISPER") {
         nextPhase = "SEARCH";
+        newTimer = 180;
       } else if (room.phase === "SEARCH") {
         if (room.round === 5) {
           nextPhase = "VOTING";
+          newTimer = 300; // 최종 투표 5분
         } else {
           nextRound = room.round + 1;
           nextPhase = "DISCUSSION";
+          newTimer = 600; // 새 라운드 10분
         }
       }
 
       await updateDoc(roomRef, {
         round: nextRound,
         phase: nextPhase,
+        timerSeconds: newTimer,
         whisperRoom: null
       });
     }
@@ -1023,7 +1116,7 @@
         if (cid === myCharId) return;
         const c = CHARACTERS[cid];
         const btn = document.createElement("button");
-        btn.className = "px-4 py-2 bg-neutral-900 hover:bg-amber-950 border border-amber-600/50 text-amber-200 rounded text-xs font-bold transition";
+        btn.className = "px-4 py-2 bg-neutral-900 hover:bg-amber-950 border border-amber-600/50 text-amber-200 rounded text-xs font-bold transition cursor-pointer";
         btn.textContent = `${c.name} (${c.role})`;
         btn.onclick = () => submitVote(cid, room);
         grid.appendChild(btn);
