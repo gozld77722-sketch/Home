@@ -3,55 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>온라인 머더 미스터리 셀렉션 ver.12.0</title>
-  <!-- Tailwind CSS CDN -->
+  <title>온라인 머더 미스터리 셀렉션 ver.12.5</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Serif+KR:wght@400;600;700&family=Rye&display=swap');
-    
-    body {
-      font-family: 'Noto Serif KR', serif;
-      background-color: #0b0c10;
-      color: #c5c6c7;
-    }
-    .font-title {
-      font-family: 'Cinzel', serif;
-    }
-    .noir-card {
-      background: linear-gradient(145deg, #161920, #0f1115);
-      border: 1px solid #2d3139;
-    }
-    .custom-scroll::-webkit-scrollbar {
-      width: 5px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #2d3139;
-      border-radius: 3px;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Serif+KR:wght@400;600;700&display=swap');
+    body { font-family: 'Noto Serif KR', serif; background-color: #0b0c10; color: #c5c6c7; }
+    .font-title { font-family: 'Cinzel', serif; }
+    .noir-card { background: linear-gradient(145deg, #161920, #0f1115); border: 1px solid #2d3139; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #2d3139; border-radius: 3px; }
     @keyframes pulse-gold {
       0%, 100% { border-color: rgba(212, 175, 55, 0.4); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
       50% { border-color: rgba(212, 175, 55, 0.9); box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
     }
-    .notice-alert-active {
-      animation: pulse-gold 1.5s infinite;
-    }
+    .notice-alert-active { animation: pulse-gold 1.5s infinite; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-900 selection:text-white">
 
-  <!-- 상단 네비게이션 헤더 -->
+  <!-- 헤더 -->
   <header class="border-b border-[#2d3139] bg-[#0f1115]/95 backdrop-blur px-3 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center space-x-2 sm:space-x-3">
       <i class="fa-solid fa-feather-pointed text-amber-500 text-lg sm:text-xl"></i>
       <div>
         <h1 id="headerScenarioTitle" class="font-title text-sm sm:text-lg font-bold tracking-wider text-amber-200">MURDER MYSTERY ARCHIVE</h1>
-        <p id="headerScenarioSubtitle" class="text-[10px] sm:text-xs text-neutral-400">온라인 인터랙티브 보드게임 (ver.12.0)</p>
+        <p id="headerScenarioSubtitle" class="text-[10px] sm:text-xs text-neutral-400">온라인 인터랙티브 보드게임 (ver.12.5)</p>
       </div>
     </div>
     <div class="flex items-center space-x-2">
-      <!-- 방장 전용 실시간 전체 긴급 방송 버튼 -->
       <button id="btnOpenHostBroadcast" class="hidden text-[11px] sm:text-xs px-2.5 py-1.5 rounded border border-purple-500/70 bg-purple-950/60 hover:bg-purple-900 text-purple-200 font-bold transition">
         <i class="fa-solid fa-bullhorn mr-1 text-purple-400 animate-pulse"></i> 전체 방송 (방장)
       </button>
@@ -64,7 +44,7 @@
     </div>
   </header>
 
-  <!-- [전원 실시간 동기화 상단 공지 배너] -->
+  <!-- 실시간 상단 공지 배너 -->
   <div id="globalNoticeBanner" class="hidden bg-gradient-to-r from-amber-950 via-indigo-950 to-amber-950 border-b border-amber-500/60 px-3 py-2 text-center text-xs text-amber-200 sticky top-[49px] sm:top-[57px] z-30 shadow-xl transition-all">
     <div class="flex items-center justify-center space-x-2 max-w-4xl mx-auto">
       <i class="fa-solid fa-bullhorn text-amber-400 animate-pulse"></i>
@@ -75,20 +55,20 @@
   <!-- 메인 뷰 컨테이너 -->
   <main class="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 max-w-5xl mx-auto w-full">
 
-    <!-- [VIEW 0: 시나리오 테마 선택 화면 (NEW)] -->
+    <!-- [VIEW 0: 시나리오 선택] -->
     <div id="viewThemeSelect" class="w-full max-w-3xl space-y-6">
       <div class="text-center space-y-2">
         <span class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-700">Scenario Selection</span>
         <h2 class="text-2xl sm:text-3xl font-bold font-title text-amber-100">머더 미스터리 시나리오 선택</h2>
-        <p class="text-xs sm:text-sm text-neutral-400">플레이할 사건 시나리오를 선택한 뒤 로비로 입장하세요.</p>
+        <p class="text-xs sm:text-sm text-neutral-400">플레이할 사건 시나리오를 선택하세요. (동적 경량 로딩)</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-        <!-- 테마 1: 윈체스터 별장 -->
+        <!-- 테마 1 -->
         <div class="noir-card rounded-2xl overflow-hidden border border-amber-700/60 hover:border-amber-400 transition-all duration-300 shadow-xl flex flex-col justify-between group">
           <div>
             <div class="relative w-full h-44 overflow-hidden border-b border-neutral-800">
-              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="윈체스터 별장" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="별장 전경" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
               <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-3">
                 <span class="text-[11px] font-bold text-amber-300 bg-black/60 px-2 py-0.5 rounded border border-amber-900/60">1926 영연방 고립 저택</span>
               </div>
@@ -101,24 +81,20 @@
               <p class="text-xs text-neutral-400 leading-relaxed break-keep">
                 외딴 절벽 위의 별장에서 일어난 독살 사건. 사라진 비밀 유언장과 유산을 노리는 친족, 주치의, 집사 간의 치열한 암투.
               </p>
-              <div class="text-[11px] text-neutral-500 space-y-0.5 pt-1">
-                <p>• 특징: 고전 정통 미스터리, 밀실 독살 트릭</p>
-                <p>• 키워드: #유언장 #지연성독극물 #금고열쇠</p>
-              </div>
             </div>
           </div>
           <div class="p-4 pt-0">
-            <button onclick="selectThemeAndGoToLobby('winchester')" class="w-full py-2.5 bg-gradient-to-r from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-amber-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
+            <button onclick="window.selectScenarioAndOpenLobby('winchester')" class="w-full py-2.5 bg-gradient-to-r from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-amber-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
               <i class="fa-solid fa-play mr-2 text-amber-300"></i> 이 시나리오로 시작하기
             </button>
           </div>
         </div>
 
-        <!-- 테마 2: 황야의 설원 특급 (신규) -->
+        <!-- 테마 2 -->
         <div class="noir-card rounded-2xl overflow-hidden border border-cyan-800/60 hover:border-cyan-400 transition-all duration-300 shadow-xl flex flex-col justify-between group">
           <div>
             <div class="relative w-full h-44 overflow-hidden border-b border-neutral-800">
-              <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80" alt="설원 특급 열차" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
+              <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80" alt="설원 열차" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
               <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-3">
                 <span class="text-[11px] font-bold text-cyan-300 bg-black/60 px-2 py-0.5 rounded border border-cyan-900/60">1898 알래스카 설원 열차</span>
               </div>
@@ -131,14 +107,10 @@
               <p class="text-xs text-neutral-400 leading-relaxed break-keep">
                 눈보라로 협곡에 고립된 호화 열차. 특실에서 사살된 금광 재벌과 흔적도 없이 사라진 순금괴 및 황금 리볼버 탄환.
               </p>
-              <div class="text-[11px] text-neutral-500 space-y-0.5 pt-1">
-                <p>• 특징: 웨스턴 누아르, 움직이는 밀실, 눈보라 고립</p>
-                <p>• 키워드: #황금탄환 #금괴강탈 #러시안룰렛</p>
-              </div>
             </div>
           </div>
           <div class="p-4 pt-0">
-            <button onclick="selectThemeAndGoToLobby('express')" class="w-full py-2.5 bg-gradient-to-r from-cyan-900 to-cyan-700 hover:from-cyan-800 hover:to-cyan-600 text-cyan-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
+            <button onclick="window.selectScenarioAndOpenLobby('express')" class="w-full py-2.5 bg-gradient-to-r from-cyan-900 to-cyan-700 hover:from-cyan-800 hover:to-cyan-600 text-cyan-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
               <i class="fa-solid fa-play mr-2 text-cyan-300"></i> 이 시나리오로 시작하기
             </button>
           </div>
@@ -146,23 +118,23 @@
       </div>
     </div>
 
-    <!-- [VIEW 1: 로비 및 방 생성/참가 화면] -->
+    <!-- [VIEW 1: 로비] -->
     <div id="viewLobby" class="w-full max-w-md noir-card rounded-xl p-5 sm:p-8 shadow-2xl border border-neutral-800 hidden">
       <div class="flex items-center justify-between mb-4 border-b border-neutral-800 pb-2">
         <button id="btnBackToThemeSelect" class="text-xs text-neutral-400 hover:text-amber-300 flex items-center transition">
           <i class="fa-solid fa-arrow-left mr-1.5"></i> 시나리오 변경
         </button>
-        <span id="lobbyThemeTag" class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">윈체스터 별장</span>
+        <span id="lobbyThemeTag" class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">시나리오 로딩 중</span>
       </div>
 
       <div class="text-center mb-5">
         <div class="relative w-full h-32 rounded-lg overflow-hidden border border-amber-900/40 mb-3 shadow">
-          <img id="lobbyCoverImg" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="시나리오 전경" class="w-full h-full object-cover filter brightness-75 contrast-125">
+          <img id="lobbyCoverImg" src="" alt="시나리오 전경" class="w-full h-full object-cover filter brightness-75 contrast-125">
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex items-end justify-center p-2">
-            <span id="lobbyCoverSub" class="text-[11px] text-amber-300 font-semibold font-title tracking-wider">Mansion in the Thunderstorm</span>
+            <span id="lobbyCoverSub" class="text-[11px] text-amber-300 font-semibold font-title tracking-wider"></span>
           </div>
         </div>
-        <h2 id="lobbyTitle" class="text-xl sm:text-2xl font-bold text-amber-100 mb-1">폭풍우 치는 윈체스터 별장</h2>
+        <h2 id="lobbyTitle" class="text-xl sm:text-2xl font-bold text-amber-100 mb-1"></h2>
         <p class="text-xs text-neutral-400">디스코드 음성 연동 머더 미스터리 (2~5인)</p>
       </div>
 
@@ -222,10 +194,8 @@
 
       <div>
         <h3 class="text-base sm:text-lg font-bold text-amber-200 mb-1">용의자 선택</h3>
-        <p id="characterSelectGuide" class="text-xs text-neutral-400 mb-3">플레이할 인물을 선택하세요. (5번째 캐릭터는 5명이 모여야 해금됩니다)</p>
-        <div id="characterCardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <!-- 캐릭터 카드 동적 렌더링 -->
-        </div>
+        <p class="text-xs text-neutral-400 mb-3">플레이할 인물을 선택하세요. (5번째 캐릭터는 5명이 모여야 해금됩니다)</p>
+        <div id="characterCardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
 
       <div class="flex justify-end pt-3 border-t border-neutral-800">
@@ -235,23 +205,22 @@
       </div>
     </div>
 
-    <!-- [VIEW 2.5: 전체 스토리 오프닝 프롤로그] -->
+    <!-- [VIEW 2.5: 프롤로그] -->
     <div id="viewPrologue" class="w-full max-w-3xl hidden noir-card p-6 sm:p-8 rounded-xl border border-amber-700/50 space-y-6 shadow-2xl">
       <div class="text-center space-y-2 border-b border-neutral-800 pb-4">
         <span id="prologueTag" class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-700">사건의 서막</span>
-        <h2 id="prologueTitle" class="text-2xl sm:text-3xl font-bold font-title text-amber-200 pt-1">사건 프롤로그</h2>
+        <h2 id="prologueTitle" class="text-2xl sm:text-3xl font-bold font-title text-amber-200 pt-1"></h2>
         <p id="prologueSubtitle" class="text-xs text-neutral-400">사라진 진실과 드리운 비극의 그림자</p>
       </div>
 
       <div class="w-full h-48 rounded-lg overflow-hidden border border-neutral-700 shadow relative">
         <img id="prologueBannerImg" src="" alt="사건 배경" class="w-full h-full object-cover filter brightness-60 contrast-125">
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-4">
-          <span id="prologueLocationLabel" class="text-xs text-amber-300 font-semibold font-title">Scene</span>
+          <span id="prologueLocationLabel" class="text-xs text-amber-300 font-semibold font-title"></span>
         </div>
       </div>
 
-      <div id="prologueStoryText" class="p-4 bg-black/60 rounded-lg border border-neutral-800 text-xs sm:text-sm text-neutral-200 leading-relaxed space-y-3 break-keep">
-      </div>
+      <div id="prologueStoryText" class="p-4 bg-black/60 rounded-lg border border-neutral-800 text-xs sm:text-sm text-neutral-200 leading-relaxed space-y-3 break-keep"></div>
 
       <div class="text-center pt-2">
         <div id="prologueHostNotice" class="text-xs text-amber-400 italic mb-2">방장이 전체 스토리를 확인한 후 사건 조사를 개시합니다.</div>
@@ -261,10 +230,8 @@
       </div>
     </div>
 
-    <!-- [VIEW 3: 메인 게임 인게임 대시보드] -->
+    <!-- [VIEW 3: 인게임 대시보드] -->
     <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-4">
-      
-      <!-- 인게임 상단 바 -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div class="noir-card p-2.5 sm:p-3 rounded-lg border border-neutral-800 flex items-center justify-between">
           <div>
@@ -296,16 +263,13 @@
         </div>
       </div>
 
-      <!-- 5R 최후 변론 알림 배너 (10분 스피치) -->
       <div id="defenseTopNotice" class="hidden noir-card p-3 rounded-lg border border-red-600/70 bg-red-950/30 text-center">
         <h4 class="text-sm font-bold text-red-300"><i class="fa-solid fa-scale-unbalanced-flip mr-1.5"></i> 5R 최후의 무죄 변론 (10분) 진행 중</h4>
         <p class="text-xs text-neutral-300">소지한 비밀과 확보한 단서들을 확인하며 디스코드에서 마지막 1분 스피치로 결백을 주장하세요!</p>
       </div>
 
-      <!-- 메인 3단 조작 레이아웃 -->
       <div id="normalGameStage" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        
-        <!-- 좌측: 내 시크릿 시트 -->
+        <!-- 좌측: 시크릿 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-user-secret mr-1.5"></i> 나의 비밀 & 타임라인</h4>
@@ -314,7 +278,7 @@
           <div id="mySecretContent" class="text-xs text-neutral-300 space-y-3 custom-scroll max-h-[380px] sm:max-h-[440px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- 중앙: 알리바이 조사 & 듀얼 밀담실 & 현장 증거 수색 -->
+        <!-- 중앙: 알리바이 & 밀담 & 수색 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 알리바이 조사 & 밀담</h4>
@@ -326,7 +290,6 @@
             <div id="alibiInvestigateButtons" class="grid grid-cols-2 gap-2"></div>
           </div>
 
-          <!-- 듀얼 밀담실 섹션 (2R, 4R 종료 후 오픈) -->
           <div id="secretMeetingBox" class="hidden p-3 rounded-lg border border-amber-600/50 bg-amber-950/20 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-amber-300"><i class="fa-solid fa-comments mr-1"></i> 밀담 존 (2R, 4R 전용)</span>
@@ -340,25 +303,17 @@
             </div>
             
             <div id="hostWhisperAssignArea" class="hidden space-y-2 pt-1 border-t border-amber-800/40">
-              <p class="text-[11px] text-neutral-300 leading-tight">
-                <strong>[방장 전용]</strong> 각 밀담룸으로 보낼 인원을 체크 후 배정하세요. (체크 시 반대편 룸 체크는 자동 해제됩니다)
-              </p>
-              
+              <p class="text-[11px] text-neutral-300 leading-tight"><strong>[방장 전용]</strong> 각 밀담룸으로 보낼 인원을 체크 후 배정하세요.</p>
               <div class="grid grid-cols-2 gap-2">
                 <div class="p-2 bg-neutral-900/90 rounded border border-neutral-700">
                   <span class="text-[11px] font-bold text-amber-400 block mb-1">밀담룸 1 배정</span>
                   <div id="whisperRoom1Checkboxes" class="space-y-1"></div>
-                  <button id="btnAssignRoom1" class="w-full mt-2 py-1 bg-amber-800 hover:bg-amber-700 text-[10px] font-bold text-white rounded">
-                    룸 1로 전송
-                  </button>
+                  <button id="btnAssignRoom1" class="w-full mt-2 py-1 bg-amber-800 hover:bg-amber-700 text-[10px] font-bold text-white rounded">룸 1로 전송</button>
                 </div>
-
                 <div class="p-2 bg-neutral-900/90 rounded border border-indigo-700">
                   <span class="text-[11px] font-bold text-indigo-400 block mb-1">밀담룸 2 배정</span>
                   <div id="whisperRoom2Checkboxes" class="space-y-1"></div>
-                  <button id="btnAssignRoom2" class="w-full mt-2 py-1 bg-indigo-800 hover:bg-indigo-700 text-[10px] font-bold text-white rounded">
-                    룸 2로 전송
-                  </button>
+                  <button id="btnAssignRoom2" class="w-full mt-2 py-1 bg-indigo-800 hover:bg-indigo-700 text-[10px] font-bold text-white rounded">룸 2로 전송</button>
                 </div>
               </div>
             </div>
@@ -369,7 +324,6 @@
             </div>
           </div>
 
-          <!-- 현장 증거물품 수색 버튼 -->
           <div class="pt-2 border-t border-neutral-800">
             <button id="btnDrawClue" class="w-full py-2 bg-neutral-900 text-neutral-500 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed">
               <i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 현장 증거 수색 대기 중
@@ -377,7 +331,7 @@
           </div>
         </div>
 
-        <!-- 우측: 내 단서 보관함 -->
+        <!-- 우측: 보관함 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-briefcase mr-1.5"></i> 내 단서 보관함</h4>
@@ -391,7 +345,6 @@
                 <p class="text-xs text-neutral-600 italic">확보한 알리바이가 없습니다.</p>
               </div>
             </div>
-
             <div class="pt-2 border-t border-neutral-800/80">
               <span class="text-xs font-semibold text-neutral-400 block mb-1.5">획득한 현장 증거물품 (클릭 시 확대)</span>
               <div id="myClueCardsList" class="space-y-2">
@@ -400,28 +353,24 @@
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- 5R 최후의 지목 투표 & 공개 투표 현황판 -->
+      <!-- 5R 최종 투표 -->
       <div id="finalVoteSection" class="hidden noir-card p-5 sm:p-6 rounded-xl border-2 border-red-600 bg-black/90 space-y-5 text-center shadow-2xl">
         <div>
           <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
           <p id="finalVoteSubtitle" class="text-xs text-neutral-300 mt-1">모든 변론이 종료되었습니다. 사건을 일으킨 진범은 누구입니까? (동률 시 진범 승리)</p>
         </div>
-        
         <div id="voteButtonsGrid" class="flex flex-wrap justify-center gap-3 pt-1"></div>
         <p id="voteWaitingText" class="hidden text-xs text-amber-400 italic py-2">투표를 완료했습니다. 다른 플레이어들의 선택을 기다리는 중입니다...</p>
-        
         <div class="mt-4 pt-4 border-t border-neutral-800 text-left max-w-xl mx-auto">
           <span class="text-xs font-bold text-amber-400 block mb-2 text-center"><i class="fa-solid fa-list-check mr-1"></i> 전체 플레이어 실시간 지목 현황</span>
           <div id="liveVoteBoard" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-300"></div>
         </div>
       </div>
-
     </div>
 
-    <!-- [VIEW 4: 엔딩 화면] -->
+    <!-- [VIEW 4: 엔딩] -->
     <div id="viewEnding" class="w-full max-w-3xl hidden noir-card p-5 sm:p-8 rounded-xl border border-neutral-800 space-y-5">
       <div class="text-center space-y-2 border-b border-neutral-800 pb-4">
         <span id="endingResultBadge" class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">결과</span>
@@ -452,17 +401,15 @@
         </button>
       </div>
     </div>
-
   </main>
 
-  <!-- [모달 1: 전체 룰북 모달] -->
+  <!-- 룰북 모달 -->
   <div id="rulesModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
     <div class="noir-card border border-amber-600/60 max-w-2xl w-full rounded-xl p-5 sm:p-6 max-h-[85vh] overflow-y-auto custom-scroll space-y-4">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-2.5">
         <h3 class="text-base sm:text-lg font-bold text-amber-300"><i class="fa-solid fa-scroll mr-2"></i> 게임 규칙서</h3>
         <button id="btnCloseRules" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
       <div class="text-xs text-neutral-300 space-y-3.5 leading-relaxed break-keep">
         <div class="p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg">
           <strong class="text-amber-200 block mb-1 text-sm">🎯 핵심 콘셉트 & 목표</strong>
@@ -470,54 +417,41 @@
           • <strong>일반 플레이어(시민)</strong>: 단서 수집과 심문을 통해 용의자 중 '단 한 명의 진범'을 찾아 투표로 검거.<br>
           • <strong>진범 플레이어</strong>: 자신의 정체를 숨기고 다른 무고한 사람에게 누명을 씌워 최종 생존.
         </div>
-
         <div class="p-3 bg-red-950/20 border border-red-900/40 rounded-lg">
           <strong class="text-red-300 block mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> [필독] 거짓말 제한 룰 (Roleplaying Honesty)</strong>
           • <strong>진범 플레이어</strong>: 자신의 범행 사실, 알리바이, 동기 등 모든 항목에 대해 <strong>완전한 거짓말과 허위 날조 진술이 가능</strong>합니다.<br>
           • <strong>일반 플레이어(시민)</strong>: 자신의 개인적인 비밀이나 약점을 숨기거나 침묵할 수는 있으나, <strong>사실과 다른 허위 사실을 날조(거짓말)하는 것은 엄격히 금지</strong>됩니다.
         </div>
-
         <div>
           <strong class="text-amber-400 block mb-1.5 text-sm">⏱️ 5라운드 진행 프로세스</strong>
           <ul class="space-y-1.5 pl-2 border-l border-amber-800/60">
-            <li><strong>[1라운드: 사건 발생 & 상호 알리바이 (15분)]</strong> 각자 알리바이 카드를 1회(2인은 2회) 조사하고, 현장 증거 1개를 수색하여 15분간 음성 토론을 진행합니다.</li>
-            <li><strong>[2라운드: 현장 조사 & 1차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 15분간 자유 토론 및 증거 수색 후, 5분간 [밀담룸 1], [밀담룸 2]로 나뉘어 비밀 대화를 나눕니다. <strong>밀담 시간 중에는 알리바이 조사가 불가능</strong>하며, 보유 카드 실물만 공유할 수 있습니다.</li>
-            <li><strong>[3라운드: 알리바이 균열 & 심층 추궁 (15분)]</strong> 누적된 단서를 바탕으로 서로의 타임라인 모순을 압박하며 15분간 심층 공방을 벌입니다.</li>
-            <li><strong>[4라운드: 마지막 물증 & 2차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 최종 단서 수색 및 대립 토론 후, 마지막 5분간 듀얼 밀담을 통해 진범을 특정하기 위한 연대를 맺습니다.</li>
-            <li><strong>[5라운드: 최후의 변론 & 최종 지목 투표 (10분)]</strong> 각 플레이어는 단서 보관함을 확인하며 1인당 약 1분간 마지막 무죄 스피치를 진행하고, 비밀 지목 투표를 실시합니다.</li>
+            <li><strong>[1라운드: 사건 발생 & 상호 알리바이 (15분)]</strong> 알리바이 1회(2인은 2회) 및 증거 1개 수색 후 음성 토론.</li>
+            <li><strong>[2라운드: 현장 조사 & 1차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 토론 후 5분간 듀얼 밀담. <strong>밀담 중 알리바이 조사 금지</strong>, 카드 실물 공유만 가능.</li>
+            <li><strong>[3라운드: 알리바이 균열 & 심층 추궁 (15분)]</strong> 누적 단서 기반 모순 추궁.</li>
+            <li><strong>[4라운드: 마지막 물증 & 2차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 최종 수색 및 2차 밀담 연대.</li>
+            <li><strong>[5라운드: 최후의 변론 & 최종 지목 투표 (10분)]</strong> 1인당 1분 스피치 후 실시간 공개 지목 투표.</li>
           </ul>
         </div>
-
         <div class="p-3 bg-black/40 border border-neutral-800 rounded-lg">
           <strong class="text-amber-400 block mb-1 text-sm">⚖️ 승리 조건 & 동률 판정 규정</strong>
-          • <strong>시민 승리</strong>: 투표 결과 최다 득표자가 '진범'일 경우 시민 팀 전원 승리.<br>
-          • <strong>진범 승리</strong>: 최다 득표자가 무고한 시민이거나, <strong>동률 득표로 인해 진범을 단독 특정하지 못한 경우 진범의 승리</strong>로 판정됩니다.
+          • <strong>시민 승리</strong>: 단독 최다 득표자가 '진범'일 경우 승리.<br>
+          • <strong>진범 승리</strong>: 최다 득표자가 시민이거나, <strong>동률 득표로 진범 특정 실패 시 진범 승리</strong>.
         </div>
       </div>
-
       <div class="pt-2 border-t border-neutral-800 text-right">
-        <button id="btnConfirmRules" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">
-          규칙 숙지 완료
-        </button>
+        <button id="btnConfirmRules" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">규칙 숙지 완료</button>
       </div>
     </div>
   </div>
 
-  <!-- [모달 1.5: 방장 전용 실시간 전체 긴급 방송 모달] -->
+  <!-- 방장 방송 모달 -->
   <div id="hostBroadcastModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="noir-card border-2 border-purple-500 max-w-md w-full rounded-xl p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
-        <h3 class="text-sm font-bold text-purple-300 flex items-center gap-1.5">
-          <i class="fa-solid fa-bullhorn text-purple-400"></i> 전체 플레이어 실시간 방송 (방장 전용)
-        </h3>
+        <h3 class="text-sm font-bold text-purple-300 flex items-center gap-1.5"><i class="fa-solid fa-bullhorn text-purple-400"></i> 전체 플레이어 실시간 방송</h3>
         <button id="btnCloseHostBroadcast" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p class="text-xs text-neutral-300 leading-relaxed break-keep">
-        각 디스코드 밀담방에 흩어져 있는 모든 플레이어의 상단 배너에 즉시 소리와 함께 노출될 긴급 방송을 전송합니다.
-      </p>
-      <div>
-        <textarea id="inputBroadcastMessage" rows="3" maxlength="100" placeholder="예: '밀담룸 1, 1분 뒤 메인방으로 집합하세요.', '아서님 마이크 확인 바랍니다.'" class="w-full bg-[#0b0c10] border border-neutral-700 rounded-lg p-2.5 text-xs text-neutral-100 focus:outline-none focus:border-purple-500"></textarea>
-      </div>
+      <textarea id="inputBroadcastMessage" rows="3" maxlength="100" placeholder="예: '밀담룸 1, 1분 뒤 메인방으로 집합하세요.'" class="w-full bg-[#0b0c10] border border-neutral-700 rounded-lg p-2.5 text-xs text-neutral-100 focus:outline-none focus:border-purple-500"></textarea>
       <div class="flex justify-end space-x-2">
         <button id="btnCancelBroadcast" class="px-4 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded">취소</button>
         <button id="btnSendBroadcast" class="px-5 py-1.5 bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs rounded transition shadow">전체 전송</button>
@@ -525,18 +459,13 @@
     </div>
   </div>
 
-  <!-- [모달 2: 다음 단계 조기 전환 찬반 투표 모달] -->
+  <!-- 조기 전환 투표 모달 -->
   <div id="phaseVoteModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="noir-card border-2 border-amber-500 max-w-sm w-full rounded-xl p-5 text-center space-y-3 shadow-2xl">
-      <div class="w-12 h-12 bg-amber-950 border border-amber-500 rounded-full flex items-center justify-center mx-auto text-amber-400 text-xl">
-        <i class="fa-solid fa-forward-step"></i>
-      </div>
+      <div class="w-12 h-12 bg-amber-950 border border-amber-500 rounded-full flex items-center justify-center mx-auto text-amber-400 text-xl"><i class="fa-solid fa-forward-step"></i></div>
       <h3 class="text-base font-bold text-amber-200">다음 단계 전환 투표</h3>
-      <p class="text-xs text-neutral-300 leading-relaxed break-keep">
-        방장이 다음 단계로의 조기 진행을 요청했습니다.<br>
-        <span class="text-amber-400 font-semibold">(반대가 1표라도 있으면 전환되지 않고 토론이 계속됩니다)</span>
-      </p>
-      <div id="phaseVoteStatusText" class="text-xs text-amber-400 font-mono py-1">찬성 0 / 반대 0 (대기 중)</div>
+      <p class="text-xs text-neutral-300">방장이 조기 전환을 요청했습니다. (반대 1표 발생 시 자동 부결)</p>
+      <div id="phaseVoteStatusText" class="text-xs text-amber-400 font-mono py-1">대기 중</div>
       <div class="flex space-x-2 pt-2">
         <button id="btnVotePhaseYes" class="flex-1 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-bold">찬성</button>
         <button id="btnVotePhaseNo" class="flex-1 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded text-xs font-bold">반대</button>
@@ -544,7 +473,7 @@
     </div>
   </div>
 
-  <!-- [모달 3: 밀담 파트너가 공개한 카드 실물 확인 모달] -->
+  <!-- 밀담 공개 카드 모달 -->
   <div id="revealedCardModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="noir-card border-2 border-amber-400 max-w-md w-full rounded-xl p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
@@ -552,7 +481,7 @@
         <button id="btnCloseRevealedCard" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-4 bg-black/60 rounded-lg border border-amber-600/40 text-center space-y-3">
-        <div id="revealedCardImgBox" class="w-full h-36 rounded-lg overflow-hidden border border-neutral-700 hidden cursor-pointer" title="클릭 시 확대">
+        <div id="revealedCardImgBox" class="w-full h-36 rounded-lg overflow-hidden border border-neutral-700 hidden cursor-pointer">
           <img id="revealedCardImg" src="" alt="공개 카드" class="w-full h-full object-cover">
         </div>
         <span id="revealedCardOwner" class="text-xs font-bold text-amber-300 px-2 py-0.5 rounded bg-amber-950 border border-amber-800 inline-block"></span>
@@ -560,18 +489,14 @@
         <p id="revealedCardDesc" class="text-xs text-neutral-300 leading-relaxed break-keep text-left p-2.5 bg-neutral-900/80 rounded border border-neutral-800"></p>
         <div id="revealedCardSender" class="text-[10px] text-neutral-400 text-right pt-1"></div>
       </div>
-      <button id="btnConfirmRevealedCard" class="w-full py-2 bg-amber-700 hover:bg-amber-600 text-white text-xs font-bold rounded">
-        확인했습니다
-      </button>
+      <button id="btnConfirmRevealedCard" class="w-full py-2 bg-amber-700 hover:bg-amber-600 text-white text-xs font-bold rounded">확인했습니다</button>
     </div>
   </div>
 
-  <!-- [모달 3.5: 단서/증거 이미지 확대 라이트박스 뷰어] -->
+  <!-- 이미지 라이트박스 모달 -->
   <div id="imageLightboxModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
     <div class="noir-card border border-amber-500/80 max-w-lg w-full rounded-2xl p-4 sm:p-6 space-y-4 shadow-2xl relative">
-      <button id="btnCloseLightbox" class="absolute top-3 right-3 text-neutral-400 hover:text-white text-xl z-10 p-1">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+      <button id="btnCloseLightbox" class="absolute top-3 right-3 text-neutral-400 hover:text-white text-xl z-10 p-1"><i class="fa-solid fa-xmark"></i></button>
       <div class="w-full h-64 sm:h-80 rounded-xl overflow-hidden border border-neutral-800 shadow-inner bg-black">
         <img id="lightboxImg" src="" alt="확대 단서" class="w-full h-full object-contain">
       </div>
@@ -583,32 +508,26 @@
     </div>
   </div>
 
-  <!-- [모달 4: 플레이어 이탈 시 게임 일시 정지 팝업] -->
+  <!-- 이탈 일시 정지 모달 -->
   <div id="disconnectPauseModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
     <div class="noir-card border-2 border-red-600 max-w-md w-full rounded-xl p-6 text-center space-y-4 shadow-2xl">
       <div class="w-14 h-14 bg-red-950 border border-red-500 rounded-full flex items-center justify-center mx-auto text-red-400 text-2xl animate-pulse">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
-      <div>
-        <h3 class="text-lg font-bold text-red-300 mb-1">게임 일시 정지 (플레이어 이탈)</h3>
-        <p id="disconnectedPlayerInfo" class="text-xs text-neutral-300 leading-relaxed break-keep mb-3">
-          플레이어의 연결이 끊어졌습니다. 해당 플레이어가 다시 접속할 때까지 게임 진행이 멈춥니다.
-        </p>
-        <div class="p-3 bg-neutral-900/80 rounded border border-neutral-800 text-xs">
-          <span class="text-neutral-400">재접속용 방 코드:</span>
-          <span id="pauseRoomCodeText" class="font-mono font-bold text-amber-400 text-base ml-1"></span>
-        </div>
+      <h3 class="text-lg font-bold text-red-300 mb-1">게임 일시 정지 (플레이어 이탈)</h3>
+      <p id="disconnectedPlayerInfo" class="text-xs text-neutral-300 leading-relaxed break-keep mb-3"></p>
+      <div class="p-3 bg-neutral-900/80 rounded border border-neutral-800 text-xs">
+        <span class="text-neutral-400">재접속용 방 코드:</span>
+        <span id="pauseRoomCodeText" class="font-mono font-bold text-amber-400 text-base ml-1"></span>
       </div>
-      <p class="text-[11px] text-neutral-400">이탈한 플레이어가 브라우저에서 방 코드를 입력하고 재접속하면 자동으로 재개됩니다.</p>
     </div>
   </div>
 
-  <!-- 하단 푸터 -->
   <footer class="border-t border-[#2d3139] px-4 py-2.5 text-center text-[10px] text-neutral-600 bg-[#0b0c10]">
-    Multi-Scenario Murder Mystery Online • Discord Synced (ver.12.0)
+    Multi-Scenario Murder Mystery Online • Modular Architecture (ver.12.5)
   </footer>
 
-  <!-- Firebase v9 Modular SDK -->
+  <!-- Firebase & Core Game Engine (동적 모듈 로드) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { 
@@ -631,443 +550,25 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // =========================================================================
-    // 시나리오 데이터 아카이브 (테마 1: 윈체스터 별장 / 테마 2: 황야의 설원 특급)
-    // =========================================================================
-    const SCENARIOS = {
-      winchester: {
-        id: "winchester",
-        title: "폭풍우 치는 윈체스터 별장",
-        subtitle: "1926 폭풍우 치는 밤의 살인 (사라진 유언장)",
-        coverImg: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
-        coverSub: "Mansion in the Thunderstorm",
-        prologueTag: "사건의 서막 • 1926",
-        prologueLocation: "October 1926 • Winchester Manor",
-        prologueStory: `
-          <p>1926년 10월의 깊은 밤, 영국의 외딴 절벽 위에 자리한 윈체스터 별장에 세찬 폭풍우가 몰아치고 있습니다. 벼락으로 인해 저택으로 이어지는 유일한 목교가 끊어지며, 저택 안의 사람들은 완전히 고립되었습니다.</p>
-          <p>거대한 부를 쥐고 있던 별장의 주인 <strong>에드워드 윈체스터 경</strong>은 최근 막대한 유산을 둘러싸고 주변 인물들과 극심한 갈등을 빚고 있었습니다. 그는 오늘 밤 새로운 유언장을 공증하기 위해 친족과 주치의, 오랜 집사를 한자리에 불러 모았습니다.</p>
-          <p class="text-amber-300 font-semibold">그러나 21시 30분, 서재에서 날카로운 비명소리가 울려 퍼졌습니다.</p>
-          <p>문이 잠긴 서재 안에서 에드워드 경은 싸늘한 주검으로 발견되었고, 그가 작성하던 비밀 유언장은 흔적도 없이 사라졌습니다. 시신의 상태로 보아 명백한 타살. 폭풍우로 인해 경찰이 도착하기까지 최소 반나절 이상이 걸립니다.</p>
-          <p class="text-red-400 font-semibold">저택 문을 열고 나갈 수 있는 자는 없습니다. 살인자는 지금 여러분 중 한 명입니다.</p>
-        `,
-        victimName: "에드워드 윈체스터 경",
-        culpritCid: "elena",
-        fixedOrderCids: ["arthur", "elena", "charles", "viola", "victor"],
-        characters: {
-          arthur: {
-            id: "arthur",
-            name: "아서 윈체스터",
-            role: "장남 / 파산 위기의 사업가",
-            avatar: "아",
-            imgUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "윈체스터 가문의 장남. 최근 무역 투자 실패로 거액의 사채를 씀.",
-            timeline: [
-              { time: "20:00", text: "응접실에서 부친(피해자)과 유산 배분을 두고 격렬한 말다툼." },
-              { time: "20:30", text: "자신의 침실로 올라가 위스키를 마시며 진정하려 애씀." },
-              { time: "21:00", text: "부친의 금고를 열기 위해 서재로 향하다 깨지는 소리를 듣고 도망침." },
-              { time: "21:30", text: "비명을 듣고 다른 이들과 함께 서재로 뛰어감." }
-            ],
-            secret: "부친의 금고를 털기 위해 서재 만능열쇠를 복제해 소지했습니다. 서재에 도착했을 때 부친은 이미 쓰러져 있어 겁먹고 도망쳤을 뿐 살해하지 않았습니다.",
-            alibis: [
-              { id: "a1", title: "옷소매의 얼룩", desc: "와이셔츠 오른쪽 소매에 붉은 액체가 묻어 있다. 포도주인가, 핏자국인가?", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" },
-              { id: "a2", title: "20:55 계단 목격담", desc: "20:55경 서재 계단에서 안색이 창백해진 채 내려오는 것이 목격되었다.", img: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=600&q=80" },
-              { id: "a3", title: "만능열쇠 복사본", desc: "외투 안주머니에서 서재 문과 금고를 여는 황동 복사 키가 발견되었다.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
-              { id: "a4", title: "깨진 회중시계", desc: "손목시계가 충격을 받아 정확히 21:00에 바늘이 멈춰 서 있다.", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80" },
-              { id: "a5", title: "찢어진 사채 차용증", desc: "아서의 방 쓰레기통에서 오늘 자정까지 변제하지 않으면 목숨이 위험하다는 사채업자의 협박 편지 조각이 발견되었다.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          elena: {
-            id: "elena",
-            name: "엘레나 바스커빌",
-            role: "주치의 / 피해자의 오랜 친구",
-            avatar: "엘",
-            imgUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "10년 넘게 피해자의 건강을 돌봐온 전속 주치의. 새 유언장 증인으로 초대됨.",
-            timeline: [
-              { time: "20:10", text: "피해자 에드워드에게 정기 지속성 진통제를 주사함." },
-              { time: "20:40", text: "1층 약품실에서 의료 키트 및 약제를 점검하고 정리함." },
-              { time: "21:10", text: "2층 복도에서 집사 찰스와 마주쳐 따뜻한 차를 권유받음." },
-              { time: "21:30", text: "서재에서 사망한 에드워드를 검진하고 사망 선고를 내림." }
-            ],
-            secret: "★ 당신이 바로 진범입니다! 피해자는 과거 당신의 치명적인 의료과실을 빌미로 평생 협박했습니다. 20:10 진통제에 지연성 청산가리를 섞어 20:50경 독살했습니다. 유일하게 전면 거짓말이 허용되므로 다른 이에게 누명을 씌우세요!",
-            alibis: [
-              { id: "e1", title: "주사기 파편", desc: "1층 약품실 쓰레기통에서 유리 주사기 앰플 파편과 독극물 침전물이 발견되었다.", img: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=600&q=80" },
-              { id: "e2", title: "만년필 대여 기록", desc: "20:35경 진단서 작성을 위해 집사에게 만년필을 빌려간 기록이 있다.", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80" },
-              { id: "e3", title: "독극물 관리대장 훼손", desc: "진료 가방 속 청산가리 바이알 재고 장부 페이지가 찢겨져 있다.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
-              { id: "e4", title: "청진기 끝의 백색 분말", desc: "청진기 림 부분에서 미량의 백색 결정 가루가 검출되었다.", img: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=600&q=80" },
-              { id: "e5", title: "타다 남은 처방전", desc: "난로 속에서 엘레나의 서명이 적힌 치사량의 독극물 특별 처방전 흔적이 발견되었다.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          charles: {
-            id: "charles",
-            name: "찰스 위킨스",
-            role: "충직한 노집사",
-            avatar: "찰",
-            imgUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "윈체스터 저택에서 30년간 헌신한 집사. 저택의 모든 열쇠와 통로를 꿰뚫음.",
-            timeline: [
-              { time: "20:20", text: "에드워드의 지시로 서재에 홍차와 찻잔 세트를 가져다 둠." },
-              { time: "20:50", text: "폭풍우로 불이 깜빡거리자 지하 보일러실 및 전기 차단기를 점검함." },
-              { time: "21:10", text: "2층 복도에서 엘레나와 마주쳐 차를 대접함." },
-              { time: "21:30", text: "비명을 듣고 서재 문을 집사용 마스터키로 개방함." }
-            ],
-            secret: "피해자가 전 재산을 보육원에 기부하겠다는 새 유언장을 작성 중인 것을 알고 있었습니다. 퇴직금과 생계가 날아갈까 봐 21:30 문을 열자마자 새 유언장 초안을 슬쩍 품속에 숨겼습니다.",
-            alibis: [
-              { id: "c1", title: "핏자국 묻은 면장갑", desc: "보일러실 석탄 더미 뒤편에서 피가 튄 집사용 면장갑이 발견되었다.", img: "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=600&q=80" },
-              { id: "c2", title: "홍차 잔의 침전물", desc: "서재 홍차 잔 바닥에 완전히 녹지 않은 검은 가루가 남아 있다.", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80" },
-              { id: "c3", title: "찢겨진 유언장 조각", desc: "앞치마 주머니에서 '...모든 재산을 보육원에...'라고 적힌 종이 조각이 발견됨.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80" },
-              { id: "c4", title: "빠져있는 마스터키", desc: "허리춤 열쇠고리에서 서재 쪽문 보조 열쇠 하나가 빠져 있다.", img: "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80" },
-              { id: "c5", title: "지하실의 피 묻은 걸레", desc: "보일러실 구석 세척통에서 서재 바닥 핏자국을 닦아낸 흔적이 있는 걸레가 발견되었다.", img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          viola: {
-            id: "viola",
-            name: "비올라 윈체스터",
-            role: "젊은 후처 / 과거 무명 배우",
-            avatar: "비",
-            imgUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "1년 전 나이 차를 극복하고 결혼한 아내. 유산을 노리고 접근했다는 소문이 자자함.",
-            timeline: [
-              { time: "20:00", text: "식당에서 아서와 에드워드가 다투는 것을 말리려다 질책을 들음." },
-              { time: "20:40", text: "마음을 식히기 위해 저택 1층 온실 정원으로 나가 담배를 피움." },
-              { time: "21:05", text: "서재 문을 두드렸으나 안에서 잠겨 있고 기척이 없어 돌아섬." },
-              { time: "21:30", text: "비명을 듣고 2층으로 뛰어올라와 사망 현장을 목격함." }
-            ],
-            secret: "장남 아서의 사채 빚보증을 서주었으며 내연 관계였습니다. 남편이 이를 눈치채고 유언장에서 제외하려 하자 아서에게 협박 편지를 보낸 적이 있습니다.",
-            alibis: [
-              { id: "v1", title: "온실 진흙 하이힐 자국", desc: "온실에서 서재 쪽문으로 이어지는 진흙길에 하이힐 족적이 찍혀 있다.", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=600&q=80" },
-              { id: "v2", title: "장미 향수의 흔적", desc: "서재 쪽문 손잡이와 난로 주변에서 비올라의 장미 향수 향이 강하게 난다.", img: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80" },
-              { id: "v3", title: "협박 편지 원본", desc: "화장대 서랍에서 '아서, 남편이 눈치챘어. 당장 손을 써야 해'라는 편지가 발견됨.", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80" },
-              { id: "v4", title: "21:05의 증언", desc: "21:05 서재 문을 두드렸을 때 안에서 긁는 신음 소리를 들었다고 진술함.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80" },
-              { id: "v5", title: "귀금속 보석함 은닉", desc: "비올라의 침대 매트리스 밑에서 서재 금고에 보관되어 있던 에드워드의 다이아몬드 브로치가 발견되었다.", img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          victor: {
-            id: "victor",
-            name: "빅터 반스",
-            role: "사설 탐정 / 초대받지 않은 손님",
-            avatar: "빅",
-            imgUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: true,
-            publicDesc: "폭풍우를 피해 투숙을 청한 탐정. 저택 인물들의 약점을 날카롭게 관찰함.",
-            timeline: [
-              { time: "19:50", text: "차량이 진흙탕에 빠져 도움을 요청하며 저택에 도착함." },
-              { time: "20:25", text: "피해자 에드워드와 서재 복도에서 은밀히 짧은 대화를 나눔." },
-              { time: "20:45", text: "손님방에 짐을 풀고 저택 복도를 거닐며 담배를 피움." },
-              { time: "21:30", text: "비명을 듣고 가장 먼저 현장 통제를 시도함." }
-            ],
-            secret: "우연이 아닙니다. 에드워드로부터 '가족들의 비리를 캐달라'는 거액의 의뢰를 받고 잠입한 상태였습니다. 비밀 조사 수첩이 털리면 의뢰비 정산이 불가능해집니다.",
-            alibis: [
-              { id: "b1", title: "비밀 조사 수첩", desc: "품속 수첩에 모든 거주자들의 약점과 이동 경로가 빼곡히 메모되어 있다.", img: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80" },
-              { id: "b2", title: "젖은 장화와 우비", desc: "우비에 묻은 진흙이 서재 창틀의 진흙 성분과 일치한다.", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" },
-              { id: "b3", title: "선금 5천 파운드 수표", desc: "지갑에서 오늘 아침 에드워드가 발행한 거액 수표가 발견되었다.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-              { id: "b4", title: "도청용 장비", desc: "가방에서 벽에 대고 소리를 엿듣는 사설 탐정용 도청 컵이 발견되었다.", img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80" },
-              { id: "b5", title: "권총 홀스터", desc: "빅터의 코트 안쪽에 소음기를 장착할 수 있는 빈 가죽 권총 홀스터가 착용되어 있다.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" }
-            ]
-          }
-        },
-        clueDeck: [
-          { name: "부러진 황동 촛대", desc: "서재 바닥의 무거운 황동 촛대. 머리를 가격할 수 있는 크기다.", img: "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=600&q=80" },
-          { name: "빈 청산가리 유리병", desc: "약품 보관함 뒤편에서 발견된 치사량의 청산가리 갈색 병.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-          { name: "금고 앞 진흙 발자국", desc: "비밀 금고 바로 앞에 남겨진 비에 젖은 진흙 구두 자국.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
-          { name: "사채업자의 독촉장", desc: "장남 아서 앞으로 청구된 5만 파운드의 긴급 변제 독촉 서류.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
-          { name: "생명보험 증서", desc: "피해자 사망 시 부인 비올라에게 거액이 지급되도록 변경된 서류.", img: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80" },
-          { name: "타고 남은 양피지 조각", desc: "벽난로 재 속에서 발견된 '유언장' 머리말이 적힌 종이.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
-          { name: "지하 차단기 훼손 흔적", desc: "메인 배전반 전선이 칼로 절단된 흔적.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" },
-          { name: "수면제 처방 기록", desc: "피해자가 최근 심한 불면증으로 고농도 진정제를 처방받은 내역.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" },
-          { name: "밀회 사진 조각", desc: "비올라와 아서가 시내 호텔에서 은밀히 만나는 사진.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" },
-          { name: "피 묻은 손수건", desc: "이니셜 'E'가 수놓인 고급 실크 손수건.", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" },
-          { name: "깨진 찻잔 파편", desc: "홍차 테이블 아래로 깨진 잔. 립스틱 자국이 있다.", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80" },
-          { name: "열쇠공 명함", desc: "복제 열쇠 제작 전문 업체의 전화번호가 적힌 명함.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
-          { name: "보육원 감사 서한", desc: "전 재산을 사회에 환원해 주셔서 감사하다는 서한.", img: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80" },
-          { name: "외투 단추", desc: "피해자의 손가락 사이에 쥐어져 있던 검은색 코트 단추.", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80" },
-          { name: "의료사고 협박장", desc: "과거 수술 사망 사건을 폭로하겠다는 협박 메모.", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80" },
-          { name: "테라스 빗물 자국", desc: "외부에서 창문을 열고 들어왔음을 암시하는 창틀 빗물.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80" },
-          { name: "피해자의 일기장", desc: "'모든 자들이 내 목숨과 돈을 노린다'고 적힌 일기.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
-          { name: "찢어진 로브 깃", desc: "책상 모서리에 걸려 뜯겨나간 에드워드의 실크 가운 조각.", img: "https://images.unsplash.com/photo-1520006403909-838d6b92c22e?auto=format&fit=crop&w=600&q=80" },
-          { name: "수면제 가루 봉지", desc: "식당 서빙 카트 바닥에서 발견된 약국 봉투.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-          { name: "고급 시가 꽁초", desc: "서재 재떨이에 비벼 꺼진 최고급 하바나 시가.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" },
-          { name: "저택 청사진", desc: "하인용 통로와 서재 쪽문 위치가 표시된 도면.", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-          { name: "변호사의 전보", desc: "'내일 오전 10시 정각 공증을 위해 방문합니다'라는 전보.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-          { name: "깨진 안경 렌즈", desc: "카펫 깊숙한 곳에서 발견된 돋보기 안경 파편.", img: "https://images.unsplash.com/photo-1577744486770-020ab432da65?auto=format&fit=crop&w=600&q=80" },
-          { name: "피 묻은 만년필", desc: "펜촉이 심하게 찌그러진 금장 만년필.", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80" }
-        ],
-        truthStory: (elenaNick) => `
-          <strong>진범: 주치의 엘레나 바스커빌 (플레이어: ${elenaNick})</strong><br>
-          엘레나는 과거 자신의 치명적인 의료과실을 빌미로 평생 자신을 협박해 온 에드워드에게 20:10 정기 진통제 주사 시 지연성 청산가리를 투여했습니다. 
-          에드워드는 20:50경 독이 퍼져 쓰러졌으며, 다른 용의자들은 각자의 약점(금고 절도 미수, 유언장 은닉, 불륜, 비밀 조사)을 숨기려다 서로를 의심했습니다.
-        `,
-        epilogues: {
-          success: (elenaNick) => `
-            <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-              <span class="font-bold text-blue-400 block mb-1">아서 윈체스터</span>
-              <p class="text-neutral-300 break-keep">살인 누명은 벗었으나 금고 절도 미수 사실이 드러나 유산 상속에서 배제되고, 사채업자들을 피해 런던 외곽으로 도피합니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-              <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
-              <p class="text-neutral-300 break-keep">유언장을 은닉한 혐의로 가벼운 처벌을 받지만, 진범 검거에 협조한 점이 참작되어 평생 모은 퇴직금을 챙겨 고향으로 낙향합니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-purple-400 block mb-1">비올라 윈체스터</span>
-              <p class="text-neutral-300 break-keep">아서와의 밀회 편지가 세간에 폭로되어 귀족 사회에서 매장당하고, 위자료 한 푼 없이 저택에서 쫓겨나 무명 극단으로 돌아갑니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-emerald-900/60 bg-emerald-950/20">
-              <span class="font-bold text-emerald-400 block mb-1">엘레나 바스커빌 (${elenaNick})</span>
-              <p class="text-neutral-300 break-keep">경찰 호송차에 오르며 수갑을 차지만, "지긋지긋한 에드워드의 협박에서 드디어 해방되었다"며 체념 섞인 미소를 짓습니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-              <span class="font-bold text-indigo-400 block mb-1">빅터 반스 (탐정)</span>
-              <p class="text-neutral-300 break-keep">날카로운 추리로 진범의 알리바이 균열을 증명해내어 런던 경시청의 자문 탐정으로 명성을 떨치며 거액의 보수를 받습니다.</p>
-            </div>
-          `,
-          fail: (elenaNick, accused) => `
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-blue-400 block mb-1">아서 윈체스터</span>
-              <p class="text-neutral-400 break-keep">${accused === 'arthur' ? '억울하게 존속살해범 누명을 쓰고 종신형을 선고받아 감옥에서 절규합니다.' : '진범의 교묘한 유도에 속아 엉뚱한 사람을 의심한 죄책감과 빚더미 속에 파멸합니다.'}</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
-              <p class="text-neutral-400 break-keep">${accused === 'charles' ? '30년간 모신 주인을 독살했다는 누명을 쓰고 노구를 이끌고 교도소로 끌려갑니다.' : '저택이 풍비박산 나고 진실이 묻힌 채 홀로 빈 저택을 지키다 쓸쓸히 생을 마감합니다.'}</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-purple-400 block mb-1">비올라 윈체스터</span>
-              <p class="text-neutral-400 break-keep">${accused === 'viola' ? '남편을 독살하고 유산을 가로채려 했다는 누명을 쓰고 호송차에 태워집니다.' : '아서와 서로를 범인으로 지목하며 물고 뜯다 진범의 비웃음 속에 빈털터리가 됩니다.'}</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-amber-600/60 bg-amber-950/20">
-              <span class="font-bold text-amber-400 block mb-1">엘레나 바스커빌 (${elenaNick}) [우승]</span>
-              <p class="text-neutral-200 break-keep font-semibold">협박 서류를 모조리 불태우고, 혼란을 틈타 안개 낀 도로를 유유히 빠져나가 해외에서 새로운 신분으로 막대한 유산을 누리며 살아갑니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-indigo-400 block mb-1">빅터 반스 (탐정)</span>
-              <p class="text-neutral-400 break-keep">${accused === 'victor' ? '에드워드의 비밀 의뢰를 수행하다가 살인범 프레임에 갇혀 탐정 자격을 영구 박탈당합니다.' : '진범의 치밀한 블러핑에 완전히 속아 엉뚱한 사람을 체포하게 만들어 명예가 바닥으로 추락합니다.'}</p>
-            </div>
-          `
-        }
-      },
+    // 동적 시나리오 모듈 컨테이너 (처음엔 비어 있어 메모리가 가볍습니다)
+    let activeScenario = null;
+    let selectedScenarioKey = null;
 
-      // -----------------------------------------------------------------------
-      // [테마 2: 황야의 설원 특급 - 사라진 황금 탄환] (신규 추가)
-      // -----------------------------------------------------------------------
-      express: {
-        id: "express",
-        title: "황야의 설원 특급: 사라진 황금 탄환",
-        subtitle: "1898 알래스카 설원 열차 살인 사건",
-        coverImg: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80",
-        coverSub: "Aurora Snow Express 1898",
-        prologueTag: "사건의 서막 • 1898",
-        prologueLocation: "Winter 1898 • Yukon Pass Aurora Express",
-        prologueStory: `
-          <p>1898년 혹한의 겨울, 골드러시 열풍이 휘몰아치는 알래스카 유콘 협곡을 달리던 호화 침대열차 <strong>'오로라 익스프레스'</strong>가 눈사태로 철로에 갇히며 멈춰 섰습니다. 외부 온도는 영하 30도, 다음 정차역까지는 걸어서 빠져나갈 수 없는 절체절명의 고립 상태입니다.</p>
-          <p>열차 1등 칸 특실에는 이번 골드러시의 최대 수혜자이자 거대한 금광주 <strong>패트릭 밴더빌트</strong>가 10만 달러 상당의 순금괴를 실은 이동식 금고와 함께 탑승해 있었습니다.</p>
-          <p class="text-cyan-300 font-semibold">그러나 22시 정각, 기관실 기적 소리와 함께 총성이 어둠을 갈랐습니다.</p>
-          <p>잠긴 특실 안에서 패트릭은 이마에 단 한 발의 황금 탄환을 맞고 즉사한 채 발견되었으며, 금고 안의 금괴와 그의 상징이었던 황금 리볼버가 감쪽같이 사라졌습니다. 열차는 달리는 밀실이었으며, 살인자는 눈보라 속으로 도망치지 못했습니다.</p>
-          <p class="text-red-400 font-semibold">살인범과 훔친 황금은 지금 이 열차 객차 안에 있습니다.</p>
-        `,
-        victimName: "패트릭 밴더빌트",
-        culpritCid: "vivian",
-        fixedOrderCids: ["jack", "vivian", "samuel", "clara", "alexander"],
-        characters: {
-          jack: {
-            id: "jack",
-            name: "잭 칼라일",
-            role: "카우보이 & 현상금 사냥꾼",
-            avatar: "잭",
-            imgUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "서부에서 악명 높은 총잡이. 최근 패트릭에게 고용되어 금괴 호송 경호를 맡음.",
-            timeline: [
-              { time: "20:30", text: "식당 칸에서 패트릭과 호송 보수 잔금 지급을 두고 시비가 붙음." },
-              { time: "21:10", text: "바 칸에서 독한 버번 위스키를 마시며 총기 손질을 함." },
-              { time: "21:45", text: "특실 문 앞 복도를 지나가다 수상한 발소리를 듣고 수색함." },
-              { time: "22:00", text: "총성을 듣고 특실 문을 발로 차 부수고 진입함." }
-            ],
-            secret: "사실 과거 패트릭의 부하들에게 동생을 잃은 복수를 위해 위장 취업했습니다. 오늘 밤 죽일 작정으로 침실에 잠입했으나, 이미 패트릭이 사살되어 있어 당황해 뛰쳐나왔습니다.",
-            alibis: [
-              { id: "j1", title: "화약 냄새 배인 장갑", desc: "오른손 가죽 장갑에 최근 발사된 흑색 화약 잔여물이 묻어 있다.", img: "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=600&q=80" },
-              { id: "j2", title: "특실 복도 족적", desc: "특실 앞 카펫에 잭의 징 박힌 박차 부츠 자국이 선명하다.", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" },
-              { id: "j3", title: "콜트 리볼버 탄약 부족", desc: "잭의 탄띠에서 44구경 실탄 1발이 빈 채 발견되었다.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
-              { id: "j4", title: "복수 선언 쪽지", desc: "잭의 안주머니에서 '네놈의 피로 동생의 원혼을 달래겠다'는 메모가 발견됨.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
-              { id: "j5", title: "깨진 버번 위스키 병", desc: "특실 쪽문 바닥에서 잭이 마시던 상표의 위스키 유리 파편이 발견되었다.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          vivian: {
-            id: "vivian",
-            name: "비비안 모로",
-            role: "살롱 가수 & 갬블러",
-            avatar: "비",
-            imgUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "라스베이거스와 시애틀을 주름잡는 매혹적인 살롱 가수이자 승부사.",
-            timeline: [
-              { time: "20:00", text: "라운지 칸에서 감미로운 재즈 곡을 부르며 승객들의 시선을 끔." },
-              { time: "21:00", text: "패트릭의 특실에 초대받아 샴페인을 나누어 마심." },
-              { time: "21:40", text: "파우더룸으로 이동해 화장을 고치고 드레스를 정돈함." },
-              { time: "22:00", text: "총성을 듣고 승객들과 함께 비명을 지르며 특실로 달려옴." }
-            ],
-            secret: "★ 당신이 바로 진범입니다! 패트릭은 당신의 가문을 몰락시킨 원수이자 당신을 도박 빚으로 위협해 왔습니다. 21:50경 소음용 쿠션을 대고 패트릭의 황금 리볼버로 이마를 쐈으며 금괴를 화물칸 석탄함에 숨겼습니다. 오직 당신만 거짓말이 가능합니다!",
-            alibis: [
-              { id: "v1", title: "그을린 실크 드레스 단", desc: "비비안의 드레스 자락 끝부분에 총구 화염으로 인한 그을음 흔적이 있다.", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" },
-              { id: "v2", title: "가터벨트 속 황동 열쇠", desc: "허벅지 가터벨트 안쪽에 특실 이동 금고를 여는 소형 열쇠가 숨겨져 있다.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
-              { id: "v3", title: "구멍 뚫린 우단 베개", desc: "특실 소파의 벨벳 쿠션에 총탄이 관통하고 화약이 묻은 채 버려져 있다.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
-              { id: "v4", title: "석탄 가루 묻은 향수병", desc: "비비안의 핸드백 속 프랑스산 향수병에 검은 석탄 분말이 묻어 있다.", img: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80" },
-              { id: "v5", title: "찢어진 도박 채무 각서", desc: "화장실 휴지통에서 '패트릭에게 진 5만 달러 채무 각서' 조각이 발견되었다.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          samuel: {
-            id: "samuel",
-            name: "사무엘 홉킨스",
-            role: "오로라 익스프레스 열차 승무장",
-            avatar: "사",
-            imgUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "20년간 유콘 횡단 철도를 지킨 노련한 차장. 열차의 모든 마스터키를 소지.",
-            timeline: [
-              { time: "20:20", text: "눈보라에 대비해 각 객실의 히터 배관과 차단기를 점검함." },
-              { time: "21:20", text: "패트릭의 룸서비스 요청으로 온수와 여분의 담요를 전달함." },
-              { time: "21:50", text: "폭설로 인한 긴급 정차 상황을 승객들에게 안내함." },
-              { time: "22:00", text: "총성을 듣고 마스터키로 특실 도어를 긴급 개방함." }
-            ],
-            secret: "열차 회사의 임금 체불로 궁지에 몰려, 패트릭의 금고 속 금괴 한 개를 슬쩍 빼돌려 기관실 공구함에 은닉해 두었습니다. 살인범으로 몰릴까 봐 전전긍긍하고 있습니다.",
-            alibis: [
-              { id: "s1", title: "석탄재 묻은 승무원 외투", desc: "사무엘의 유니폼 소매에 기관실 석탄 가루와 윤활유 자국이 묻어 있다.", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80" },
-              { id: "s2", title: "공구함 속 순금괴 1개", desc: "사무엘의 전용 렌치 공구함 밑바닥에서 패트릭의 각인이 찍힌 금괴 1개가 발견됨.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-              { id: "s3", title: "휘어진 비상 마스터키", desc: "특실 문을 따려다 무리한 힘을 받아 끝부분이 휘어진 청동 열쇠.", img: "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80" },
-              { id: "s4", title: "사철(私鐵) 퇴직금 체불 통지서", desc: "안주머니에서 철도 회사가 파산 직전이라는 경영진의 비밀 통보문이 발견됨.", img: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80" },
-              { id: "s5", title: "핏자국 묻은 회중시계", desc: "사무엘의 은장 회중시계 뚜껑 테두리에 피 묻은 지문이 찍혀 있다.", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          clara: {
-            id: "clara",
-            name: "클라라 밴더빌트",
-            role: "피해자의 외동딸 & 금광 상속녀",
-            avatar: "클",
-            imgUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: false,
-            publicDesc: "동부 명문대를 졸업하고 부친의 사업을 물려받기 위해 동행한 상속녀.",
-            timeline: [
-              { time: "20:10", text: "식당 칸에서 부친 패트릭의 폭력적이고 강압적인 태도에 항의함." },
-              { time: "20:50", text: "자신의 침대 칸에서 두통약을 먹고 독서를 하며 휴식함." },
-              { time: "21:35", text: "부친에게 사과하기 위해 특실 앞까지 갔으나 안에서 다투는 소리에 돌아섬." },
-              { time: "22:00", text: "총성을 듣고 경악하며 특실로 달려와 오열함." }
-            ],
-            secret: "부친이 자신을 다른 부호와 정략결혼 시키려 하자 반발해 부친의 금광 양도 증서와 인장을 훔쳐 가방 속에 숨겨두었습니다. 유산과 양도증이 들통날까 봐 두려워합니다.",
-            alibis: [
-              { id: "c1", title: "금광 양도 날인 증서", desc: "클라라의 여행 가방 바닥 안감에서 패트릭의 인장이 찍힌 금광 양도서가 발견됨.", img: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80" },
-              { id: "c2", title: "소형 진주 호신용 권총", desc: "가방 속 보석함에서 실탄 2발이 장전된 여성용 22구경 데린저 권총이 발견됨.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-              { id: "c3", title: "찢어진 정략결혼 계약서", desc: "클라라의 코트 주머니에서 부친이 강요한 결혼 계약서 파편이 발견됨.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80" },
-              { id: "c4", title: "21:35 특실 말소리 증언", desc: "21:35 특실 앞에서 여성의 날카로운 웃음소리를 들었다고 진술함.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80" },
-              { id: "c5", title: "피 묻은 레이스 손수건", desc: "특실 문 손잡이 바로 밑 바닥에서 클라라의 이니셜 'C.V' 손수건이 발견되었다.", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80" }
-            ]
-          },
-          alexander: {
-            id: "alexander",
-            name: "알렉산더 볼코프",
-            role: "러시아 모피 상인 & 지하 밀수업자",
-            avatar: "알",
-            imgUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-            isFiveOnly: true,
-            publicDesc: "시베리아와 알래스카를 오가며 진귀한 모피와 보석을 거래하는 거상.",
-            timeline: [
-              { time: "20:00", text: "바 칸에서 승객들에게 값비싼 보드카를 돌리며 재력을 과시함." },
-              { time: "21:00", text: "패트릭과 밀담을 나누며 미개간 금광 채굴권 계약을 논의함." },
-              { time: "21:40", text: "열차 화물 칸에 들러 자신의 모피 상자 상태를 점검함." },
-              { time: "22:00", text: "총성을 듣고 파이프 담배를 입에 문 채 복도로 걸어나옴." }
-            ],
-            secret: "모피 상인은 위장일 뿐, 러시아 제국에서 도망쳐 나온 수배범입니다. 패트릭에게 거액의 금괴를 불법 러시아 채권과 맞바꾸자고 제안했다가 거절당해 앙심을 품고 있었습니다.",
-            alibis: [
-              { id: "l1", title: "모피 코트에 묻은 피", desc: "곰 가죽 외투 깃 안쪽에 말라붙은 작은 핏방울 자국이 발견되었다.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
-              { id: "l2", title: "러시아 제국 비밀 체포영장", desc: "트렁크 깊숙한 곳에서 알렉산더의 본명과 사진이 인쇄된 지명수배 전단이 발견됨.", img: "https://images.unsplash.com/photo-1577744486770-020ab432da65?auto=format&fit=crop&w=600&q=80" },
-              { id: "l3", title: "금괴 계량용 천칭 저울", desc: "가방에서 순금괴의 순도와 무게를 달기 위한 정밀 황동 저울이 발견됨.", img: "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=600&q=80" },
-              { id: "l4", title: "화물칸 썰매 도주 장비", desc: "화물칸 구석에서 눈사태 속을 탈출하기 위해 개조된 설상 스키와 로프가 발견됨.", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-              { id: "l5", title: "독한 마취 클로로포름 병", desc: "외투 주머니에서 사람을 단시간에 기절시킬 수 있는 마취 약품 병이 발견되었다.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" }
-            ]
-          }
-        },
-        clueDeck: [
-          { name: "탄피 없는 황금 총알", desc: "패트릭의 이마에서 적출된 24K 순금 도금 리볼버 탄환.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
-          { name: "열려있는 빈 이동식 금고", desc: "특실 침대 밑에 고정된 채 다이얼이 파손되어 열려 있는 철제 금고.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
-          { name: "소음용으로 쓰인 벨벳 방석", desc: "화약 그을음이 동그랗게 남은 채 찢겨진 특실의 우단 쿠션.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
-          { name: "석탄 더미 속 순금괴 묶음", desc: "화물칸 석탄 포대 아래 깊숙이 묻혀 있던 10만 달러 상당의 순금괴들.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-          { name: "비어 있는 황금 리볼버 케이스", desc: "패트릭의 서랍 속에 빈 채로 뚜껑이 열려 있는 자개 총기 상자.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-          { name: "깨진 샴페인 플루트 잔", desc: "특실 테이블 밑에 깨진 잔. 입술 연지(립스틱) 자국이 선명하다.", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80" },
-          { name: "차단된 비상 브레이크 밸브", desc: "객차 연결 통로에서 누군가 고의로 와이어를 자른 비상 정차 레버.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" },
-          { name: "핏자국이 남은 카드 한 장", desc: "스페이드 에이스 카드 뒷면에 피 묻은 지문이 찍혀 있다.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" },
-          { name: "기관실 석탄 삽", desc: "손잡이에 지문이 지워진 채 화물칸 통로에 던져져 있던 무거운 삽.", img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" },
-          { name: "외투에서 떨어진 은색 단추", desc: "피해자의 굳은 손아귀에 쥐어져 있던 고급 모피 코트 단추.", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80" },
-          { name: "얼어붙은 창문 틈 로프", desc: "특실 외부 창틀에 걸려 있는 눈 묻은 마닐라 삼 로프 조각.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80" },
-          { name: "채무 불이행 협박 전보", desc: "'이번 열차에서 지불하지 않으면 살아서 못 내린다'는 전보지.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
-          { name: "패트릭의 수첩", desc: "'비비안, 클라라, 잭... 모두가 날 노린다'고 적힌 메모.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
-          { name: "찢어진 양도 증서 모서리", desc: "바닥 틈새에서 발견된 공증인 도장이 찍힌 금광 문서 파편.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80" },
-          { name: "하바나 시가 재", desc: "특실 카펫 위에 털려 있는 최고급 수입 시가 재 분말.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" },
-          { name: "정체불명의 백색 마취 가루", desc: "샴페인 바닥에서 침전된 무색무취의 강력 진정제 성분.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-          { name: "열차 마스터 다이어그램", desc: "각 침실의 환기구와 비밀 통로가 붉은 펜으로 표시된 도면.", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-          { name: "피 묻은 가죽 홀스터", desc: "특실 옷걸이 뒤에 숨겨져 있던 피가 튄 권총집.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
-          { name: "녹아내린 눈 발자국", desc: "복도 히터 바로 옆에 남아 있는 방수 가죽 장화의 물자국.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
-          { name: "금고 다이얼 파편", desc: "강한 충격이나 특수 키로 억지로 비틀어 뜯어낸 번호판 조각.", img: "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80" },
-          { name: "러시아 화폐 루블 뭉치", desc: "화물칸 모피 상자 사이에서 발견된 피 묻은 거액의 지폐 뭉치.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-          { name: "부러진 만년필 펜촉", desc: "계약서 서명 도중 짓눌려 잉크가 사방으로 튄 금장 펜.", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80" },
-          { name: "도청용 금속 청진관", desc: "특실 옆방 벽면에 부착되어 있던 얇은 청동 관.", img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80" },
-          { name: "향수 냄새 나는 손수건", desc: "피해자의 얼굴을 덮고 있던 짙은 프랑스 장미향 손수건.", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" }
-        ],
-        truthStory: (vivianNick) => `
-          <strong>진범: 살롱 가수 비비안 모로 (플레이어: ${vivianNick})</strong><br>
-          비비안은 패트릭이 과거 자신의 부친을 파멸시키고 자신을 도박 빚으로 협박해 온 것에 앙심을 품고 복수를 계획했습니다. 
-          21:00 특실에서 샴페인을 마시며 패트릭의 주의를 돌린 뒤, 21:50경 열차 소파의 벨벳 쿠션을 소음기로 삼아 패트릭의 황금 리볼버로 이마를 쐈습니다.
-          이후 금괴를 기관실 화물칸 석탄함 속에 숨겨두었으며, 다른 용의자들의 원한과 탐욕을 이용해 수사망을 교란했습니다.
-        `,
-        epilogues: {
-          success: (vivianNick) => `
-            <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-              <span class="font-bold text-amber-400 block mb-1">잭 칼라일</span>
-              <p class="text-neutral-300 break-keep">살인 누명을 벗었으나 원수를 직접 처단하지 못한 씁쓸함을 안은 채, 다음 역에서 설원을 향해 홀로 말을 타고 떠납니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-              <span class="font-bold text-cyan-400 block mb-1">사무엘 홉킨스</span>
-              <p class="text-neutral-300 break-keep">금괴 1개를 숨겼던 죄는 진범 검거 협조로 기소유예 처분을 받고, 명예롭게 승무장 직을 은퇴하여 손주들에게 돌아갑니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-purple-400 block mb-1">클라라 밴더빌트</span>
-              <p class="text-neutral-300 break-keep">부친의 억압에서 마침내 벗어나 금광의 정당한 단독 상속인으로서 동부로 돌아가 대사업가로 거듭납니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-emerald-900/60 bg-emerald-950/20">
-              <span class="font-bold text-emerald-400 block mb-1">비비안 모로 (${vivianNick})</span>
-              <p class="text-neutral-300 break-keep">다음 간이역에서 도착한 연방 보안관에게 황금 탄환과 리볼버를 압수당하고 차디찬 철창으로 호송되며 비극적인 복수극의 막을 내립니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-              <span class="font-bold text-indigo-400 block mb-1">알렉산더 볼코프</span>
-              <p class="text-neutral-300 break-keep">신분이 노출될 뻔한 위기를 넘기고 혼란을 틈타 다음 역에서 종적을 감춘 뒤 시베리아 국경으로 달아납니다.</p>
-            </div>
-          `,
-          fail: (vivianNick, accused) => `
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-amber-400 block mb-1">잭 칼라일</span>
-              <p class="text-neutral-400 break-keep">${accused === 'jack' ? '악명 높은 총잡이라는 과거 때문에 살인 누명을 쓰고 교수형 판결을 받게 됩니다.' : '진범의 연기에 속아 무고한 사람을 몰아세운 죄책감 속에 방랑자로 전락합니다.'}</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-cyan-400 block mb-1">사무엘 홉킨스</span>
-              <p class="text-neutral-400 break-keep">${accused === 'samuel' ? '숨겨둔 금괴 1개가 발견되어 강도살인범으로 지목되어 평생을 감옥에서 썩게 됩니다.' : '평생을 바친 열차에서 끔찍한 비극을 막지 못했다는 자책으로 철도를 떠납니다.'}</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-purple-400 block mb-1">클라라 밴더빌트</span>
-              <p class="text-neutral-400 break-keep">${accused === 'clara' ? '양도 증서를 훔친 정황 때문에 친아버지를 쏜 패륜 살인마로 낙인찍혀 모든 권리를 박탈당합니다.' : '부친을 잃고 유산마저 진범에게 빼앗긴 채 쓸쓸히 고립됩니다.'}</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-amber-600/60 bg-amber-950/20">
-              <span class="font-bold text-amber-400 block mb-1">비비안 모로 (${vivianNick}) [우승]</span>
-              <p class="text-neutral-200 break-keep font-semibold">완벽한 연기로 무고한 사람에게 누명을 씌운 뒤, 눈보라가 잦아든 틈을 타 석탄함 속 순금괴를 챙겨 샌프란시스코행 배에 몸을 싣고 화려하게 사라집니다.</p>
-            </div>
-            <div class="p-3 bg-neutral-900 rounded border border-red-950">
-              <span class="font-bold text-indigo-400 block mb-1">알렉산더 볼코프</span>
-              <p class="text-neutral-400 break-keep">${accused === 'alexander' ? '러시아 수배범이라는 사실이 들통나 살인범으로 둔갑되어 혹독한 연방 교도소로 이송됩니다.' : '금괴를 독점하지 못하고 빈손으로 보안관의 눈을 피해 도망치는 신세가 됩니다.'}</p>
-            </div>
-          `
-        }
+    // 필요할 때만 비동기 로드하는 함수
+    async function loadScenarioModule(key) {
+      if (activeScenario && activeScenario.id === key) return activeScenario;
+      const fileName = key === "express" ? "./scenario-express.js" : "./scenario-winchester.js";
+      try {
+        const module = await import(fileName);
+        activeScenario = module.scenarioData;
+        selectedScenarioKey = key;
+        return activeScenario;
+      } catch (err) {
+        console.error("시나리오 로드 실패:", err);
+        alert(`시나리오 모듈(${fileName})을 불러오지 못했습니다. 파일 위치를 확인하세요.`);
+        throw err;
       }
-    };
-
-    let selectedScenarioKey = "winchester";
-    let activeScenario = SCENARIOS.winchester;
+    }
 
     let currentUser = null;
     let currentRoomCode = null;
@@ -1082,7 +583,7 @@
     let lastKnownNotice = "";
     let hasAlertedTimer60 = false;
 
-    // DOM 요소 캐싱
+    // DOM 캐싱
     const viewThemeSelect = document.getElementById("viewThemeSelect");
     const viewLobby = document.getElementById("viewLobby");
     const viewCharacterSelect = document.getElementById("viewCharacterSelect");
@@ -1104,7 +605,7 @@
     const globalNoticeText = document.getElementById("globalNoticeText");
     const btnBackToThemeSelect = document.getElementById("btnBackToThemeSelect");
 
-    // 라이트박스 DOM
+    // 라이트박스
     const imageLightboxModal = document.getElementById("imageLightboxModal");
     const lightboxImg = document.getElementById("lightboxImg");
     const lightboxTag = document.getElementById("lightboxTag");
@@ -1126,17 +627,15 @@
       if (e.target === imageLightboxModal) imageLightboxModal.classList.add("hidden");
     };
 
-    // 테마 선택 라우팅
-    window.selectThemeAndGoToLobby = (themeKey) => {
-      selectedScenarioKey = themeKey;
-      activeScenario = SCENARIOS[themeKey];
-
+    // 시나리오 선택 이벤트
+    window.selectScenarioAndOpenLobby = async (key) => {
+      await loadScenarioModule(key);
       document.getElementById("headerScenarioTitle").textContent = activeScenario.title.toUpperCase();
       document.getElementById("headerScenarioSubtitle").textContent = activeScenario.subtitle;
       document.getElementById("lobbyTitle").textContent = activeScenario.title;
       document.getElementById("lobbyCoverImg").src = activeScenario.coverImg;
       document.getElementById("lobbyCoverSub").textContent = activeScenario.coverSub;
-      document.getElementById("lobbyThemeTag").textContent = themeKey === "winchester" ? "윈체스터 별장" : "황야의 설원 특급";
+      document.getElementById("lobbyThemeTag").textContent = key === "winchester" ? "윈체스터 별장" : "황야의 설원 특급";
 
       viewThemeSelect.classList.add("hidden");
       viewLobby.classList.remove("hidden");
@@ -1147,7 +646,7 @@
       viewThemeSelect.classList.remove("hidden");
     };
 
-    // 모달들
+    // 모달 핸들러
     const rulesModal = document.getElementById("rulesModal");
     document.getElementById("btnOpenRules").onclick = () => rulesModal.classList.remove("hidden");
     document.getElementById("btnReadRulesQuick").onclick = () => rulesModal.classList.remove("hidden");
@@ -1190,7 +689,6 @@
 
     const disconnectPauseModal = document.getElementById("disconnectPauseModal");
 
-    // 사운드 이펙트 생성기 (Web Audio API)
     function playAudioTone(freq, type = 'sine', duration = 0.25, gainVal = 0.15) {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1206,11 +704,10 @@
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
       } catch (e) {
-        console.warn("오디오 알림 실패:", e);
+        console.warn("오디오 에러:", e);
       }
     }
 
@@ -1300,19 +797,17 @@
       } catch (err) {
         btnCreateRoom.disabled = false;
         btnCreateRoom.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> 새 방 만들기 (방장)';
-        return alert("Firebase 익명 로그인 오류: 콘솔에서 익명 로그인을 활성화해주세요.");
+        return alert("Firebase 익명 로그인 실패: 콘솔에서 익명 로그인을 활성화해주세요.");
       }
 
       const code = makeRoomCode();
       currentRoomCode = code;
 
-      // 시나리오 캐릭터 풀과 알리바이 풀 빌드
-      const scenario = SCENARIOS[selectedScenarioKey];
       const charOwners = {};
       const alibiPool = {};
-      Object.keys(scenario.characters).forEach(cid => {
+      Object.keys(activeScenario.characters).forEach(cid => {
         charOwners[cid] = null;
-        alibiPool[cid] = scenario.characters[cid].alibis.map(a => a.id);
+        alibiPool[cid] = activeScenario.characters[cid].alibis.map(a => a.id);
       });
 
       const roomData = {
@@ -1324,17 +819,13 @@
         phase: "ROUND_MAIN",
         timerSeconds: 900,
         isPaused: false,
-        globalNotice: `[${scenario.title}] 대기실에 입장했습니다. 역할을 선택하고 룰북(거짓말 규칙)을 확인하세요.`,
+        globalNotice: `[${activeScenario.title}] 대기실에 입장했습니다. 역할을 선택하고 룰북을 확인하세요.`,
         players: {
-          [currentUser.uid]: {
-            nickname: name,
-            charId: null,
-            online: true
-          }
+          [currentUser.uid]: { nickname: name, charId: null, online: true }
         },
         characterOwners: charOwners,
         alibiPool: alibiPool,
-        clueDeck: [...scenario.clueDeck].sort(() => Math.random() - 0.5),
+        clueDeck: [...activeScenario.clueDeck].sort(() => Math.random() - 0.5),
         whisperRooms: {
           room1: { members: [], revealedCards: [] },
           room2: { members: [], revealedCards: [] }
@@ -1352,7 +843,7 @@
       } catch (err) {
         btnCreateRoom.disabled = false;
         btnCreateRoom.innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i> 새 방 만들기 (방장)';
-        alert("Firestore 저장 오류: 데이터베이스 규칙을 확인하세요.");
+        alert("Firestore 저장 에러: 규칙을 확인하세요.");
       }
     };
 
@@ -1375,8 +866,13 @@
         }
 
         const roomData = snap.data();
-        const players = roomData.players || {};
+        
+        // 참가자는 방의 시나리오 키를 바탕으로 즉시 해당 모듈 동적 로드
+        if (roomData.scenarioKey) {
+          await loadScenarioModule(roomData.scenarioKey);
+        }
 
+        const players = roomData.players || {};
         let existingUid = null;
         Object.keys(players).forEach(uid => {
           if (players[uid].nickname === name) existingUid = uid;
@@ -1412,14 +908,13 @@
 
     function listenRoom(code) {
       if (roomUnsubscribe) roomUnsubscribe();
-      roomUnsubscribe = onSnapshot(doc(db, "rooms", code), (snap) => {
+      roomUnsubscribe = onSnapshot(doc(db, "rooms", code), async (snap) => {
         if (!snap.exists()) return;
         const data = snap.data();
         
-        // 방에 저장된 시나리오 키로 전환
-        if (data.scenarioKey && SCENARIOS[data.scenarioKey]) {
-          selectedScenarioKey = data.scenarioKey;
-          activeScenario = SCENARIOS[data.scenarioKey];
+        // 접속 도중 시나리오 모듈이 로드되지 않았을 경우 자동 로드
+        if (data.scenarioKey && (!activeScenario || activeScenario.id !== data.scenarioKey)) {
+          await loadScenarioModule(data.scenarioKey);
           document.getElementById("headerScenarioTitle").textContent = activeScenario.title.toUpperCase();
           document.getElementById("headerScenarioSubtitle").textContent = activeScenario.subtitle;
         }
@@ -1430,7 +925,6 @@
 
     function renderRoomState(room) {
       displayRoomCode.textContent = room.code;
-
       handleDisconnectPause(room);
 
       const isHost = (room.hostUid === currentUser?.uid);
@@ -1561,7 +1055,6 @@
       }
 
       characterCardGrid.innerHTML = "";
-
       const charPool = activeScenario.characters;
 
       Object.keys(charPool).forEach(cid => {
@@ -1756,7 +1249,6 @@
         timerEl.classList.remove("text-rose-500", "animate-pulse");
       }
 
-      // 조기 다음 단계 요청 버튼
       const btnRequestNextPhase = document.getElementById("btnRequestNextPhase");
       if (isHost && room.phase !== "VOTING") {
         btnRequestNextPhase.classList.remove("hidden");
@@ -1765,7 +1257,6 @@
         btnRequestNextPhase.classList.add("hidden");
       }
 
-      // 5R 최후 변론 알림 배너
       const normalStage = document.getElementById("normalGameStage");
       const defenseNotice = document.getElementById("defenseTopNotice");
       const voteSection = document.getElementById("finalVoteSection");
@@ -1787,7 +1278,6 @@
         voteSection.classList.add("hidden");
       }
 
-      // 좌측 시크릿 시트 채우기
       const secretBox = document.getElementById("mySecretContent");
       secretBox.innerHTML = `
         <div class="p-2.5 rounded bg-black/40 border border-neutral-800">
@@ -1805,10 +1295,8 @@
         </div>
       `;
 
-      // 알리바이 및 증거 제한 체크
       const totalPlayers = Object.keys(room.players).length;
       const maxDrawsThisRound = totalPlayers <= 2 ? 2 : 1;
-      
       const currentRound = room.round;
       const alibiKey = `${currentRound}_${currentUser.uid}`;
       const clueKey = `${currentRound}_${currentUser.uid}`;
@@ -1842,7 +1330,6 @@
       renderInventoryList();
       handlePhaseVoteStatus(room);
 
-      // 현장 증거 수색 버튼
       const remainClues = room.clueDeck?.length || 0;
       const btnDrawClue = document.getElementById("btnDrawClue");
       
@@ -1917,9 +1404,7 @@
           if (!snap.exists()) return;
           const data = snap.data();
 
-          if (data.phase !== "ROUND_MAIN") {
-            throw new Error("밀담 시간 중에는 알리바이 조사가 불가능합니다.");
-          }
+          if (data.phase !== "ROUND_MAIN") throw new Error("밀담 시간 중에는 알리바이 조사가 불가능합니다.");
 
           const activeRound = data.round;
           const alibiKey = `${activeRound}_${currentUser.uid}`;
@@ -1927,14 +1412,10 @@
           const maxDraws = totalPlayers <= 2 ? 2 : 1;
           const currentDrawn = data.roundAlibisDrawn?.[alibiKey] || 0;
 
-          if (currentDrawn >= maxDraws) {
-            throw new Error("이번 라운드 조사 횟수를 모두 소진했습니다!");
-          }
+          if (currentDrawn >= maxDraws) throw new Error("이번 라운드 조사 횟수를 모두 소진했습니다!");
 
           const pool = data.alibiPool?.[targetCharId] || [];
-          if (pool.length === 0) {
-            throw new Error("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
-          }
+          if (pool.length === 0) throw new Error("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
 
           const cardId = pool[0];
           const remaining = pool.slice(1);
@@ -1971,21 +1452,15 @@
           if (!snap.exists()) return;
           const data = snap.data();
 
-          if (data.phase !== "ROUND_MAIN") {
-            throw new Error("수색 가능한 라운드 토론 시간이 아닙니다.");
-          }
+          if (data.phase !== "ROUND_MAIN") throw new Error("수색 가능한 라운드 토론 시간이 아닙니다.");
 
           const activeRound = data.round;
           const clueKey = `${activeRound}_${currentUser.uid}`;
 
-          if (data.roundCluesDrawn && data.roundCluesDrawn[clueKey]) {
-            throw new Error("이미 이번 라운드 수색을 마쳤습니다!");
-          }
+          if (data.roundCluesDrawn && data.roundCluesDrawn[clueKey]) throw new Error("이미 이번 라운드 수색을 마쳤습니다!");
 
           const deck = data.clueDeck || [];
-          if (deck.length === 0) {
-            throw new Error("더 이상 남은 증거가 없습니다.");
-          }
+          if (deck.length === 0) throw new Error("더 이상 남은 증거가 없습니다.");
 
           drawnClue = deck[0];
           const remaining = deck.slice(1);
@@ -2024,8 +1499,8 @@
 
       const r1Members = wRooms.room1?.members || [];
       const r2Members = wRooms.room2?.members || [];
-
       const charPool = activeScenario.characters;
+
       const r1Text = r1Members.length > 0 ? r1Members.map(cid => charPool[cid]?.name || cid).join(", ") : "비어 있음";
       const r2Text = r2Members.length > 0 ? r2Members.map(cid => charPool[cid]?.name || cid).join(", ") : "비어 있음";
       document.getElementById("whisperRoom1Status").innerHTML = `• 밀담룸 1: <strong class="text-amber-300">${r1Text}</strong>`;
