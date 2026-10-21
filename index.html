@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>폭풍우 치는 윈체스터 별장: 사라진 유언장 ver.11.2</title>
+  <title>폭풍우 치는 윈체스터 별장: 사라진 유언장 ver.11.3</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -40,10 +40,14 @@
       <i class="fa-solid fa-feather-pointed text-amber-500 text-lg sm:text-xl"></i>
       <div>
         <h1 class="font-title text-sm sm:text-lg font-bold tracking-wider text-amber-200">WINCHESTER MANOR</h1>
-        <p class="text-[10px] sm:text-xs text-neutral-400">1926 폭풍우 치는 밤의 살인 (ver.11.2)</p>
+        <p class="text-[10px] sm:text-xs text-neutral-400">1926 폭풍우 치는 밤의 살인 (ver.11.3)</p>
       </div>
     </div>
     <div class="flex items-center space-x-2">
+      <!-- [ver.11.3] 방장 전용 실시간 전체 전달(방송) 모달 열기 버튼 -->
+      <button id="btnOpenHostBroadcast" class="hidden text-[11px] sm:text-xs px-2.5 py-1.5 rounded border border-purple-500/70 bg-purple-950/60 hover:bg-purple-900 text-purple-200 font-bold transition">
+        <i class="fa-solid fa-bullhorn mr-1 text-purple-400 animate-pulse"></i> 전체 방송 (방장)
+      </button>
       <button id="btnOpenRules" class="text-[11px] sm:text-xs px-2.5 py-1.5 rounded border border-amber-600/60 bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 font-semibold transition">
         <i class="fa-solid fa-book-open mr-1"></i> 룰북
       </button>
@@ -146,7 +150,7 @@
       </div>
     </div>
 
-    <!-- [VIEW 2.5: 전체 스토리 오프닝 프롤로그 (ver.11.2 신설)] -->
+    <!-- [VIEW 2.5: 전체 스토리 오프닝 프롤로그] -->
     <div id="viewPrologue" class="w-full max-w-3xl hidden noir-card p-6 sm:p-8 rounded-xl border border-amber-700/50 space-y-6 shadow-2xl">
       <div class="text-center space-y-2 border-b border-neutral-800 pb-4">
         <span class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-700">사건의 서막 • 1926</span>
@@ -371,11 +375,11 @@
 
   </main>
 
-  <!-- [모달 1: 전체 룰북 모달 (ver.11.2 범인 특정 스포일러 완전 제거)] -->
+  <!-- [모달 1: 전체 룰북 모달] -->
   <div id="rulesModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
     <div class="noir-card border border-amber-600/60 max-w-2xl w-full rounded-xl p-5 sm:p-6 max-h-[85vh] overflow-y-auto custom-scroll space-y-4">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-2.5">
-        <h3 class="text-base sm:text-lg font-bold text-amber-300"><i class="fa-solid fa-scroll mr-2"></i> 윈체스터 별장 게임 규칙서 (ver.11.2)</h3>
+        <h3 class="text-base sm:text-lg font-bold text-amber-300"><i class="fa-solid fa-scroll mr-2"></i> 윈체스터 별장 게임 규칙서 (ver.11.3)</h3>
         <button id="btnCloseRules" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -397,7 +401,7 @@
           <strong class="text-amber-400 block mb-1.5 text-sm">⏱️ 5라운드 진행 프로세스</strong>
           <ul class="space-y-1.5 pl-2 border-l border-amber-800/60">
             <li><strong>[1라운드: 사건 발생 & 상호 알리바이 (15분)]</strong> 각자 알리바이 카드를 1회(2인은 2회) 조사하고, 현장 증거 1개를 수색하여 15분간 음성 토론을 진행합니다.</li>
-            <li><strong>[2라운드: 현장 조사 & 1차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 15분간 자유 토론 및 증거 수색 후, 5분간 [밀담룸 1], [밀담룸 2]로 나뉘어 비밀 대화를 나눕니다. 밀담 중에만 보유 카드를 실물로 보여줄 수 있습니다.</li>
+            <li><strong>[2라운드: 현장 조사 & 1차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 15분간 자유 토론 및 증거 수색 후, 5분간 [밀담룸 1], [밀담룸 2]로 나뉘어 비밀 대화를 나눕니다. <strong>밀담 시간 중에는 알리바이 조사가 불가능</strong>하며, 보유 카드 실물만 공유할 수 있습니다.</li>
             <li><strong>[3라운드: 알리바이 균열 & 심층 추궁 (15분)]</strong> 누적된 단서를 바탕으로 서로의 타임라인 모순을 압박하며 15분간 심층 공방을 벌입니다.</li>
             <li><strong>[4라운드: 마지막 물증 & 2차 듀얼 밀담 (15분 + 밀담 5분)]</strong> 최종 단서 수색 및 대립 토론 후, 마지막 5분간 듀얼 밀담을 통해 진범을 특정하기 위한 연대를 맺습니다.</li>
             <li><strong>[5라운드: 최후의 변론 & 최종 지목 투표 (10분)]</strong> 각 플레이어는 단서 보관함을 확인하며 1인당 약 1분간 마지막 무죄 스피치를 진행하고, 비밀 지목 투표를 실시합니다.</li>
@@ -415,6 +419,28 @@
         <button id="btnConfirmRules" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">
           규칙 숙지 완료
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- [모달 1.5: 방장 전용 실시간 전체 긴급 방송 모달 (ver.11.3 신설)] -->
+  <div id="hostBroadcastModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="noir-card border-2 border-purple-500 max-w-md w-full rounded-xl p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+        <h3 class="text-sm font-bold text-purple-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-bullhorn text-purple-400"></i> 전체 플레이어 실시간 방송 (방장 전용)
+        </h3>
+        <button id="btnCloseHostBroadcast" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-neutral-300 leading-relaxed break-keep">
+        각 디스코드 밀담방에 흩어져 있는 모든 플레이어의 상단 배너에 즉시 노출될 공지 메시지를 전송합니다.
+      </p>
+      <div>
+        <textarea id="inputBroadcastMessage" rows="3" maxlength="100" placeholder="예: '밀담룸 1, 2분 뒤 메인방으로 집합하세요.', '아서님 잠시 마이크 확인 바랍니다.'" class="w-full bg-[#0b0c10] border border-neutral-700 rounded-lg p-2.5 text-xs text-neutral-100 focus:outline-none focus:border-purple-500"></textarea>
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button id="btnCancelBroadcast" class="px-4 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded">취소</button>
+        <button id="btnSendBroadcast" class="px-5 py-1.5 bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs rounded transition shadow">전체 전송</button>
       </div>
     </div>
   </div>
@@ -438,7 +464,7 @@
     </div>
   </div>
 
-  <!-- [모달 3: 밀담 파트너가 공개한 카드 실물 확인 모달 (이미지 연동)] -->
+  <!-- [모달 3: 밀담 파트너가 공개한 카드 실물 확인 모달] -->
   <div id="revealedCardModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="noir-card border-2 border-amber-400 max-w-md w-full rounded-xl p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
@@ -482,7 +508,7 @@
 
   <!-- 하단 푸터 -->
   <footer class="border-t border-[#2d3139] px-4 py-2.5 text-center text-[10px] text-neutral-600 bg-[#0b0c10]">
-    Winchester Manor Murder Mystery Online • Multi-Device Discord Synced (ver.11.2)
+    Winchester Manor Murder Mystery Online • Multi-Device Discord Synced (ver.11.3)
   </footer>
 
   <!-- Firebase v9 Modular SDK -->
@@ -508,7 +534,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // [ver.11.2] 알리바이 카드 및 캐릭터별 설명 보조 이미지 탑재
+    // [ver.11.3] 내용과 1:1 매칭되는 정밀 알리바이 카드 이미지 데이터셋
     const CHARACTERS = {
       arthur: {
         id: "arthur",
@@ -526,8 +552,8 @@
         ],
         secret: "부친의 금고를 털기 위해 서재 만능열쇠를 복제해 소지했습니다. 서재에 도착했을 때 부친은 이미 쓰러져 있어 겁먹고 도망쳤을 뿐 살해하지 않았습니다.",
         alibis: [
-          { id: "a1", title: "옷소매의 얼룩", desc: "와이셔츠 오른쪽 소매에 붉은 액체가 묻어 있다. 포도주인가, 핏자국인가?", img: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=300&q=80" },
-          { id: "a2", title: "20:55 계단 목격담", desc: "20:55경 서재 계단에서 안색이 창백해진 채 내려오는 것이 목격되었다.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80" },
+          { id: "a1", title: "옷소매의 얼룩", desc: "와이셔츠 오른쪽 소매에 붉은 액체가 묻어 있다. 포도주인가, 핏자국인가?", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=300&q=80" },
+          { id: "a2", title: "20:55 계단 목격담", desc: "20:55경 서재 계단에서 안색이 창백해진 채 내려오는 것이 목격되었다.", img: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=300&q=80" },
           { id: "a3", title: "만능열쇠 복사본", desc: "외투 안주머니에서 서재 문과 금고를 여는 황동 복사 키가 발견되었다.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=300&q=80" },
           { id: "a4", title: "깨진 회중시계", desc: "손목시계가 충격을 받아 정확히 21:00에 바늘이 멈춰 서 있다.", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=80" },
           { id: "a5", title: "찢어진 사채 차용증", desc: "아서의 방 쓰레기통에서 오늘 자정까지 변제하지 않으면 목숨이 위험하다는 사채업자의 협박 편지 조각이 발견되었다.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=300&q=80" }
@@ -549,11 +575,11 @@
         ],
         secret: "★ 당신이 바로 진범입니다! 피해자는 과거 당신의 치명적인 의료과실을 빌미로 평생 협박했습니다. 20:10 진통제에 지연성 청산가리를 섞어 20:50경 독살했습니다. 유일하게 전면 거짓말이 허용되므로 다른 이에게 누명을 씌우세요!",
         alibis: [
-          { id: "e1", title: "주사기 파편", desc: "1층 약품실 쓰레기통에서 유리 주사기 앰플 파편과 독극물 침전물이 발견되었다.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=300&q=80" },
+          { id: "e1", title: "주사기 파편", desc: "1층 약품실 쓰레기통에서 유리 주사기 앰플 파편과 독극물 침전물이 발견되었다.", img: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=300&q=80" },
           { id: "e2", title: "만년필 대여 기록", desc: "20:35경 진단서 작성을 위해 집사에게 만년필을 빌려간 기록이 있다.", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=300&q=80" },
           { id: "e3", title: "독극물 관리대장 훼손", desc: "진료 가방 속 청산가리 바이알 재고 장부 페이지가 찢겨져 있다.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80" },
-          { id: "e4", title: "청진기 끝의 백색 분말", desc: "청진기 림 부분에서 미량의 백색 결정 가루가 검출되었다.", img: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=300&q=80" },
-          { id: "e5", title: "타다 남은 처방전", desc: "난로 속에서 엘레나의 서명이 적힌 치사량의 독극물 특별 처방전 흔적이 발견되었다.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80" }
+          { id: "e4", title: "청진기 끝의 백색 분말", desc: "청진기 림 부분에서 미량의 백색 결정 가루가 검출되었다.", img: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=300&q=80" },
+          { id: "e5", title: "타다 남은 처방전", desc: "난로 속에서 엘레나의 서명이 적힌 치사량의 독극물 특별 처방전 흔적이 발견되었다.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=300&q=80" }
         ]
       },
       charles: {
@@ -574,7 +600,7 @@
         alibis: [
           { id: "c1", title: "핏자국 묻은 면장갑", desc: "보일러실 석탄 더미 뒤편에서 피가 튄 집사용 면장갑이 발견되었다.", img: "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=300&q=80" },
           { id: "c2", title: "홍차 잔의 침전물", desc: "서재 홍차 잔 바닥에 완전히 녹지 않은 검은 가루가 남아 있다.", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=300&q=80" },
-          { id: "c3", title: "찢겨진 유언장 조각", desc: "앞치마 주머니에서 '...모든 재산을 보육원에...'라고 적힌 종이 조각이 발견됨.", img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=300&q=80" },
+          { id: "c3", title: "찢겨진 유언장 조각", desc: "앞치마 주머니에서 '...모든 재산을 보육원에...'라고 적힌 종이 조각이 발견됨.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80" },
           { id: "c4", title: "빠져있는 마스터키", desc: "허리춤 열쇠고리에서 서재 쪽문 보조 열쇠 하나가 빠져 있다.", img: "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=300&q=80" },
           { id: "c5", title: "지하실의 피 묻은 걸레", desc: "보일러실 구석 세척통에서 서재 바닥 핏자국을 닦아낸 흔적이 있는 걸레가 발견되었다.", img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=300&q=80" }
         ]
@@ -598,7 +624,7 @@
           { id: "v1", title: "온실 진흙 하이힐 자국", desc: "온실에서 서재 쪽문으로 이어지는 진흙길에 하이힐 족적이 찍혀 있다.", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=300&q=80" },
           { id: "v2", title: "장미 향수의 흔적", desc: "서재 쪽문 손잡이와 난로 주변에서 비올라의 장미 향수 향이 강하게 난다.", img: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=300&q=80" },
           { id: "v3", title: "협박 편지 원본", desc: "화장대 서랍에서 '아서, 남편이 눈치챘어. 당장 손을 써야 해'라는 편지가 발견됨.", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=80" },
-          { id: "v4", title: "21:05의 증언", desc: "21:05 서재 문을 두드렸을 때 안에서 긁는 신음 소리를 들었다고 진술함.", img: "https://images.unsplash.com/photo-1508873696983-2df570464756?auto=format&fit=crop&w=300&q=80" },
+          { id: "v4", title: "21:05의 증언", desc: "21:05 서재 문을 두드렸을 때 안에서 긁는 신음 소리를 들었다고 진술함.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80" },
           { id: "v5", title: "귀금속 보석함 은닉", desc: "비올라의 침대 매트리스 밑에서 서재 금고에 보관되어 있던 에드워드의 다이아몬드 브로치가 발견되었다.", img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=300&q=80" }
         ]
       },
@@ -627,18 +653,18 @@
       }
     };
 
-    // [ver.11.2] 24종 현장 증거 덱 이미지 매핑 완료
+    // [ver.11.3] 24종 현장 증거 이미지 매칭
     const CLUE_DECK = [
       { name: "부러진 황동 촛대", desc: "서재 바닥의 무거운 황동 촛대. 머리를 가격할 수 있는 크기다.", img: "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=300&q=80" },
       { name: "빈 청산가리 유리병", desc: "약품 보관함 뒤편에서 발견된 치사량의 청산가리 갈색 병.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=300&q=80" },
       { name: "금고 앞 진흙 발자국", desc: "비밀 금고 바로 앞에 남겨진 비에 젖은 진흙 구두 자국.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=300&q=80" },
       { name: "사채업자의 독촉장", desc: "장남 아서 앞으로 청구된 5만 파운드의 긴급 변제 독촉 서류.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=300&q=80" },
       { name: "생명보험 증서", desc: "피해자 사망 시 부인 비올라에게 거액이 지급되도록 변경된 서류.", img: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=300&q=80" },
-      { name: "타고 남은 양피지 조각", desc: "벽난로 재 속에서 발견된 '유언장' 머리말이 적힌 종이.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=300&q=80" },
-      { name: "지하 차단기 훼손 흔적", desc: "메인 배전반 전선이 칼로 절단된 흔적.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80" },
+      { name: "타고 남은 양피지 조각", desc: "벽난로 재 속에서 발견된 '유언장' 머리말이 적힌 종이.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=300&q=80" },
+      { name: "지하 차단기 훼손 흔적", desc: "메인 배전반 전선이 칼로 절단된 흔적.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=300&q=80" },
       { name: "수면제 처방 기록", desc: "피해자가 최근 심한 불면증으로 고농도 진정제를 처방받은 내역.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=300&q=80" },
       { name: "밀회 사진 조각", desc: "비올라와 아서가 시내 호텔에서 은밀히 만나는 사진.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=300&q=80" },
-      { name: "피 묻은 손수건", desc: "이니셜 'E'가 수놓인 고급 실크 손수건.", img: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=300&q=80" },
+      { name: "피 묻은 손수건", desc: "이니셜 'E'가 수놓인 고급 실크 손수건.", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=300&q=80" },
       { name: "깨진 찻잔 파편", desc: "홍차 테이블 아래로 깨진 잔. 립스틱 자국이 있다.", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=300&q=80" },
       { name: "열쇠공 명함", desc: "복제 열쇠 제작 전문 업체의 전화번호가 적힌 명함.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=300&q=80" },
       { name: "보육원 감사 서한", desc: "전 재산을 사회에 환원해 주셔서 감사하다는 서한.", img: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=300&q=80" },
@@ -691,6 +717,32 @@
     document.getElementById("btnReadRulesQuick").onclick = () => rulesModal.classList.remove("hidden");
     document.getElementById("btnCloseRules").onclick = () => rulesModal.classList.add("hidden");
     document.getElementById("btnConfirmRules").onclick = () => rulesModal.classList.add("hidden");
+
+    // [ver.11.3] 방장 전용 실시간 전체 긴급 방송 모달 바인딩
+    const hostBroadcastModal = document.getElementById("hostBroadcastModal");
+    const btnOpenHostBroadcast = document.getElementById("btnOpenHostBroadcast");
+    const btnCloseHostBroadcast = document.getElementById("btnCloseHostBroadcast");
+    const btnCancelBroadcast = document.getElementById("btnCancelBroadcast");
+    const btnSendBroadcast = document.getElementById("btnSendBroadcast");
+    const inputBroadcastMessage = document.getElementById("inputBroadcastMessage");
+
+    btnOpenHostBroadcast.onclick = () => {
+      inputBroadcastMessage.value = "";
+      hostBroadcastModal.classList.remove("hidden");
+    };
+    btnCloseHostBroadcast.onclick = () => hostBroadcastModal.classList.add("hidden");
+    btnCancelBroadcast.onclick = () => hostBroadcastModal.classList.add("hidden");
+
+    btnSendBroadcast.onclick = async () => {
+      const msg = inputBroadcastMessage.value.trim();
+      if (!msg) return alert("전송할 방송 메시지를 입력해주세요.");
+      if (!currentRoomCode) return;
+
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        globalNotice: `📢 [방장 공지] ${msg}`
+      });
+      hostBroadcastModal.classList.add("hidden");
+    };
 
     const revealedCardModal = document.getElementById("revealedCardModal");
     document.getElementById("btnCloseRevealedCard").onclick = () => revealedCardModal.classList.add("hidden");
@@ -785,7 +837,6 @@
       const code = makeRoomCode();
       currentRoomCode = code;
 
-      // [ver.11.2] 타이머 15분(900초) 설정
       const roomData = {
         code: code,
         hostUid: currentUser.uid,
@@ -902,6 +953,14 @@
 
       handleDisconnectPause(room);
 
+      // 방장인 경우 상단 전체 방송 버튼 노출
+      const isHost = (room.hostUid === currentUser?.uid);
+      if (isHost && (room.status === "PLAYING" || room.status === "PROLOGUE")) {
+        btnOpenHostBroadcast.classList.remove("hidden");
+      } else {
+        btnOpenHostBroadcast.classList.add("hidden");
+      }
+
       if (room.globalNotice) {
         globalNoticeBanner.classList.remove("hidden");
         globalNoticeText.textContent = room.globalNotice;
@@ -909,7 +968,6 @@
         globalNoticeBanner.classList.add("hidden");
       }
 
-      // [ver.11.2] 상태 라우팅에 PROLOGUE 단계 추가
       if (room.status === "LOBBY") {
         viewLobby.classList.add("hidden");
         viewGame.classList.add("hidden");
@@ -1061,7 +1119,6 @@
 
       const chosenCount = Object.values(owners).filter(v => v !== null).length;
 
-      // [ver.11.2] 선택 완료 후 바로 게임이 아닌 전체 스토리 프롤로그로 유도
       if (isHost) {
         btnStartGame.disabled = (chosenCount < 2);
         btnStartGame.className = chosenCount >= 2 
@@ -1120,7 +1177,6 @@
       await updateDoc(roomRef, updates);
     }
 
-    // [ver.11.2] 프롤로그 전환 함수
     async function showPrologueView() {
       const roomRef = doc(db, "rooms", currentRoomCode);
       await updateDoc(roomRef, {
@@ -1141,7 +1197,6 @@
       }
     }
 
-    // [ver.11.2] 1라운드 시작 시 15분(900초) 설정
     async function startGameSession(room) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       await updateDoc(roomRef, {
@@ -1151,7 +1206,7 @@
         timerSeconds: 900,
         roundCluesDrawn: {},
         roundAlibisDrawn: {},
-        globalNotice: "📢 [1R: 토론 및 조사 (15분)] 음성 토론을 진행하면서 알리바이 조사와 현장 증거 수색을 자유롭게 진행하세요!"
+        globalNotice: "📢 [1R: 토론 및 조사 (15분)] 음성 토론을 진행하면서 알리바이 조사와 현장 증거 수색을 자유롭게 진행하세요! (진범만 거짓말 가능)"
       });
     }
 
@@ -1199,7 +1254,7 @@
         btnRequestNextPhase.classList.add("hidden");
       }
 
-      // 5R 최후 변론 알림 배너 및 투표 패널 레이아웃
+      // 5R 최후 변론 알림 배너
       const normalStage = document.getElementById("normalGameStage");
       const defenseNotice = document.getElementById("defenseTopNotice");
       const voteSection = document.getElementById("finalVoteSection");
@@ -1238,7 +1293,7 @@
         </div>
       `;
 
-      // 알리바이 조사 횟수 및 수색 체크 (현재 라운드 기준)
+      // [ver.11.3 핵심 수정]: 밀담 시간(WHISPER) 중 알리바이 조사 불가능 처리
       const totalPlayers = Object.keys(room.players).length;
       const maxDrawsThisRound = totalPlayers <= 2 ? 2 : 1;
       
@@ -1251,17 +1306,25 @@
 
       const badge = document.getElementById("alibiCountBadge");
       const guideText = document.getElementById("alibiGuideText");
-      if (alibiDrawnCount >= maxDrawsThisRound) {
-        badge.textContent = `조사 완료 (${alibiDrawnCount}/${maxDrawsThisRound})`;
-        badge.className = "text-[11px] px-2 py-0.5 rounded font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800";
-        guideText.textContent = "이번 라운드 알리바이 조사를 마쳤습니다. 다음 라운드에 다시 조사 가능합니다.";
+
+      if (room.phase === "WHISPER") {
+        badge.textContent = `조사 불가 (밀담 진행 중)`;
+        badge.className = "text-[11px] px-2 py-0.5 rounded font-semibold bg-purple-950/80 text-purple-300 border border-purple-800";
+        guideText.textContent = "밀담 시간에는 알리바이 조사가 금지됩니다. 파트너와 대화를 나누거나 실물 카드를 공유하세요.";
+        renderInvestigateButtons(room, myCharId, true); // 강제 비활성화
       } else {
-        badge.textContent = `조사 가능 (${alibiDrawnCount}/${maxDrawsThisRound})`;
-        badge.className = "text-[11px] px-2 py-0.5 rounded font-semibold bg-amber-950/80 text-amber-400 border border-amber-800";
-        guideText.textContent = `타인의 숨겨진 알리바이 카드를 조사합니다. (남은 횟수: ${maxDrawsThisRound - alibiDrawnCount}회)`;
+        if (alibiDrawnCount >= maxDrawsThisRound) {
+          badge.textContent = `조사 완료 (${alibiDrawnCount}/${maxDrawsThisRound})`;
+          badge.className = "text-[11px] px-2 py-0.5 rounded font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800";
+          guideText.textContent = "이번 라운드 알리바이 조사를 마쳤습니다. 다음 라운드에 다시 조사 가능합니다.";
+        } else {
+          badge.textContent = `조사 가능 (${alibiDrawnCount}/${maxDrawsThisRound})`;
+          badge.className = "text-[11px] px-2 py-0.5 rounded font-semibold bg-amber-950/80 text-amber-400 border border-amber-800";
+          guideText.textContent = `타인의 숨겨진 알리바이 카드를 조사합니다. (남은 횟수: ${maxDrawsThisRound - alibiDrawnCount}회)`;
+        }
+        renderInvestigateButtons(room, myCharId, (alibiDrawnCount >= maxDrawsThisRound));
       }
 
-      renderInvestigateButtons(room, myCharId, (alibiDrawnCount >= maxDrawsThisRound));
       renderDualWhisperSection(room, myCharId);
       checkRevealedCardInDualWhisper(room, myCharId);
       renderInventoryList();
@@ -1340,6 +1403,10 @@
           const snap = await tx.get(roomRef);
           if (!snap.exists()) return;
           const data = snap.data();
+
+          if (data.phase !== "ROUND_MAIN") {
+            throw new Error("밀담 시간 중에는 알리바이 조사가 불가능합니다.");
+          }
 
           const activeRound = data.round;
           const alibiKey = `${activeRound}_${currentUser.uid}`;
@@ -1487,7 +1554,7 @@
             row.className = "flex items-center justify-between p-1.5 bg-black/60 rounded border border-neutral-700 text-xs";
             row.innerHTML = `
               <div class="flex items-center space-x-1.5 truncate mr-2">
-                ${card.img ? `<img src="${card.img}" class="w-5 h-5 rounded object-cover">` : ''}
+                ${card.img ? `<img src="${card.img}" class="w-5 h-5 rounded object-cover flex-shrink-0">` : ''}
                 <span class="text-amber-200 truncate">[${card.ownerName}] ${card.title}</span>
               </div>
               <button class="btnShow text-[10px] px-2 py-0.5 bg-amber-700 hover:bg-amber-600 text-white rounded whitespace-nowrap">실물 공개</button>
@@ -1614,7 +1681,6 @@
       }
     }
 
-    // [ver.11.2] 단서 보관함 카드/증거물 이미지 연동 렌더링
     function renderInventoryList() {
       const alibiContainer = document.getElementById("myAlibiCardsList");
       const clueContainer = document.getElementById("myClueCardsList");
@@ -1717,34 +1783,33 @@
       }
     }
 
-    // [ver.11.2] 타이머 15분(900초) 및 최후 변론 10분(600초) 동기화
     async function advanceGamePhaseDirectly(room, isTimeout) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       let nextRound = room.round;
       let nextPhase = room.phase;
-      let newTimer = 900; // 15분
+      let newTimer = 900;
       let notice = "";
 
       if (room.phase === "ROUND_MAIN") {
         if (room.round === 2 || room.round === 4) {
           nextPhase = "WHISPER";
-          newTimer = 300; // 밀담은 5분 유지
-          notice = `🤫 [${room.round}R 듀얼 밀담 오픈 (5분)] 방장이 밀담룸 1, 2를 배정 중입니다. 디스코드 밀담방으로 이동 준비를 하세요!`;
+          newTimer = 300;
+          notice = `🤫 [${room.round}R 듀얼 밀담 오픈 (5분)] 방장이 밀담룸 1, 2를 배정 중입니다. 디스코드 밀담방으로 이동하세요! (밀담 중 알리바이 조사 금지)`;
         } else if (room.round === 5) {
           nextPhase = "FINAL_DEFENSE";
-          newTimer = 600; // 최후 변론 10분
+          newTimer = 600;
           notice = "⚖️ [5R 최후의 변론 (10분)] 마지막 결백 주장과 의심되는 용의자에 대한 1분 스피치 변론을 진행하세요!";
         } else {
           nextRound = room.round + 1;
           nextPhase = "ROUND_MAIN";
-          newTimer = 900; // 다음 라운드 토론 15분
+          newTimer = 900;
           notice = `📢 [${nextRound}R: 토론 및 수색 (15분)] 전원 메인 토론방에서 새로운 라운드를 시작하세요!`;
         }
       } 
       else if (room.phase === "WHISPER") {
         nextRound = room.round + 1;
         nextPhase = "ROUND_MAIN";
-        newTimer = 900; // 밀담 후 다음 라운드 토론 15분
+        newTimer = 900;
         notice = `📢 [${nextRound}R: 토론 및 수색 (15분)] 밀담이 종료되었습니다. 전원 메인 토론방으로 복귀하여 토론과 수색을 진행하세요!`;
       } 
       else if (room.phase === "FINAL_DEFENSE") {
@@ -1916,8 +1981,7 @@
             <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
             <p class="text-neutral-300 break-keep">유언장을 은닉한 혐의로 가벼운 처벌을 받지만, 진범 검거에 협조한 점이 참작되어 평생 모은 퇴직금을 챙겨 고향으로 낙향합니다.</p>
           </div>
-          <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-            <span class="font-bold text-purple-400 block mb-1">비올라 윈체스터</span>
+          <div class="p-3 bg-neutral-900 rounded border border-purple-400 block mb-1">비올라 윈체스터</span>
             <p class="text-neutral-300 break-keep">아서와의 밀회 편지가 세간에 폭로되어 귀족 사회에서 매장당하고, 위자료 한 푼 없이 저택에서 쫓겨나 무명 극단으로 돌아갑니다.</p>
           </div>
           <div class="p-3 bg-neutral-900 rounded border border-emerald-900/60 bg-emerald-950/20">
