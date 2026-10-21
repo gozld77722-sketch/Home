@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>폭풍우 치는 윈체스터 별장: 사라진 유언장 ver.8</title>
+  <title>폭풍우 치는 윈체스터 별장: 사라진 유언장 ver.9</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -40,7 +40,7 @@
       <i class="fa-solid fa-feather-pointed text-amber-500 text-lg sm:text-xl"></i>
       <div>
         <h1 class="font-title text-sm sm:text-lg font-bold tracking-wider text-amber-200">WINCHESTER MANOR</h1>
-        <p class="text-[10px] sm:text-xs text-neutral-400">1926 폭풍우 치는 밤의 살인 (ver.8)</p>
+        <p class="text-[10px] sm:text-xs text-neutral-400">1926 폭풍우 치는 밤의 살인 (ver.9)</p>
       </div>
     </div>
     <div class="flex items-center space-x-2">
@@ -132,7 +132,7 @@
         <h3 class="text-base sm:text-lg font-bold text-amber-200 mb-1">용의자 선택</h3>
         <p class="text-xs text-neutral-400 mb-3">플레이할 인물을 선택하세요. (빅터 반스는 5명이 모여야 해금됩니다)</p>
         <div id="characterCardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <!-- 캐릭터 카드 5개 동적 생성 -->
+          <!-- 캐릭터 카드 동적 렌더링 -->
         </div>
       </div>
 
@@ -180,7 +180,13 @@
         </div>
       </div>
 
-      <!-- 메인 3단 조작 레이아웃 (평소 조사/토론 화면) -->
+      <!-- [3번 수정]: 5R 최후 변론 알림 배너 (변론 중일 때만 상단에 띄움) -->
+      <div id="defenseTopNotice" class="hidden noir-card p-3 rounded-lg border border-red-600/70 bg-red-950/30 text-center">
+        <h4 class="text-sm font-bold text-red-300"><i class="fa-solid fa-scale-unbalanced-flip mr-1.5"></i> 5R 최후의 무죄 변론 (3분) 진행 중</h4>
+        <p class="text-xs text-neutral-300">소지한 비밀과 확보한 단서들을 확인하며 디스코드에서 마지막 무죄를 주장하세요!</p>
+      </div>
+
+      <!-- 메인 3단 조작 레이아웃 (1R~5R 변론까지 모두 표시되어 본인 단서 확인 가능) -->
       <div id="normalGameStage" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         <!-- 좌측: 내 시크릿 시트 -->
@@ -211,17 +217,15 @@
               <span id="whisperRoomBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-900 text-amber-200">배정 대기</span>
             </div>
 
-            <!-- 대기자용 실시간 룸 현황 모니터링 -->
             <div id="whisperSpectatorBoard" class="p-2 bg-black/50 rounded border border-neutral-800 text-[11px] space-y-1">
               <span class="text-amber-400 font-semibold block"><i class="fa-solid fa-door-open mr-1"></i> 현재 별장 내 밀담 현황</span>
               <div id="whisperRoom1Status" class="text-neutral-300">• 밀담룸 1: <span class="text-neutral-500 italic">비어 있음</span></div>
               <div id="whisperRoom2Status" class="text-neutral-300">• 밀담룸 2: <span class="text-neutral-500 italic">비어 있음</span></div>
             </div>
             
-            <!-- 방장 전용 듀얼 룸 배정 UI -->
             <div id="hostWhisperAssignArea" class="hidden space-y-2 pt-1 border-t border-amber-800/40">
               <p class="text-[11px] text-neutral-300 leading-tight">
-                <strong>[방장 전용]</strong> 각 밀담룸으로 보낼 인원을 체크 후 배정하세요. (한 플레이어는 한 방에만 배정됩니다)
+                <strong>[방장 전용]</strong> 각 밀담룸으로 보낼 인원을 체크 후 배정하세요. (체크 시 반대편 룸 체크는 자동 해제됩니다)
               </p>
               
               <div class="grid grid-cols-2 gap-2">
@@ -243,14 +247,13 @@
               </div>
             </div>
 
-            <!-- 밀담 참여자 카드 실물 공개 UI -->
             <div id="whisperActiveArea" class="hidden pt-2 border-t border-amber-800/60">
               <span id="myWhisperRoomTitle" class="text-xs text-amber-300 block mb-1 font-bold">내 보관함의 카드 실물 보여주기:</span>
               <div id="whisperCardsList" class="space-y-1"></div>
             </div>
           </div>
 
-          <!-- 현장 증거물품 수색 버튼 (1번 수정: CLUE_DISCUSSION 단계에서 확실한 해금 작동) -->
+          <!-- 현장 증거물품 수색 버튼 (1번 수정: ver.5 방식 복구) -->
           <div class="pt-2 border-t border-neutral-800">
             <button id="btnDrawClue" class="w-full py-2 bg-neutral-900 text-neutral-500 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed">
               <i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 현장 증거 수색 (알리바이 토론 종료 후 해금) <span id="clueRemainCount" class="font-mono ml-1">(24/24)</span>
@@ -284,43 +287,25 @@
 
       </div>
 
-      <!-- [3번 수정]: 5라운드 전용 스테이지 (최후 변론 및 최후 지목 투표 전면 노출) -->
-      <div id="finalSpecialStage" class="hidden w-full space-y-4">
+      <!-- 5R 최후의 지목 투표 & 공개 투표 현황판 (투표 시 전면 노출) -->
+      <div id="finalVoteSection" class="hidden noir-card p-5 sm:p-6 rounded-xl border-2 border-red-600 bg-black/90 space-y-5 text-center shadow-2xl">
+        <div>
+          <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
+          <p class="text-xs text-neutral-300 mt-1">모든 변론이 종료되었습니다. 에드워드를 독살한 진범은 누구입니까?</p>
+        </div>
         
-        <!-- 5R 최후 변론 안내 배너 -->
-        <div id="finalDefenseBanner" class="hidden noir-card p-6 rounded-xl border border-amber-600/70 bg-amber-950/20 text-center space-y-2">
-          <div class="w-12 h-12 bg-amber-950 border border-amber-500 rounded-full flex items-center justify-center mx-auto text-amber-400 text-xl animate-pulse">
-            <i class="fa-solid fa-scale-unbalanced-flip"></i>
-          </div>
-          <h3 class="text-xl font-bold text-amber-200">5라운드: 최후의 무죄 변론 (3분)</h3>
-          <p class="text-xs text-neutral-300 leading-relaxed max-w-lg mx-auto">
-            각자 수집된 증거와 알리바이를 바탕으로 마지막 결백을 주장하세요.<br>
-            이 시간이 지나면 모든 플레이어의 선택이 실시간으로 공개되는 최후의 지목 투표가 시작됩니다.
-          </p>
+        <div id="voteButtonsGrid" class="flex flex-wrap justify-center gap-3 pt-1"></div>
+        <p id="voteWaitingText" class="hidden text-xs text-amber-400 italic py-2">투표를 완료했습니다. 다른 플레이어들의 선택을 기다리는 중입니다...</p>
+        
+        <div class="mt-4 pt-4 border-t border-neutral-800 text-left max-w-xl mx-auto">
+          <span class="text-xs font-bold text-amber-400 block mb-2 text-center"><i class="fa-solid fa-list-check mr-1"></i> 전체 플레이어 실시간 지목 현황</span>
+          <div id="liveVoteBoard" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-300"></div>
         </div>
-
-        <!-- 5R 최후의 지목 투표 & 실시간 공개 현황판 -->
-        <div id="finalVoteSection" class="hidden noir-card p-5 sm:p-6 rounded-xl border-2 border-amber-600 bg-black/90 space-y-5 text-center shadow-2xl">
-          <div>
-            <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
-            <p class="text-xs text-neutral-300 mt-1">모든 변론이 종료되었습니다. 에드워드를 독살한 진범은 누구입니까?</p>
-          </div>
-          
-          <div id="voteButtonsGrid" class="flex flex-wrap justify-center gap-3 pt-1"></div>
-          <p id="voteWaitingText" class="hidden text-xs text-amber-400 italic py-2">투표를 완료했습니다. 다른 플레이어들의 선택을 기다리는 중입니다...</p>
-          
-          <!-- 실시간 전체 플레이어 고정 순서 지목 현황판 -->
-          <div class="mt-4 pt-4 border-t border-neutral-800 text-left max-w-xl mx-auto">
-            <span class="text-xs font-bold text-amber-400 block mb-2 text-center"><i class="fa-solid fa-list-check mr-1"></i> 전체 플레이어 실시간 지목 현황</span>
-            <div id="liveVoteBoard" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-300"></div>
-          </div>
-        </div>
-
       </div>
 
     </div>
 
-    <!-- [VIEW 4: 엔딩 화면] -->
+    <!-- [VIEW 4: 엔딩 화면 (4, 5번 수정: 시민/범인 전용 승패 배너 및 에필로그 분기)] -->
     <div id="viewEnding" class="w-full max-w-3xl hidden noir-card p-5 sm:p-8 rounded-xl border border-neutral-800 space-y-5">
       <div class="text-center space-y-2 border-b border-neutral-800 pb-4">
         <span id="endingResultBadge" class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">결과</span>
@@ -369,7 +354,7 @@
 
         <div>
           <strong class="text-amber-400 block mb-1">2. 2R & 4R [듀얼 밀담 타임 (5분)]</strong>
-          • 증거 토론 후 방장이 [밀담룸 1]과 [밀담룸 2]로 인원을 나누어 배정합니다. (한 사람은 한 방에만 입장 가능)<br>
+          • 증거 토론 후 방장이 [밀담룸 1]과 [밀담룸 2]로 인원을 나누어 배정합니다. (중복 배정 불가)<br>
           • 밀담룸 참여자는 카드를 실물로 보여줄 수 있으며, 종료 시 지체 없이 다음 라운드로 진행됩니다.
         </div>
 
@@ -771,6 +756,9 @@
           room1: { members: [], revealedCards: [] },
           room2: { members: [], revealedCards: [] }
         },
+        // [1번 복구]: 단순하고 확실한 라운드 액션 저장 객체
+        roundCluesDrawn: {},
+        roundAlibisDrawn: {},
         phaseVotes: {},
         phaseVoteActive: false,
         votes: {}
@@ -1116,28 +1104,25 @@
         btnRequestNextPhase.classList.add("hidden");
       }
 
-      // [3번 수정]: 5라운드 변론/투표 시 레이아웃 명확 분기
+      // [3번 수정]: 5R 최후 변론 알림 배너 및 투표 패널 레이아웃
       const normalStage = document.getElementById("normalGameStage");
-      const finalStage = document.getElementById("finalSpecialStage");
-      const defenseBanner = document.getElementById("finalDefenseBanner");
+      const defenseNotice = document.getElementById("defenseTopNotice");
       const voteSection = document.getElementById("finalVoteSection");
 
-      if (room.round === 5 && (room.phase === "FINAL_DEFENSE" || room.phase === "VOTING")) {
-        normalStage.classList.add("hidden");
-        finalStage.classList.remove("hidden");
-
-        if (room.phase === "FINAL_DEFENSE") {
-          defenseBanner.classList.remove("hidden");
-          voteSection.classList.add("hidden");
-        } else if (room.phase === "VOTING") {
-          defenseBanner.classList.add("hidden");
-          voteSection.classList.remove("hidden");
-          renderVoteButtons(room, myCharId);
-          renderLiveVoteBoard(room);
-        }
+      if (room.phase === "FINAL_DEFENSE") {
+        defenseNotice.classList.remove("hidden");
+        normalStage.classList.remove("hidden"); // 보관함과 시트를 그대로 노출하여 증거 확인 가능
+        voteSection.classList.add("hidden");
+      } else if (room.phase === "VOTING") {
+        defenseNotice.classList.add("hidden");
+        normalStage.classList.add("hidden");    // 투표 시에는 투표판을 크게 전면 노출
+        voteSection.classList.remove("hidden");
+        renderVoteButtons(room, myCharId);
+        renderLiveVoteBoard(room);
       } else {
+        defenseNotice.classList.add("hidden");
         normalStage.classList.remove("hidden");
-        finalStage.classList.add("hidden");
+        voteSection.classList.add("hidden");
       }
 
       // 좌측 시크릿 시트 채우기
@@ -1158,12 +1143,13 @@
         </div>
       `;
 
-      // 조사/수색 상태 계산
+      // [1번 수정]: ver.5 방식의 단순하고 확실한 조사 횟수 및 수색 체크
       const totalPlayers = Object.keys(room.players).length;
       const maxDrawsThisRound = totalPlayers <= 2 ? 2 : 1;
       
-      const alibiDrawnCount = room[`alibiDrawn_${room.round}_${currentUser.uid}`] || 0;
-      const hasDrawnClueThisRound = !!room[`clueDrawn_${room.round}_${currentUser.uid}`];
+      const alibiKey = `${room.round}_${currentUser.uid}`;
+      const alibiDrawnCount = room.roundAlibisDrawn?.[alibiKey] || 0;
+      const hasDrawnClueThisRound = !!room.roundCluesDrawn?.[alibiKey];
 
       const badge = document.getElementById("alibiCountBadge");
       const guideText = document.getElementById("alibiGuideText");
@@ -1183,7 +1169,7 @@
       renderInventoryList();
       handlePhaseVoteStatus(room);
 
-      // [1번 수정]: 증거 수색 해금 동기화 보장 (CLUE_DISCUSSION 단계에서 확실한 해금 작동)
+      // [1번 수정]: 현장 증거 수색 해금 & 버튼 동기화 (ver.5 방식 복구)
       const remainClues = room.clueDeck?.length || 0;
       document.getElementById("clueRemainCount").textContent = `(${remainClues}/24)`;
       const btnDrawClue = document.getElementById("btnDrawClue");
@@ -1244,9 +1230,10 @@
       const snap = await getDoc(roomRef);
       const data = snap.data();
 
+      const alibiKey = `${round}_${currentUser.uid}`;
       const totalPlayers = Object.keys(data.players).length;
       const maxDraws = totalPlayers <= 2 ? 2 : 1;
-      const currentDrawn = data[`alibiDrawn_${round}_${currentUser.uid}`] || 0;
+      const currentDrawn = data.roundAlibisDrawn?.[alibiKey] || 0;
 
       if (currentDrawn >= maxDraws) return alert("이번 라운드 조사 횟수를 모두 소진했습니다!");
 
@@ -1258,7 +1245,7 @@
 
       await updateDoc(roomRef, {
         [`alibiPool.${targetCharId}`]: remaining,
-        [`alibiDrawn_${round}_${currentUser.uid}`]: currentDrawn + 1
+        [`roundAlibisDrawn.${alibiKey}`]: currentDrawn + 1
       });
 
       const targetChar = CHARACTERS[targetCharId];
@@ -1270,14 +1257,16 @@
       }
     }
 
+    // [1번 수정]: ver.5 방식으로 완벽 복구된 증거 수색 로직
     async function drawClueCard(room) {
       if (!currentRoomCode) return;
       const round = room.round;
+      const alibiKey = `${round}_${currentUser.uid}`;
       const roomRef = doc(db, "rooms", currentRoomCode);
       const snap = await getDoc(roomRef);
       const data = snap.data();
 
-      if (data[`clueDrawn_${round}_${currentUser.uid}`]) return alert("이미 이번 라운드 수색을 마쳤습니다!");
+      if (data.roundCluesDrawn?.[alibiKey]) return alert("이미 이번 라운드 수색을 마쳤습니다!");
 
       const deck = data.clueDeck || [];
       if (deck.length === 0) return alert("더 이상 남은 증거가 없습니다.");
@@ -1287,7 +1276,7 @@
 
       await updateDoc(roomRef, { 
         clueDeck: remaining,
-        [`clueDrawn_${round}_${currentUser.uid}`]: true
+        [`roundCluesDrawn.${alibiKey}`]: true
       });
 
       localInventory.clues.push(drawnClue);
@@ -1295,7 +1284,6 @@
       renderInventoryList();
     }
 
-    // [2번 수정]: 듀얼 밀담룸 상호 배타 배정 강제
     function renderDualWhisperSection(room, myCharId) {
       const whisperArea = document.getElementById("secretMeetingBox");
       const isWhisperRound = (room.round === 2 || room.round === 4);
@@ -1314,13 +1302,11 @@
       const r1Members = wRooms.room1?.members || [];
       const r2Members = wRooms.room2?.members || [];
 
-      // 대기자용 실시간 현황판 업데이트
       const r1Text = r1Members.length > 0 ? r1Members.map(cid => CHARACTERS[cid].name).join(", ") : "비어 있음";
       const r2Text = r2Members.length > 0 ? r2Members.map(cid => CHARACTERS[cid].name).join(", ") : "비어 있음";
       document.getElementById("whisperRoom1Status").innerHTML = `• 밀담룸 1: <strong class="text-amber-300">${r1Text}</strong>`;
       document.getElementById("whisperRoom2Status").innerHTML = `• 밀담룸 2: <strong class="text-indigo-300">${r2Text}</strong>`;
 
-      // 방장 전용 배정 UI
       if (isHost) {
         hostArea.classList.remove("hidden");
         const phaseKey = `${room.round}_WHISPER`;
@@ -1333,7 +1319,6 @@
         hostArea.classList.add("hidden");
       }
 
-      // 내 소속 룸 판별 (room1 또는 room2)
       let myRoomId = null;
       if (r1Members.includes(myCharId)) myRoomId = "room1";
       else if (r2Members.includes(myCharId)) myRoomId = "room2";
@@ -1383,7 +1368,7 @@
       }
     }
 
-    // [2번 수정]: 룸 1 전송 시 룸 2에서 즉시 제외, 룸 2 전송 시 룸 1에서 즉시 제외
+    // [2번 수정]: 상호 체크박스 해제 및 동기화 완벽 처리
     function refreshWhisperCheckboxes(room) {
       const box1 = document.getElementById("whisperRoom1Checkboxes");
       const box2 = document.getElementById("whisperRoom2Checkboxes");
@@ -1407,6 +1392,13 @@
           l2.className = "flex items-center space-x-1 text-[10px] text-neutral-300 cursor-pointer";
           l2.innerHTML = `<input type="checkbox" value="${cid}" class="cb-room2 accent-indigo-500" ${r2Assigned.includes(cid) ? 'checked' : ''}> <span>${c.name}</span>`;
           box2.appendChild(l2);
+
+          const cb1 = l1.querySelector(".cb-room1");
+          const cb2 = l2.querySelector(".cb-room2");
+
+          // 체크 시 상대 룸 체크 자동 해제
+          cb1.onchange = () => { if (cb1.checked) cb2.checked = false; };
+          cb2.onchange = () => { if (cb2.checked) cb1.checked = false; };
         }
       });
 
@@ -1414,7 +1406,6 @@
         const checked = Array.from(box1.querySelectorAll(".cb-room1:checked")).map(cb => cb.value);
         if (checked.length < 2 || checked.length > 3) return alert("밀담룸 1 참여 인원은 2~3명을 선택하세요!");
         
-        // 룸 1에 들어간 인원은 룸 2에서 완전히 제외
         const snap = await getDoc(doc(db, "rooms", currentRoomCode));
         const currentWRooms = snap.data().whisperRooms || {};
         const cleanedRoom2 = (currentWRooms.room2?.members || []).filter(cid => !checked.includes(cid));
@@ -1431,7 +1422,6 @@
         const checked = Array.from(box2.querySelectorAll(".cb-room2:checked")).map(cb => cb.value);
         if (checked.length < 2 || checked.length > 3) return alert("밀담룸 2 참여 인원은 2~3명을 선택하세요!");
         
-        // 룸 2에 들어간 인원은 룸 1에서 완전히 제외
         const snap = await getDoc(doc(db, "rooms", currentRoomCode));
         const currentWRooms = snap.data().whisperRooms || {};
         const cleanedRoom1 = (currentWRooms.room1?.members || []).filter(cid => !checked.includes(cid));
@@ -1569,7 +1559,6 @@
       }
     }
 
-    // [3번 수정]: 라운드 시퀀스 및 페이즈 전이 정밀화
     async function advanceGamePhaseDirectly(room, isTimeout) {
       const roomRef = doc(db, "rooms", currentRoomCode);
       let nextRound = room.round;
@@ -1643,7 +1632,7 @@
 
         const c = CHARACTERS[cid];
         const btn = document.createElement("button");
-        btn.className = "px-4 py-2 bg-neutral-900 hover:bg-amber-950 border border-amber-600/50 text-amber-200 rounded text-xs font-bold transition cursor-pointer break-keep shadow-lg";
+        btn.className = "px-4 py-2.5 bg-neutral-900 hover:bg-red-950 border border-red-700/60 text-red-200 rounded text-xs font-bold transition cursor-pointer break-keep shadow-lg";
         btn.textContent = `${c.name} (${c.role})`;
         btn.onclick = () => submitVote(cid);
         grid.appendChild(btn);
@@ -1695,6 +1684,7 @@
       }
     }
 
+    // [4, 5번 수정]: 시민 승리 vs 범인 승리 시 배너 및 인물별 에필로그 완전 분기
     function renderEndingView(room) {
       const votes = room.votes || {};
       const players = room.players || {};
@@ -1712,16 +1702,24 @@
       });
 
       const isSuccess = (accused === "elena");
+      const isElenaMe = (room.players[currentUser.uid]?.charId === "elena");
       const badge = document.getElementById("endingResultBadge");
       const title = document.getElementById("endingTitle");
 
       const elenaPlayerUid = owners["elena"];
       const elenaPlayerNick = elenaPlayerUid && players[elenaPlayerUid] ? players[elenaPlayerUid].nickname : "미상";
 
+      // [4번]: 범인 본인에게는 패배 문구 노출
       if (isSuccess) {
-        badge.textContent = "진범 검거 성공 (시민 승리)";
-        badge.className = "text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-700";
-        title.textContent = "차디찬 수갑과 밝혀진 복수극";
+        if (isElenaMe) {
+          badge.textContent = "💀 검거 완료 - 작전 실패 (진범 패배)";
+          badge.className = "text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-wider bg-red-950 text-red-400 border border-red-700 shadow";
+          title.textContent = "차디찬 수갑과 밝혀진 복수극 (패배)";
+        } else {
+          badge.textContent = "🏆 진범 검거 성공 (시민 승리)";
+          badge.className = "text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-700 shadow";
+          title.textContent = "차디찬 수갑과 밝혀진 복수극 (승리)";
+        }
       } else {
         badge.textContent = `🏆 진범 승리 / [엘레나] 플레이어: ${elenaPlayerNick} 우승!`;
         badge.className = "text-xs px-4 py-1.5 rounded-full font-bold uppercase tracking-wider bg-red-950 text-amber-300 border-2 border-red-600 shadow-lg animate-pulse";
@@ -1735,32 +1733,60 @@
         <br><br>
         ${isSuccess 
           ? `치밀한 알리바이 대조와 증거물 교차 검증을 통해 엘레나의 독극물 파편 및 재고 장부 훼손이 입증되어 <strong>${elenaPlayerNick}</strong> 님이 체포되었습니다.` 
-          : `안타깝게도 <strong>${CHARACTERS[accused]?.name || '무고한 인물'}</strong>이(가) 최다 득표를 받아 살인 누명을 쓰고 연행되었으며, 진범 <strong>엘레나 바스커빌 (${elenaPlayerNick})</strong> 님은 유유히 탈출하여 완전 범죄로 게임에서 최종 우승했습니다!`
+          : `안타깝게도 <strong>${CHARACTERS[accused]?.name || '무고한 인물'}</strong>이(가) 최다 득표를 받아 살인 누명을 쓰고 연행되었으며, 진범 <strong>엘레나 바스커빌 (${elenaPlayerNick})</strong> 님은 유유히 탈출하여 완전 범죄로 최종 우승했습니다!`
         }
       `;
 
-      document.getElementById("endingEpilogues").innerHTML = `
-        <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-          <span class="font-bold text-blue-400 block mb-1">아서 윈체스터</span>
-          <p class="text-neutral-400 break-keep">살인 누명은 벗었으나 유산이 동결되어 사채업자들을 피해 야반도주합니다.</p>
-        </div>
-        <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-          <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
-          <p class="text-neutral-400 break-keep">유언장 은닉 혐의로 처벌을 받고 30년간 지켜온 저택을 떠납니다.</p>
-        </div>
-        <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-          <span class="font-bold text-purple-400 block mb-1">비올라 윈체스터</span>
-          <p class="text-neutral-400 break-keep">아서와의 밀회 편지가 세간에 공개되어 위자료 한 푼 없이 쫓겨납니다.</p>
-        </div>
-        <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-          <span class="font-bold text-emerald-400 block mb-1">엘레나 바스커빌 (${elenaPlayerNick})</span>
-          <p class="text-neutral-400 break-keep">${isSuccess ? '교도소에 수감되었으나 에드워드의 지독한 협박에서 벗어났다며 미소를 짓습니다.' : '협박장을 모두 태우고 막대한 재산을 챙겨 해외로 도주해 부귀영화를 누립니다.'}</p>
-        </div>
-        <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
-          <span class="font-bold text-indigo-400 block mb-1">빅터 반스 (탐정)</span>
-          <p class="text-neutral-400 break-keep">${isSuccess ? '사건 해결에 결정적인 자문을 제공해 명탐정으로 이름을 떨칩니다.' : '엉뚱한 인물을 지목해 탐정 사무소 문을 닫게 됩니다.'}</p>
-        </div>
-      `;
+      // [5번]: 승패 결과에 따른 5인 에필로그 스토리 완전 분기
+      if (isSuccess) {
+        // [시민 승리 시 에필로그]
+        document.getElementById("endingEpilogues").innerHTML = `
+          <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
+            <span class="font-bold text-blue-400 block mb-1">아서 윈체스터</span>
+            <p class="text-neutral-300 break-keep">살인 누명은 벗었으나 금고 절도 미수 사실이 드러나 유산 상속에서 배제되고, 사채업자들을 피해 런던 외곽으로 도피합니다.</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
+            <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
+            <p class="text-neutral-300 break-keep">유언장을 은닉한 혐의로 가벼운 처벌을 받지만, 진범 검거에 협조한 점이 참작되어 평생 모은 퇴직금을 챙겨 고향으로 낙향합니다.</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
+            <span class="font-bold text-purple-400 block mb-1">비올라 윈체스터</span>
+            <p class="text-neutral-300 break-keep">아서와의 밀회 편지가 세간에 폭로되어 귀족 사회에서 매장당하고, 위자료 한 푼 없이 저택에서 쫓겨나 무명 극단으로 돌아갑니다.</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-emerald-900/60 bg-emerald-950/20">
+            <span class="font-bold text-emerald-400 block mb-1">엘레나 바스커빌 (${elenaPlayerNick})</span>
+            <p class="text-neutral-300 break-keep">경찰 호송차에 오르며 수갑을 차지만, "지긋지긋한 에드워드의 협박에서 드디어 해방되었다"며 체념 섞인 미소를 짓습니다.</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-neutral-800">
+            <span class="font-bold text-indigo-400 block mb-1">빅터 반스 (탐정)</span>
+            <p class="text-neutral-300 break-keep">날카로운 추리로 진범의 알리바이 균열을 증명해내어 런던 경시청의 자문 탐정으로 명성을 떨치며 거액의 보수를 받습니다.</p>
+          </div>
+        `;
+      } else {
+        // [범인 승리 시 에필로그]
+        document.getElementById("endingEpilogues").innerHTML = `
+          <div class="p-3 bg-neutral-900 rounded border border-red-950">
+            <span class="font-bold text-blue-400 block mb-1">아서 윈체스터</span>
+            <p class="text-neutral-400 break-keep">${accused === 'arthur' ? '억울하게 존속살해범 누명을 쓰고 종신형을 선고받아 감옥에서 절규합니다.' : '진범의 교묘한 유도에 속아 엉뚱한 사람을 의심한 죄책감과 빚더미 속에 파멸합니다.'}</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-red-950">
+            <span class="font-bold text-amber-400 block mb-1">찰스 위킨스</span>
+            <p class="text-neutral-400 break-keep">${accused === 'charles' ? '30년간 모신 주인을 독살했다는 누명을 쓰고 노구를 이끌고 교도소로 끌려갑니다.' : '저택이 풍비박산 나고 진실이 묻힌 채 홀로 빈 저택을 지키다 쓸쓸히 생을 마감합니다.'}</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-red-950">
+            <span class="font-bold text-purple-400 block mb-1">비올라 윈체스터</span>
+            <p class="text-neutral-400 break-keep">${accused === 'viola' ? '남편을 독살하고 유산을 가로채려 했다는 누명을 쓰고 호송차에 태워집니다.' : '아서와 서로를 범인으로 지목하며 물고 뜯다 진범의 비웃음 속에 빈털터리가 됩니다.'}</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-amber-600/60 bg-amber-950/20">
+            <span class="font-bold text-amber-400 block mb-1">엘레나 바스커빌 (${elenaPlayerNick}) [우승]</span>
+            <p class="text-neutral-200 break-keep font-semibold">협박 서류를 모조리 불태우고, 혼란을 틈타 안개 낀 도로를 유유히 빠져나가 해외에서 새로운 신분으로 막대한 유산을 누리며 살아갑니다.</p>
+          </div>
+          <div class="p-3 bg-neutral-900 rounded border border-red-950">
+            <span class="font-bold text-indigo-400 block mb-1">빅터 반스 (탐정)</span>
+            <p class="text-neutral-400 break-keep">${accused === 'victor' ? '에드워드의 비밀 의뢰를 수행하다가 살인범 프레임에 갇혀 탐정 자격을 영구 박탈당합니다.' : '진범의 치밀한 블러핑에 완전히 속아 엉뚱한 사람을 체포하게 만들어 명예가 바닥으로 추락합니다.'}</p>
+          </div>
+        `;
+      }
     }
   </script>
 </body>
