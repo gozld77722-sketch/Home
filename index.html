@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.9)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.10)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -381,7 +381,7 @@
           </div>
         </div>
 
-        <!-- 우측: 내 단서 보관함 (1번 수정: 각 카드 고유 설명 이미지 렌더링) -->
+        <!-- 우측: 내 단서 보관함 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-briefcase mr-1.5"></i> 내 단서 보관함</h4>
@@ -586,25 +586,71 @@
     let lastHandledShareTimestamp = 0;
     let lastNotifiedWhisperPhase = null;
 
-    // 1번 수정: 알리바이/증거 카드의 고유 상황별 보정 이미지 풀 (설명 직관화)
-    const ALIBI_FALLBACK_IMAGES = [
-      "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80", // 찢어진 종이/비밀 쪽지
-      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80", // 서류 계약서
-      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80", // 멈춘 회중시계
-      "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80", // 깨진 위스키 잔
-      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80", // 약물 병/앰플
-      "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80", // 벨벳 쿠션/소음기
-      "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80", // 열린 금고와 열쇠
-      "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80", // 권총과 탄환
-      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80", // 향수 묻은 손수건
-      "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80", // 젖은 눈 발자국
-      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80", // 절단된 전선/레버
-      "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80", // 피 묻은 카드
-      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80", // 무거운 삽
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80", // 떨어진 단추
-      "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80", // 지폐 다발
-      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80"  // 청진기/도청 장치
-    ];
+    // [ver.11.10 신설] 텍스트 설명 키워드 기반 스마트 이미지 매핑 엔진 (음식/엉뚱한 이미지 완전 제거)
+    function resolveSmartCardImage(title, desc, providedImg) {
+      // 1. 시나리오 파일에 지정된 이미지가 있고, Unsplash의 엉뚱한 이미지(만두/알약 기본템)가 아닌 경우 우선 유지
+      if (providedImg && !providedImg.includes("photo-1584308666744-24d5c474f2ae") && !providedImg.includes("photo-1563245372-f21724e3856d")) {
+        return providedImg;
+      }
+
+      const text = `${title || ''} ${desc || ''}`.toLowerCase();
+
+      // 권총, 리볼버, 총알, 탄환, 총기, 피스톨
+      if (text.includes("권총") || text.includes("리볼버") || text.includes("피스톨") || text.includes("총알") || text.includes("탄환") || text.includes("탄띠") || text.includes("홀스터")) {
+        return "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80"; // 리볼버와 총탄
+      }
+      // 증서, 양도, 계약서, 유언장, 편지, 메모, 쪽지, 전보, 소송장
+      if (text.includes("증서") || text.includes("계약서") || text.includes("유언") || text.includes("쪽지") || text.includes("전보") || text.includes("메모") || text.includes("서류") || text.includes("소송장") || text.includes("각서")) {
+        return "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80"; // 봉인된 앤틱 양도 계약서/쪽지
+      }
+      // 금괴, 골드, 루블, 지폐, 화폐, 돈, 크레딧, 자금, 착수금, 사채
+      if (text.includes("금괴") || text.includes("황금") || text.includes("루블") || text.includes("지폐") || text.includes("돈") || text.includes("크레딧") || text.includes("착수금")) {
+        return "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80"; // 순금괴 묶음 및 화폐
+      }
+      // 시계, 회중시계, 타임
+      if (text.includes("시계") || text.includes("회중시계")) {
+        return "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80"; // 앤틱 회중시계
+      }
+      // 독약, 나노독, 약물, 앰플, 신경독, 마취, 클로로포름, 진정제
+      if (text.includes("독") || text.includes("약") || text.includes("앰플") || text.includes("마취") || text.includes("클로로포름") || text.includes("진정제") || text.includes("톡신")) {
+        return "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80"; // 어두운 실험실의 독극물 앰플 병
+      }
+      // 쿠션, 베개, 방석, 소음
+      if (text.includes("쿠션") || text.includes("베개") || text.includes("방석") || text.includes("우단") || text.includes("벨벳")) {
+        return "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80"; // 화약 구멍 뚫린 벨벳 쿠션
+      }
+      // 열쇠, 금고, 마스터키, 다이얼
+      if (text.includes("열쇠") || text.includes("금고") || text.includes("마스터키") || text.includes("다이얼")) {
+        return "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80"; // 앤틱 열쇠와 철제 금고
+      }
+      // 샴페인, 위스키, 잔, 술병
+      if (text.includes("샴페인") || text.includes("위스키") || text.includes("술") || text.includes("와인")) {
+        return "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80"; // 깨진 위스키 잔
+      }
+      // 손수건, 드레스, 의류, 단추, 외투, 장갑
+      if (text.includes("손수건") || text.includes("향수") || text.includes("드레스") || text.includes("단추") || text.includes("외투") || text.includes("장갑")) {
+        return "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=600&q=80"; // 화약 냄새 배인 장갑/패브릭
+      }
+      // 발자국, 족적, 로프, 줄, 창문
+      if (text.includes("발자국") || text.includes("족적") || text.includes("로프") || text.includes("밧줄") || text.includes("신발")) {
+        return "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80"; // 눈밭 위의 선명한 발자국
+      }
+      // 도청, 청진관, 드론, 칩셋, 통신, 안테나, 레버, 밸브
+      if (text.includes("도청") || text.includes("청진") || text.includes("드론") || text.includes("칩") || text.includes("전선") || text.includes("레버") || text.includes("밸브")) {
+        return "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80"; // 절단된 기계 와이어와 특수 장비
+      }
+      // 삽, 도구, 렌치, 펜
+      if (text.includes("삽") || text.includes("도구") || text.includes("렌치") || text.includes("만년필") || text.includes("펜")) {
+        return "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80"; // 피 묻은 무거운 철제 도구
+      }
+      // 카드, 트럼프, 도박
+      if (text.includes("카드") || text.includes("도박") || text.includes("스페이드")) {
+        return "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80"; // 핏자국이 찍힌 트럼프 카드
+      }
+
+      // 기본 Fallback: 조사 서류 및 만년필
+      return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80";
+    }
 
     let audioCtx = null;
     let isBgmPlaying = false;
@@ -842,7 +888,6 @@
       document.getElementById('displayRoomCode').innerText = data.roomCode;
       document.getElementById('playerCount').innerText = pCount;
 
-      // 방장 수동 공지 배너
       const banner = document.getElementById('hostAnnouncementBanner');
       if (data.announcement) {
         document.getElementById('hostAnnouncementText').innerText = data.announcement;
@@ -894,7 +939,6 @@
       renderInGameDashboard(data);
     }
 
-    // 상단 맞춤형 시스템 가이드 배너 텍스트 갱신
     function updateSystemDiscordGuide(data) {
       const guideText = document.getElementById('systemDiscordGuideText');
       const timeTag = document.getElementById('systemPhaseTimeTag');
@@ -939,7 +983,6 @@
       }
     }
 
-    // 캐릭터 선택 대기실
     function renderCharacterSelection(data) {
       const grid = document.getElementById('characterCardGrid');
       grid.innerHTML = "";
@@ -1143,7 +1186,6 @@
       document.getElementById('skipVoteModal').classList.add('hidden');
     });
 
-    // 2번 수정: 다음 라운드 진행 시 밀담 공지(announcement)를 확실히 초기화하고 이동 팝업을 닫음
     async function proceedNextPhase(data) {
       let nextPhase = 'R1';
       let nextRound = data.round;
@@ -1189,7 +1231,6 @@
           return;
       }
 
-      // 밀담 팝업 닫기
       document.getElementById('whisperNoticeModal').classList.add('hidden');
 
       await updateDoc(doc(db, "rooms", currentRoomCode), {
@@ -1200,11 +1241,10 @@
         roundClueDone: {},
         skipVote: null,
         whisperRooms: { room1: [], room2: [] },
-        announcement: "" // 밀담 공지 잔여 현상 해결
+        announcement: ""
       });
     }
 
-    // 2번 수정: 밀담 페이즈가 끝나면 즉시 팝업 모달 숨김 처리
     function handleWhisperNotice(data) {
       const isWhisper = data.phase.includes('WHISPER');
       if (!isWhisper) {
@@ -1241,7 +1281,7 @@
                          (share.roomType === 'room2' && data.whisperRooms?.room2?.includes(myPlayerId));
         if (inMyRoom) {
           document.getElementById('cardShareSenderText').innerText = `${share.senderName}님이 증거를 실물 공유했습니다.`;
-          document.getElementById('cardShareImg').src = share.cardImg || ALIBI_FALLBACK_IMAGES[0];
+          document.getElementById('cardShareImg').src = resolveSmartCardImage(share.cardTitle, share.cardDesc, share.cardImg);
           document.getElementById('cardShareTitle').innerText = share.cardTitle;
           document.getElementById('cardShareDesc').innerText = share.cardDesc;
           document.getElementById('cardShareModal').classList.remove('hidden');
@@ -1357,7 +1397,7 @@
       });
     }
 
-    // 1번 수정: 각 알리바이 카드별 고유 설명 이미지 보장 추출
+    // [ver.11.10 스마트 이미지 매핑 적용] 알리바이 조사
     async function investigateAlibi(targetCharId, data) {
       const pool = data.alibiPool && data.alibiPool[targetCharId];
       if (!pool || pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
@@ -1374,7 +1414,6 @@
       let cardImg = "";
       let cardTitle = "";
 
-      // 시나리오 정의 프로퍼티 안전 파싱
       if (typeof cardObj === 'object' && cardObj !== null) {
         cardTitle = cardObj.name || cardObj.title || `${targetChar.name}의 알리바이 #${cardNum + 1}`;
         cardText = cardObj.desc || cardObj.text || "";
@@ -1384,11 +1423,8 @@
         cardText = cardObj || "기록된 알리바이가 없습니다.";
       }
 
-      // 이미지가 누락된 경우 고유 해시로 상황별 다른 이미지 지정
-      if (!cardImg) {
-        const hash = (targetCharId.charCodeAt(0) + cardNum * 3) % ALIBI_FALLBACK_IMAGES.length;
-        cardImg = ALIBI_FALLBACK_IMAGES[hash];
-      }
+      // 스마트 이미지 매핑 엔진 호출
+      cardImg = resolveSmartCardImage(cardTitle, cardText, cardImg);
 
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const updatedAlibis = [...(myInv.alibis || []), {
@@ -1434,7 +1470,7 @@
       }
     }
 
-    // 1번 수정: 증거 수색 시 설명 전용 이미지 정확한 획득 보장
+    // [ver.11.10 스마트 이미지 매핑 적용] 현장 증거 수색
     document.getElementById('btnDrawClue').addEventListener('click', async () => {
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
       if (!snap.exists()) return;
@@ -1465,7 +1501,7 @@
       alert(`[현장 증거 발견: ${clueObj ? clueObj.name : clueId}]\n\n"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`);
     });
 
-    // 1번 수정: 내 단서 보관함 렌더링 - 각 카드별 고유 이미지 정확 매핑
+    // [ver.11.10 스마트 이미지 매핑 적용] 내 단서 보관함 렌더링
     function renderInventory(data) {
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const alibiList = document.getElementById('myAlibiCardsList');
@@ -1474,14 +1510,14 @@
 
       document.getElementById('totalInventoryCount').innerText = `총 ${totalCount}건`;
 
-      // 1) 확보한 알리바이 카드 목록
+      // 1) 알리바이 보관함
       if (myInv.alibis && myInv.alibis.length > 0) {
         alibiList.innerHTML = myInv.alibis.map(a => {
-          const displayImg = a.img || ALIBI_FALLBACK_IMAGES[(a.cardNum || 1) % ALIBI_FALLBACK_IMAGES.length];
+          const smartImg = resolveSmartCardImage(a.title, a.text, a.img);
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
-                <img src="${displayImg}" onclick="window.openImageDetail('${displayImg}', '${a.charName} 알리바이 (#${a.cardNum}/5)')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
+                <img src="${smartImg}" onclick="window.openImageDetail('${smartImg}', '${a.charName} 알리바이 (#${a.cardNum}/5)')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
                 <div class="min-w-0 flex-1">
                   <div class="text-amber-400 font-bold text-[11px] truncate">[알리바이 #${a.cardNum}/5] ${a.charName}</div>
                   <div class="text-neutral-200 text-[10px] truncate font-semibold">${a.title || ''}</div>
@@ -1495,25 +1531,23 @@
         alibiList.innerHTML = `<p class="text-xs text-neutral-600 italic">확보한 알리바이가 없습니다.</p>`;
       }
 
-      // 2) 획득한 현장 증거 목록
+      // 2) 증거물품 보관함
       if (myInv.clues && myInv.clues.length > 0) {
         clueList.innerHTML = myInv.clues.map(cid => {
           const c = currentScenario.clues.find(x => x.id === cid);
-          // 시나리오 내 고유 img, imgUrl, 또는 고유 인덱스 풀 결합
-          const clueIdx = currentScenario.clues.findIndex(x => x.id === cid);
-          const clueImg = (c && (c.img || c.imgUrl || c.image)) 
-            ? (c.img || c.imgUrl || c.image) 
-            : ALIBI_FALLBACK_IMAGES[(clueIdx >= 0 ? clueIdx : 0) % ALIBI_FALLBACK_IMAGES.length];
+          const clueName = c ? c.name : cid;
+          const clueDesc = c ? c.desc : '';
+          const smartImg = resolveSmartCardImage(clueName, clueDesc, c ? (c.img || c.imgUrl || c.image) : "");
 
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
-                <img src="${clueImg}" onclick="window.openImageDetail('${clueImg}', '[현장 증거] ${c ? c.name : cid}')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
+                <img src="${smartImg}" onclick="window.openImageDetail('${smartImg}', '[현장 증거] ${clueName}')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
                 <div class="min-w-0 flex-1">
-                  <span class="text-amber-400 font-bold text-[11px] block truncate">[현장 증거] ${c ? c.name : cid}</span>
+                  <span class="text-amber-400 font-bold text-[11px] block truncate">[현장 증거] ${clueName}</span>
                 </div>
               </div>
-              <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${c ? c.desc : ''}</p>
+              <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${clueDesc}</p>
             </div>
           `;
         }).join('');
@@ -1650,20 +1684,19 @@
       clues.forEach(cid => {
         const c = currentScenario.clues.find(x => x.id === cid);
         if (!c) return;
-        const clueIdx = currentScenario.clues.findIndex(x => x.id === cid);
-        const clueImg = (c.img || c.imgUrl || c.image) || ALIBI_FALLBACK_IMAGES[(clueIdx >= 0 ? clueIdx : 0) % ALIBI_FALLBACK_IMAGES.length];
+        const smartImg = resolveSmartCardImage(c.name, c.desc, c.img || c.imgUrl || c.image);
 
         const item = document.createElement('div');
         item.className = "flex items-center justify-between p-1.5 bg-black/40 rounded border border-neutral-800 text-[11px]";
         item.innerHTML = `
           <div class="flex items-center space-x-1.5 truncate">
-            <img src="${clueImg}" class="w-6 h-6 rounded object-cover border border-amber-600/40">
+            <img src="${smartImg}" class="w-6 h-6 rounded object-cover border border-amber-600/40">
             <span class="text-neutral-300 truncate">[현장 증거] ${c.name}</span>
           </div>
           <button class="px-2 py-0.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded text-[10px] font-bold">실물 공개</button>
         `;
         item.querySelector('button').addEventListener('click', () => {
-          shareCardToWhisperRoom(myRoomType, `[현장 증거] ${c.name}`, c.desc, clueImg, data);
+          shareCardToWhisperRoom(myRoomType, `[현장 증거] ${c.name}`, c.desc, smartImg, data);
         });
         list.appendChild(item);
       });
