@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.4)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.5)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -143,7 +143,7 @@
             </div>
             <div class="p-4 space-y-2">
               <div class="flex items-center justify-between">
-                <h3 class="text-base font-bold text-emerald-200">안개 낀 폐쇄병원: 침묵의 병동</h3>
+                <h3 class="text-base font-bold text-emerald-200">안개 낀 폐쇄병원</h3>
                 <span class="text-[10px] text-emerald-400 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">2~5인</span>
               </div>
               <p class="text-xs text-neutral-400 leading-relaxed break-keep">
@@ -240,7 +240,7 @@
 
       <div>
         <h3 class="text-base sm:text-lg font-bold text-amber-200 mb-1">용의자 선택</h3>
-        <p id="characterSelectGuide" class="text-xs text-neutral-400 mb-3">플레이할 인물을 선택하세요. (5번째 캐릭터는 5명이 모여야 해금됩니다)</p>
+        <p id="characterSelectGuide" class="text-xs text-neutral-400 mb-3">플레이할 인물을 선택하세요. (2인 진행 시 선택되지 않은 2명은 현장 잔류 용의자 NPC로 자동 전환됩니다)</p>
         <div id="characterCardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
 
@@ -314,7 +314,7 @@
       <!-- 5R 최후 변론 알림 배너 -->
       <div id="defenseTopNotice" class="hidden noir-card p-3 rounded-lg border border-red-600/70 bg-red-950/30 text-center">
         <h4 class="text-sm font-bold text-red-300"><i class="fa-solid fa-scale-unbalanced-flip mr-1.5"></i> 5R 최후의 무죄 변론 (10분) 진행 중</h4>
-        <p class="text-xs text-neutral-300">소지한 비밀과 확보한 단서들을 확인하며 디스코드에서 마지막 1분 스피치로 결백을 주장하세요!</p>
+        <p class="text-xs text-neutral-300">소지한 비밀과 확보한 단서들을 확인하며 디스코드에서 마지막 결백을 주장하세요!</p>
       </div>
 
       <!-- 메인 3단 조작 레이아웃 -->
@@ -332,16 +332,16 @@
         <!-- 중앙: 알리바이 조사 & 듀얼 밀담실 & 현장 증거 수색 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
-            <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 알리바이 조사 & 밀담</h4>
+            <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 용의자 알리바이 조사</h4>
             <span id="alibiCountBadge" class="text-[11px] px-2 py-0.5 rounded font-semibold bg-neutral-800 text-amber-300 border border-neutral-700">남은 조사: 0회</span>
           </div>
 
           <div class="space-y-2">
-            <p id="alibiGuideText" class="text-[11px] text-neutral-400 leading-tight">타인의 숨겨진 알리바이 카드를 조사합니다.</p>
+            <p id="alibiGuideText" class="text-[11px] text-neutral-400 leading-tight">타 플레이어 및 현장 잔류 용의자(NPC)의 알리바이 카드를 조사합니다.</p>
             <div id="alibiInvestigateButtons" class="grid grid-cols-2 gap-2"></div>
           </div>
 
-          <!-- 듀얼 밀담실 섹션 -->
+          <!-- 듀얼 밀담실 섹션 (3인 이상 전용) -->
           <div id="secretMeetingBox" class="hidden p-3 rounded-lg border border-amber-600/50 bg-amber-950/20 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-amber-300"><i class="fa-solid fa-comments mr-1"></i> 밀담 존 (2R, 4R 전용)</span>
@@ -402,7 +402,7 @@
 
           <div class="space-y-3 custom-scroll max-h-[380px] sm:max-h-[440px] overflow-y-auto pr-1">
             <div>
-              <span class="text-xs font-semibold text-neutral-400 block mb-1.5">확보한 타인 알리바이 카드</span>
+              <span class="text-xs font-semibold text-neutral-400 block mb-1.5">확보한 타인 및 NPC 알리바이</span>
               <div id="myAlibiCardsList" class="space-y-2">
                 <p class="text-xs text-neutral-600 italic">확보한 알리바이가 없습니다.</p>
               </div>
@@ -419,11 +419,11 @@
 
       </div>
 
-      <!-- 5R 최후의 지목 투표 패널 -->
+      <!-- 5R 최후의 지목 투표 패널 (NPC 포함) -->
       <div id="finalVoteSection" class="hidden noir-card p-5 sm:p-6 rounded-xl border-2 border-red-600 bg-black/90 space-y-5 text-center shadow-2xl">
         <div>
           <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
-          <p id="finalVoteSubtitle" class="text-xs text-neutral-300 mt-1">모든 변론이 종료되었습니다. 사건을 일으킨 진범은 누구입니까? (동률 시 진범 승리)</p>
+          <p id="finalVoteSubtitle" class="text-xs text-neutral-300 mt-1">모든 변론이 종료되었습니다. 사건을 일으킨 진범은 누구입니까? (현장 잔류 NPC 포함 지목 가능 / 동률 시 진범 승리)</p>
         </div>
         
         <div id="voteButtonsGrid" class="flex flex-wrap justify-center gap-3 pt-1"></div>
@@ -527,7 +527,7 @@
       <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
         <div class="flex items-center space-x-2">
           <i class="fa-solid fa-book-skull text-amber-500 text-lg"></i>
-          <h3 class="text-base sm:text-lg font-bold text-amber-200 font-title">머더 미스터리 공식 규칙서 (개정본)</h3>
+          <h3 class="text-base sm:text-lg font-bold text-amber-200 font-title">머더 미스터리 공식 규칙서 (규정 개정본)</h3>
         </div>
         <button id="btnCloseRulesModal" class="text-neutral-400 hover:text-neutral-100 text-xl font-bold transition">&times;</button>
       </div>
@@ -554,8 +554,10 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px] text-neutral-300">
             <div class="p-2 bg-black/40 rounded border border-neutral-800">
               <span class="font-bold text-amber-300 block mb-0.5">• 2인 플레이 모드</span>
+              - <strong>NPC 가상 용의자 시스템</strong>: 선택되지 않은 기본 캐릭터 2명은 현장 잔류 NPC가 되어 동일하게 알리바이 조사가 가능합니다.<br>
               - 알리바이 조사 기회: 라운드당 <strong>2회</strong> 제공<br>
-              - <strong>밀담존 자동 생략</strong>: 2인은 이미 1:1 대화 상태이므로 2R/4R 밀담 없이 즉시 다음 라운드로 직행
+              - <strong>밀담존 자동 생략</strong>: 2인은 이미 1:1 대화 상태이므로 2R/4R 밀담 없이 즉시 다음 라운드로 직행<br>
+              - 최종 투표 시 NPC 용의자도 진범으로 지목 가능
             </div>
             <div class="p-2 bg-black/40 rounded border border-neutral-800">
               <span class="font-bold text-amber-300 block mb-0.5">• 3인 ~ 5인 플레이 모드</span>
@@ -581,7 +583,7 @@
             <h4 class="font-bold text-amber-200 text-xs mb-0.5">[1라운드] 사건 발생 및 상호 탐색 (토론 15분)</h4>
             <p class="text-neutral-400 text-[11px]">
               • <strong>자기소개 및 알리바이 진술</strong>: 각자의 입장에서 당일 행적을 밝힙니다.<br>
-              • <strong>기본 조사</strong>: 타인의 알리바이 카드 조사 및 현장 증거 수색(라운드당 1회)을 진행하며 단서를 확보합니다.
+              • <strong>기본 조사</strong>: 타인 및 NPC의 알리바이 조사 및 현장 증거 수색(라운드당 1회)을 진행하며 단서를 확보합니다.
             </p>
           </div>
 
@@ -611,7 +613,7 @@
             <h4 class="font-bold text-red-300 text-xs mb-0.5">[5라운드] 최후의 무죄 변론 (10분) & 진범 지목 투표</h4>
             <p class="text-neutral-400 text-[11px]">
               • <strong>최후 변론 (10분)</strong>: 각자 자신이 확보한 단서와 결백을 주장합니다.<br>
-              • <strong>공개 지목 투표</strong>: 변론 종료 즉시 시스템을 통해 진범이라고 확신하는 인물에게 동시 투표합니다.
+              • <strong>공개 지목 투표</strong>: 변론 종료 즉시 시스템을 통해 진범이라고 확신하는 인물(NPC 포함)에게 동시 투표합니다.
             </p>
           </div>
 
@@ -968,7 +970,7 @@
       const pCount = Object.keys(data.players || {}).length;
       const is5P = pCount >= 5;
 
-      document.getElementById('scenarioModeBadge').innerText = is5P ? "5인 완전 범죄 모드" : `${pCount}인 일반 모드`;
+      document.getElementById('scenarioModeBadge').innerText = is5P ? "5인 완전 범죄 모드" : (pCount === 2 ? "2인 NPC 수사 모드" : `${pCount}인 일반 모드`);
 
       const myInfo = data.players[myPlayerId];
       const randomBtn = document.getElementById('btnRandomAssign');
@@ -1313,6 +1315,7 @@
       renderWhisperSection(data);
     }
 
+    // 알리바이 조사 렌더링 (★ 2인 플레이 시 미선택 캐릭터를 NPC로 정상 노출 복구)
     function renderAlibiSection(data, myInfo) {
       const container = document.getElementById('alibiInvestigateButtons');
       const badge = document.getElementById('alibiCountBadge');
@@ -1332,13 +1335,25 @@
         return;
       }
 
-      Object.entries(data.players).forEach(([pid, p]) => {
-        if (pid === myPlayerId || !p.charId) return;
-        const targetChar = currentScenario.characters.find(c => c.id === p.charId);
-        if (!targetChar) return;
+      const selectedCharIds = Object.values(data.players).map(p => p.charId).filter(Boolean);
+      const is5P = pCount >= 5;
+
+      // 조사 가능한 캐릭터 리스트 (내 캐릭터 제외한 모든 플레이어 캐릭터 + 2인일 때 미선택 기본 4인 캐릭터 NPC)
+      const targetCharacters = currentScenario.characters.filter(char => {
+        if (char.id === myInfo.charId) return false; // 본인 제외
+        if (selectedCharIds.includes(char.id)) return true; // 타 플레이어 캐릭터
+        if (pCount === 2 && char.isDefault) return true; // 2인 모드 시 잔류 NPC 캐릭터
+        if (is5P) return true;
+        return false;
+      });
+
+      targetCharacters.forEach(targetChar => {
+        const isNPC = !selectedCharIds.includes(targetChar.id);
+        const pool = (data.alibiPool && data.alibiPool[targetChar.id]) || [];
+        const remainCardsCount = pool.length;
 
         const btn = document.createElement('button');
-        const canInvestigate = remainCount > 0;
+        const canInvestigate = remainCount > 0 && remainCardsCount > 0;
         btn.disabled = !canInvestigate;
         btn.className = `p-2 rounded border text-xs font-semibold flex items-center justify-between transition ${
           canInvestigate 
@@ -1347,19 +1362,22 @@
         }`;
 
         btn.innerHTML = `
-          <div class="flex items-center space-x-2">
-            <img src="${targetChar.avatarImg}" class="w-6 h-6 rounded-full object-cover">
+          <div class="flex items-center space-x-1.5 truncate">
+            <span class="text-[9px] px-1 py-0.5 rounded ${isNPC ? 'bg-neutral-700 text-amber-300' : 'bg-amber-950 text-amber-400'} font-bold">
+              ${isNPC ? 'NPC' : '유저'}
+            </span>
             <span class="truncate">${targetChar.name}</span>
           </div>
-          <i class="fa-solid fa-search text-[10px] text-amber-500"></i>
+          <span class="text-[10px] text-amber-500 font-mono">${remainCardsCount}/5</span>
         `;
 
-        btn.addEventListener('click', () => investigateAlibi(targetChar.id, data));
+        btn.addEventListener('click', () => investigateAlibi(targetChar.id, data, isNPC));
         container.appendChild(btn);
       });
     }
 
-    async function investigateAlibi(targetCharId, data) {
+    // 알리바이 조사 실행 (NPC 알리바이 포함)
+    async function investigateAlibi(targetCharId, data, isNPC) {
       const pool = data.alibiPool && data.alibiPool[targetCharId];
       if (!pool || pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
 
@@ -1377,6 +1395,7 @@
       const updatedAlibis = [...(myInv.alibis || []), {
         charId: targetCharId,
         charName: targetChar.name,
+        isNPC: !!isNPC,
         cardNum: cardNum + 1,
         title: cardTitle,
         text: cardText
@@ -1390,7 +1409,7 @@
         [`roundInvestigateDone.${myPlayerId}`]: doneCount
       });
 
-      alert(`[${targetChar.name}의 알리바이 확보]\n\n제목: ${cardTitle}\n내용: "${cardText}"\n\n내 단서 보관함에 보관되었습니다.`);
+      alert(`[${targetChar.name}${isNPC ? ' (현장 NPC)' : ''} 알리바이 확보]\n\n제목: ${cardTitle}\n내용: "${cardText}"\n\n내 단서 보관함에 보관되었습니다.`);
     }
 
     function renderClueSection(data) {
@@ -1446,7 +1465,7 @@
       alert(`[현장 증거 발견: ${clueObj ? clueObj.name : clueId}]\n\n"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`);
     });
 
-    // 단서 보관함 렌더링 (이미지 전면 배제 및 텍스트 카드 집중형 UI)
+    // 단서 보관함 렌더링 (텍스트 카드 집중형 UI)
     function renderInventory(data) {
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const alibiList = document.getElementById('myAlibiCardsList');
@@ -1455,12 +1474,14 @@
 
       document.getElementById('totalInventoryCount').innerText = `총 ${totalCount}건`;
 
-      // 타인 알리바이 목록 (텍스트 중심 카드)
+      // 타인 및 NPC 알리바이 목록 (텍스트 중심 카드)
       if (myInv.alibis && myInv.alibis.length > 0) {
         alibiList.innerHTML = myInv.alibis.map(a => `
           <div class="p-3 bg-neutral-900/90 border border-neutral-700/80 rounded-lg space-y-1 shadow">
             <div class="flex justify-between items-center text-neutral-300 font-bold text-[11px]">
-              <span class="px-1.5 py-0.5 bg-neutral-800 text-amber-300 rounded">${a.charName} #${a.cardNum}</span>
+              <span class="px-1.5 py-0.5 ${a.isNPC ? 'bg-neutral-700 text-amber-300' : 'bg-neutral-800 text-amber-400'} rounded">
+                ${a.isNPC ? '[NPC] ' : ''}${a.charName} #${a.cardNum}
+              </span>
               <span class="text-[10px] text-neutral-500 font-normal">구두 증언 전용</span>
             </div>
             <h5 class="text-xs font-bold text-neutral-100">${a.title || '알리바이 기록'}</h5>
@@ -1615,6 +1636,7 @@
       });
     }
 
+    // 5R 투표 버튼 렌더링 (★ 2인 플레이 시 NPC 용의자도 지목 후보군에 포함 복구)
     function renderFinalVoteSection(data) {
       const grid = document.getElementById('voteButtonsGrid');
       const board = document.getElementById('liveVoteBoard');
@@ -1629,19 +1651,36 @@
         waitingText.classList.add('hidden');
       }
 
-      Object.entries(data.players).forEach(([pid, p]) => {
-        if (!p.charId) return;
-        const targetChar = currentScenario.characters.find(c => c.id === p.charId);
-        if (!targetChar) return;
+      const pCount = Object.keys(data.players || {}).length;
+      const myCharId = data.players[myPlayerId]?.charId;
+      const selectedCharIds = Object.values(data.players).map(p => p.charId).filter(Boolean);
+
+      // 투표 대상 캐릭터 목록: 내 캐릭터 제외 + (타 플레이어 캐릭터 & 2인 모드 시 잔류 NPC 캐릭터)
+      const voteTargets = currentScenario.characters.filter(char => {
+        if (char.id === myCharId) return false;
+        if (selectedCharIds.includes(char.id)) return true;
+        if (pCount === 2 && char.isDefault) return true; // 2인일 때 NPC도 후보에 포함
+        return false;
+      });
+
+      voteTargets.forEach(targetChar => {
+        const isNPC = !selectedCharIds.includes(targetChar.id);
+        const playerOwner = Object.values(data.players).find(p => p.charId === targetChar.id);
 
         if (!myVote) {
           const btn = document.createElement('button');
           btn.className = "px-4 py-2 bg-red-950 hover:bg-red-900 border border-red-700 text-red-200 text-xs font-bold rounded flex items-center space-x-2 transition cursor-pointer";
-          btn.innerHTML = `<img src="${targetChar.avatarImg}" class="w-5 h-5 rounded-full object-cover"> <span>${targetChar.name} (${p.nickname})</span>`;
-          btn.addEventListener('click', () => submitVote(p.charId, data));
+          btn.innerHTML = `
+            <img src="${targetChar.avatarImg}" class="w-5 h-5 rounded-full object-cover">
+            <span>${targetChar.name} ${isNPC ? '(현장 NPC)' : `(${playerOwner?.nickname})`}</span>
+          `;
+          btn.addEventListener('click', () => submitVote(targetChar.id, data));
           grid.appendChild(btn);
         }
+      });
 
+      // 실시간 투표 현황 보드
+      Object.entries(data.players).forEach(([pid, p]) => {
         const votedTargetId = data.votes && data.votes[pid];
         let votedName = '<span class="text-neutral-500 italic">고민 중...</span>';
         if (votedTargetId) {
@@ -1685,6 +1724,7 @@
         const killerId = currentScenario.killerId;
         let winner = 'KILLER';
 
+        // 단독 최다 득표이면서 진범인 경우만 시민 승리, 동률 또는 오지목 시 진범 승리
         if (topCandidates.length === 1 && topCandidates[0] === killerId) {
           winner = 'CITIZEN';
         } else {
