@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.8)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.9)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -259,7 +259,7 @@
     <!-- [VIEW 3: 메인 게임 인게임 대시보드] -->
     <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-3">
       
-      <!-- 4. [신설] 남은시간/내역할 위에 위치하는 실시간 상황 & 디스코드 이동 가이드 배너 -->
+      <!-- 실시간 맞춤 상황 안내 배너 -->
       <div id="systemDiscordGuideBanner" class="w-full p-2.5 rounded-lg border border-amber-600/70 bg-gradient-to-r from-amber-950/80 via-neutral-900 to-amber-950/80 flex items-center justify-between text-xs shadow-md">
         <div class="flex items-center space-x-2">
           <span class="px-2 py-0.5 rounded bg-amber-600 text-black font-bold text-[10px] tracking-wide uppercase"><i class="fa-brands fa-discord mr-1"></i>안내</span>
@@ -300,7 +300,7 @@
         </div>
       </div>
 
-      <!-- 7. 5R 최후 변론 배너 (1분 스피치 모순 문구 제거, 10분 결백 주장으로 정리) -->
+      <!-- 5R 최후 변론 알림 배너 -->
       <div id="defenseTopNotice" class="hidden noir-card p-3 rounded-lg border border-red-600/70 bg-red-950/30 text-center">
         <h4 class="text-sm font-bold text-red-300"><i class="fa-solid fa-scale-unbalanced-flip mr-1.5"></i> 5R 최후의 무죄 변론 (10분) 진행 중</h4>
         <p class="text-xs text-neutral-300">소지한 비밀과 확보한 단서들을 확인하며 디스코드에서 결백을 주장하고 의심스러운 진범을 추궁하세요!</p>
@@ -318,11 +318,11 @@
           <div id="mySecretContent" class="text-xs text-neutral-300 space-y-3 custom-scroll max-h-[380px] sm:max-h-[440px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- 중앙: 1. 알리바이 조사(5장 수량 표기) & 밀담실 & 2. 현장 증거 수색 -->
+        <!-- 중앙: 알리바이 조사 & 듀얼 밀담실 & 현장 증거 수색 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i> 알리바이 조사 & 밀담</h4>
-            <span id="alibiCountBadge" class="text-[11px] px-2 py-0.5 rounded font-semibold bg-neutral-800 text-amber-300 border border-neutral-700">남은 조사: 0회</span>
+            <span id="alibiCountBadge" class="text-[11px] px-2 py-0.5 rounded font-semibold bg-neutral-800 text-amber-300 border border-neutral-700">조사 진행</span>
           </div>
 
           <div class="space-y-2">
@@ -367,7 +367,6 @@
               </div>
             </div>
 
-            <!-- 6. 밀담 실물 공유: 알리바이 제외, 증거 카드만 공개 가능 -->
             <div id="whisperActiveArea" class="hidden pt-2 border-t border-amber-800/60">
               <span id="myWhisperRoomTitle" class="text-xs text-amber-300 block mb-1 font-bold">내 증거물품 실물 보여주기 (증거만 가능):</span>
               <div id="whisperCardsList" class="space-y-1 max-h-32 overflow-y-auto custom-scroll"></div>
@@ -382,7 +381,7 @@
           </div>
         </div>
 
-        <!-- 우측: 2 & 3. 내 단서 보관함 (설명 이미지 연동 & 클릭 시 확대) -->
+        <!-- 우측: 내 단서 보관함 (1번 수정: 각 카드 고유 설명 이미지 렌더링) -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-briefcase mr-1.5"></i> 내 단서 보관함</h4>
@@ -391,14 +390,14 @@
 
           <div class="space-y-3 custom-scroll max-h-[380px] sm:max-h-[440px] overflow-y-auto pr-1">
             <div>
-              <span class="text-xs font-semibold text-neutral-400 block mb-1.5">확보한 타인 알리바이 카드 (설명 확인)</span>
+              <span class="text-xs font-semibold text-neutral-400 block mb-1.5">확보한 타인 알리바이 카드</span>
               <div id="myAlibiCardsList" class="space-y-2">
                 <p class="text-xs text-neutral-600 italic">확보한 알리바이가 없습니다.</p>
               </div>
             </div>
 
             <div class="pt-2 border-t border-neutral-800/80">
-              <span class="text-xs font-semibold text-neutral-400 block mb-1.5">획득한 현장 증거물품 (설명 이미지)</span>
+              <span class="text-xs font-semibold text-neutral-400 block mb-1.5">획득한 현장 증거물품</span>
               <div id="myClueCardsList" class="space-y-2">
                 <p class="text-xs text-neutral-600 italic">수색한 증거물이 없습니다.</p>
               </div>
@@ -408,7 +407,7 @@
 
       </div>
 
-      <!-- 8. 5R 최후의 지목 투표 패널 (본인 지목 불가 필터링) -->
+      <!-- 5R 최후의 지목 투표 패널 -->
       <div id="finalVoteSection" class="hidden noir-card p-5 sm:p-6 rounded-xl border-2 border-red-600 bg-black/90 space-y-5 text-center shadow-2xl">
         <div>
           <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
@@ -464,7 +463,7 @@
   <div id="cardShareModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="noir-card max-w-sm w-full p-5 rounded-xl border border-amber-500 shadow-2xl space-y-3 text-center">
       <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
-        <span id="cardShareSenderText" class="text-xs font-bold text-amber-400">아서 윈체스터님이 증거를 공유했습니다.</span>
+        <span id="cardShareSenderText" class="text-xs font-bold text-amber-400">플레이어가 증거를 공유했습니다.</span>
         <button id="btnCloseCardShare" class="text-neutral-400 hover:text-white">&times;</button>
       </div>
       <img id="cardShareImg" src="" class="w-full h-40 object-cover rounded border border-neutral-700">
@@ -496,7 +495,7 @@
     </div>
   </div>
 
-  <!-- 5. [수정] 밀담존 이동 알림 모달: 체크된 해당 인원에게만 팝업 -->
+  <!-- 밀담존 이동 알림 모달 -->
   <div id="whisperNoticeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="noir-card max-w-sm w-full p-6 rounded-xl border-2 border-amber-500 shadow-2xl space-y-4 text-center">
       <div class="text-amber-400 text-3xl"><i class="fa-solid fa-headset animate-bounce"></i></div>
@@ -504,7 +503,7 @@
       <p id="whisperNoticeRoomText" class="text-sm font-bold text-neutral-100 bg-neutral-900/90 py-2.5 rounded border border-neutral-700">
         배정 룸 확인 중...
       </p>
-      <p class="text-xs text-neutral-400">5분간 지정된 디스코드 밀담방에서 비밀 대화를 나누세요.<br>화면 중앙에서 확보한 증거물품을 실물 공유할 수 있습니다.</p>
+      <p class="text-xs text-neutral-400">지정된 디스코드 밀담방으로 이동하여 비밀 대화를 나누세요.<br>화면 중앙에서 확보한 증거물품을 실물 공유할 수 있습니다.</p>
       <button id="btnCloseWhisperNotice" class="w-full py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">확인</button>
     </div>
   </div>
@@ -533,7 +532,7 @@
         <div>
           <strong class="text-amber-400 block mb-1.5 text-sm">⏱️ 라운드 진행 프로세스</strong>
           <ul class="space-y-1.5 pl-2 border-l border-amber-800/60">
-            <li><strong>[1R: 토론 & 수색 (15분)]</strong> 각자 알리바이 조사(2인은 2회, 3인이상은 1회) 및 현장 증거 1회를 수색하고 음성 토론을 진행합니다.</li>
+            <li><strong>[1R: 토론 & 수색 (15분)]</strong> 각자 알리바이 조사 및 현장 증거 1회를 수색하고 음성 토론을 진행합니다.</li>
             <li><strong>[2R: 토론(15분) & 듀얼 밀담(5분)]</strong> 토론 후 [밀담방 1], [밀담방 2]로 이동하여 비밀 대화를 나눕니다. 밀담 중에는 증거 실물만 공개 가능합니다.</li>
             <li><strong>[3R: 심층 추궁 (15분)]</strong> 모순된 타임라인을 파고들며 압박합니다.</li>
             <li><strong>[4R: 토론(15분) & 2차 밀담(5분)]</strong> 최종 증거를 토대로 결론을 도출합니다.</li>
@@ -585,7 +584,27 @@
     let currentPhase = null;
     let isCurrentHost = false;
     let lastHandledShareTimestamp = 0;
-    let lastNotifiedWhisperRound = 0; // 밀담 라운드별 팝업 중복 방지
+    let lastNotifiedWhisperPhase = null;
+
+    // 1번 수정: 알리바이/증거 카드의 고유 상황별 보정 이미지 풀 (설명 직관화)
+    const ALIBI_FALLBACK_IMAGES = [
+      "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80", // 찢어진 종이/비밀 쪽지
+      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80", // 서류 계약서
+      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80", // 멈춘 회중시계
+      "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80", // 깨진 위스키 잔
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80", // 약물 병/앰플
+      "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80", // 벨벳 쿠션/소음기
+      "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80", // 열린 금고와 열쇠
+      "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80", // 권총과 탄환
+      "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80", // 향수 묻은 손수건
+      "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80", // 젖은 눈 발자국
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80", // 절단된 전선/레버
+      "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80", // 피 묻은 카드
+      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80", // 무거운 삽
+      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80", // 떨어진 단추
+      "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80", // 지폐 다발
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80"  // 청진기/도청 장치
+    ];
 
     let audioCtx = null;
     let isBgmPlaying = false;
@@ -701,7 +720,6 @@
       await updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "" });
     });
 
-    // 2 & 3. 이미지 확대 모달
     window.openImageDetail = function(imgSrc, title) {
       if (!imgSrc) return;
       document.getElementById('imageDetailTarget').src = imgSrc;
@@ -718,7 +736,6 @@
       const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
       currentRoomCode = roomCode;
 
-      // 각 캐릭터별 알리바이 풀 5장 [0, 1, 2, 3, 4] 고정 생성
       const initialAlibiPool = {};
       currentScenario.characters.forEach(c => {
         initialAlibiPool[c.id] = [0, 1, 2, 3, 4];
@@ -850,12 +867,8 @@
         hostNextControl.classList.add('hidden');
       }
 
-      // 4. 시스템 맞춤 디스코드 이동 가이드 배너 갱신
       updateSystemDiscordGuide(data);
-
-      // 5. 밀담 배정 알림 팝업 타겟팅
       handleWhisperNotice(data);
-
       handleSkipVoteModal(data);
       handleCardShareSync(data);
 
@@ -881,7 +894,7 @@
       renderInGameDashboard(data);
     }
 
-    // 4. 상단 맞춤형 시스템 가이드 배너 텍스트 갱신
+    // 상단 맞춤형 시스템 가이드 배너 텍스트 갱신
     function updateSystemDiscordGuide(data) {
       const guideText = document.getElementById('systemDiscordGuideText');
       const timeTag = document.getElementById('systemPhaseTimeTag');
@@ -1053,11 +1066,11 @@
         timerSeconds: 900,
         roundInvestigateDone: {},
         roundClueDone: {},
-        skipVote: null
+        skipVote: null,
+        announcement: ""
       });
     });
 
-    // 다음 단계 요청 & 스킵 투표
     document.getElementById('btnRequestNextPhase').addEventListener('click', async () => {
       if (!isCurrentHost) return;
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
@@ -1130,6 +1143,7 @@
       document.getElementById('skipVoteModal').classList.add('hidden');
     });
 
+    // 2번 수정: 다음 라운드 진행 시 밀담 공지(announcement)를 확실히 초기화하고 이동 팝업을 닫음
     async function proceedNextPhase(data) {
       let nextPhase = 'R1';
       let nextRound = data.round;
@@ -1175,6 +1189,9 @@
           return;
       }
 
+      // 밀담 팝업 닫기
+      document.getElementById('whisperNoticeModal').classList.add('hidden');
+
       await updateDoc(doc(db, "rooms", currentRoomCode), {
         phase: nextPhase,
         round: nextRound,
@@ -1182,35 +1199,36 @@
         roundInvestigateDone: {},
         roundClueDone: {},
         skipVote: null,
-        whisperRooms: { room1: [], room2: [] }
+        whisperRooms: { room1: [], room2: [] },
+        announcement: "" // 밀담 공지 잔여 현상 해결
       });
     }
 
-    // 5. [수정] 밀담존 이동 알림: 체크되어 배정된 인원에게만 팝업 노출
+    // 2번 수정: 밀담 페이즈가 끝나면 즉시 팝업 모달 숨김 처리
     function handleWhisperNotice(data) {
       const isWhisper = data.phase.includes('WHISPER');
       if (!isWhisper) {
+        document.getElementById('whisperNoticeModal').classList.add('hidden');
+        lastNotifiedWhisperPhase = null;
         return;
       }
 
       const r1 = data.whisperRooms?.room1 || [];
       const r2 = data.whisperRooms?.room2 || [];
 
-      // 이번 밀담 라운드에서 이미 팝업을 본 적이 없을 때만 체크
-      if (lastNotifiedWhisperRound !== data.round) {
+      if (lastNotifiedWhisperPhase !== data.phase) {
         if (r1.includes(myPlayerId)) {
           document.getElementById('whisperNoticeRoomText').innerText = "🎧 [디스코드 밀담방 1]로 이동하세요!";
           document.getElementById('whisperNoticeModal').classList.remove('hidden');
-          lastNotifiedWhisperRound = data.round;
+          lastNotifiedWhisperPhase = data.phase;
         } else if (r2.includes(myPlayerId)) {
           document.getElementById('whisperNoticeRoomText').innerText = "🎧 [디스코드 밀담방 2]로 이동하세요!";
           document.getElementById('whisperNoticeModal').classList.remove('hidden');
-          lastNotifiedWhisperRound = data.round;
+          lastNotifiedWhisperPhase = data.phase;
         }
       }
     }
 
-    // 카드 실물 공유 리스너 (증거 카드만 대상)
     function handleCardShareSync(data) {
       const share = data.sharedCard;
       if (!share || !share.timestamp) return;
@@ -1223,7 +1241,7 @@
                          (share.roomType === 'room2' && data.whisperRooms?.room2?.includes(myPlayerId));
         if (inMyRoom) {
           document.getElementById('cardShareSenderText').innerText = `${share.senderName}님이 증거를 실물 공유했습니다.`;
-          document.getElementById('cardShareImg').src = share.cardImg || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80";
+          document.getElementById('cardShareImg').src = share.cardImg || ALIBI_FALLBACK_IMAGES[0];
           document.getElementById('cardShareTitle').innerText = share.cardTitle;
           document.getElementById('cardShareDesc').innerText = share.cardDesc;
           document.getElementById('cardShareModal').classList.remove('hidden');
@@ -1231,7 +1249,6 @@
       }
     }
 
-    // 인게임 대시보드 렌더링
     function renderInGameDashboard(data) {
       const myInfo = data.players[myPlayerId];
       if (!myInfo || !myInfo.charId) return;
@@ -1282,20 +1299,12 @@
         document.getElementById('finalVoteSection').classList.add('hidden');
       }
 
-      // 1. 알리바이 카드 5장 수량 표시 적용 렌더링
       renderAlibiSection(data, myInfo);
-
-      // 현장 증거 수색 렌더링
       renderClueSection(data);
-
-      // 2 & 3. 설명 이미지 바인딩 단서 보관함 렌더링
       renderInventory(data);
-
-      // 6. 증거만 공유 가능한 밀담실 렌더링
       renderWhisperSection(data);
     }
 
-    // 1. 알리바이 조사: 총 5장 중 잔여 수량 [남은수/5] 명확히 표시
     function renderAlibiSection(data, myInfo) {
       const container = document.getElementById('alibiInvestigateButtons');
       const badge = document.getElementById('alibiCountBadge');
@@ -1321,7 +1330,6 @@
         const [pid, p] = entry;
         if (pid === myPlayerId) return;
 
-        // 해당 인물의 남은 알리바이 카드 수 계산 (총 5장 기준)
         const pool = (data.alibiPool && data.alibiPool[charDef.id]) || [];
         const remainCardsCount = pool.length;
 
@@ -1334,7 +1342,6 @@
             : 'bg-neutral-900 text-neutral-600 border-neutral-800 cursor-not-allowed'
         }`;
 
-        // 1번 항목: [남은카드/5장] 명확히 표기
         btn.innerHTML = `
           <div class="flex items-center space-x-2 truncate">
             <img src="${charDef.avatarImg}" class="w-6 h-6 rounded-full object-cover">
@@ -1350,7 +1357,7 @@
       });
     }
 
-    // 2. 알리바이 조사 실행: 설명 이미지(`img`) 및 설명 내용 바인딩
+    // 1번 수정: 각 알리바이 카드별 고유 설명 이미지 보장 추출
     async function investigateAlibi(targetCharId, data) {
       const pool = data.alibiPool && data.alibiPool[targetCharId];
       if (!pool || pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
@@ -1363,18 +1370,24 @@
       const targetChar = currentScenario.characters.find(c => c.id === targetCharId);
       const cardObj = targetChar.alibiCards[cardNum];
       
-      // 2번 항목: 인물 사진이 아닌 '설명에 관한 단서 이미지' 추출
       let cardText = "";
       let cardImg = "";
       let cardTitle = "";
-      if (typeof cardObj === 'object') {
+
+      // 시나리오 정의 프로퍼티 안전 파싱
+      if (typeof cardObj === 'object' && cardObj !== null) {
         cardTitle = cardObj.name || cardObj.title || `${targetChar.name}의 알리바이 #${cardNum + 1}`;
         cardText = cardObj.desc || cardObj.text || "";
-        cardImg = cardObj.img || "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80";
+        cardImg = cardObj.img || cardObj.imgUrl || cardObj.image || "";
       } else {
         cardTitle = `${targetChar.name}의 알리바이 #${cardNum + 1}`;
         cardText = cardObj || "기록된 알리바이가 없습니다.";
-        cardImg = "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80";
+      }
+
+      // 이미지가 누락된 경우 고유 해시로 상황별 다른 이미지 지정
+      if (!cardImg) {
+        const hash = (targetCharId.charCodeAt(0) + cardNum * 3) % ALIBI_FALLBACK_IMAGES.length;
+        cardImg = ALIBI_FALLBACK_IMAGES[hash];
       }
 
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
@@ -1421,7 +1434,7 @@
       }
     }
 
-    // 3. 증거 수색: 증거 설명 전용 이미지(`c.img`) 안전 바인딩
+    // 1번 수정: 증거 수색 시 설명 전용 이미지 정확한 획득 보장
     document.getElementById('btnDrawClue').addEventListener('click', async () => {
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
       if (!snap.exists()) return;
@@ -1452,7 +1465,7 @@
       alert(`[현장 증거 발견: ${clueObj ? clueObj.name : clueId}]\n\n"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`);
     });
 
-    // 2 & 3. 내 단서 보관함: 설명 이미지(알리바이/증거) 정상 렌더링 & 클릭 시 전체 확대
+    // 1번 수정: 내 단서 보관함 렌더링 - 각 카드별 고유 이미지 정확 매핑
     function renderInventory(data) {
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const alibiList = document.getElementById('myAlibiCardsList');
@@ -1461,10 +1474,10 @@
 
       document.getElementById('totalInventoryCount').innerText = `총 ${totalCount}건`;
 
-      // 2번 항목: 알리바이 카드 설명 이미지 노출
+      // 1) 확보한 알리바이 카드 목록
       if (myInv.alibis && myInv.alibis.length > 0) {
         alibiList.innerHTML = myInv.alibis.map(a => {
-          const displayImg = a.img || "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80";
+          const displayImg = a.img || ALIBI_FALLBACK_IMAGES[(a.cardNum || 1) % ALIBI_FALLBACK_IMAGES.length];
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
@@ -1482,11 +1495,16 @@
         alibiList.innerHTML = `<p class="text-xs text-neutral-600 italic">확보한 알리바이가 없습니다.</p>`;
       }
 
-      // 3번 항목: 증거 설명 전용 이미지 노출
+      // 2) 획득한 현장 증거 목록
       if (myInv.clues && myInv.clues.length > 0) {
         clueList.innerHTML = myInv.clues.map(cid => {
           const c = currentScenario.clues.find(x => x.id === cid);
-          const clueImg = (c && c.img) ? c.img : "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80";
+          // 시나리오 내 고유 img, imgUrl, 또는 고유 인덱스 풀 결합
+          const clueIdx = currentScenario.clues.findIndex(x => x.id === cid);
+          const clueImg = (c && (c.img || c.imgUrl || c.image)) 
+            ? (c.img || c.imgUrl || c.image) 
+            : ALIBI_FALLBACK_IMAGES[(clueIdx >= 0 ? clueIdx : 0) % ALIBI_FALLBACK_IMAGES.length];
+
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
@@ -1618,13 +1636,11 @@
       });
     });
 
-    // 6. [수정] 밀담룸 실물 공유: 알리바이는 제외하고 오직 '현장 증거'만 공유
     function renderWhisperCards(data, myRoomType) {
       const list = document.getElementById('whisperCardsList');
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       list.innerHTML = "";
 
-      // 증거물품 카드만 필터링
       const clues = myInv.clues || [];
       if (clues.length === 0) {
         list.innerHTML = `<span class="text-xs text-neutral-500 italic">공유 가능한 현장 증거가 없습니다. (알리바이는 음성으로만 전달)</span>`;
@@ -1634,7 +1650,8 @@
       clues.forEach(cid => {
         const c = currentScenario.clues.find(x => x.id === cid);
         if (!c) return;
-        const clueImg = c.img || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80";
+        const clueIdx = currentScenario.clues.findIndex(x => x.id === cid);
+        const clueImg = (c.img || c.imgUrl || c.image) || ALIBI_FALLBACK_IMAGES[(clueIdx >= 0 ? clueIdx : 0) % ALIBI_FALLBACK_IMAGES.length];
 
         const item = document.createElement('div');
         item.className = "flex items-center justify-between p-1.5 bg-black/40 rounded border border-neutral-800 text-[11px]";
@@ -1672,7 +1689,6 @@
       alert(`[${title}] 증거를 밀담룸 플레이어들에게 실물로 공개했습니다!`);
     }
 
-    // 8. [수정] 5R 최후 지목 투표: 자신이 자신을 지목할 수 없도록 버튼 필터링
     function renderFinalVoteSection(data) {
       const grid = document.getElementById('voteButtonsGrid');
       const board = document.getElementById('liveVoteBoard');
@@ -1692,7 +1708,6 @@
         if (!entry) return;
         const [pid, p] = entry;
 
-        // 8번 항목: 본인 자신은 지목 버튼에서 제외 (자신 지목 불가)
         if (!myVote && pid !== myPlayerId) {
           const btn = document.createElement('button');
           btn.className = "px-4 py-2 bg-red-950 hover:bg-red-900 border border-red-700 text-red-200 text-xs font-bold rounded flex items-center space-x-2 transition cursor-pointer";
@@ -1701,7 +1716,6 @@
           grid.appendChild(btn);
         }
 
-        // 전체 실시간 지목 현황판
         const votedTargetId = data.votes && data.votes[pid];
         let votedName = '<span class="text-neutral-500 italic">고민 중...</span>';
         if (votedTargetId) {
@@ -1763,7 +1777,6 @@
       }
     }
 
-    // 엔딩 화면
     function renderEnding(data) {
       const truth = currentScenario.endings.truth;
       document.getElementById('endingTruthText').innerText = truth;
