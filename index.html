@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.5)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.6)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -165,7 +165,7 @@
       <div class="p-3 mb-4 rounded bg-black/40 border border-neutral-800 text-xs text-neutral-400 leading-relaxed space-y-1">
         <p class="font-semibold text-amber-300"><i class="fa-solid fa-headset mr-1"></i> 음성 채널 권장 사항</p>
         <p>• 디스코드에 <strong>[메인 토론방]</strong>과 <strong>[밀담방 1]</strong>, <strong>[밀담방 2]</strong>를 준비하세요.</p>
-        <p>• 방장이 다음 단계 요청 버튼을 눌러 라운드를 전환합니다.</p>
+        <p>• 방장이 다음 단계 요청 시 플레이어 전원 스킵 투표를 진행합니다.</p>
       </div>
 
       <div class="space-y-4">
@@ -200,8 +200,9 @@
           <span id="scenarioModeBadge" class="block sm:inline sm:ml-3 mt-1 sm:mt-0 text-[11px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">모드 계산 중</span>
         </div>
         <div class="mt-2 sm:mt-0 flex items-center space-x-2">
-          <button id="btnRandomAssign" class="hidden px-2.5 py-1 bg-amber-900/80 hover:bg-amber-800 text-amber-200 border border-amber-600/60 rounded text-xs font-bold transition">
-            <i class="fa-solid fa-dice mr-1"></i> 역할 무작위 배정
+          <!-- 1. 방장 전용 무작위 배정 버튼 복구 -->
+          <button id="btnRandomAssign" class="hidden px-2.5 py-1.5 bg-amber-900/80 hover:bg-amber-800 text-amber-200 border border-amber-600/60 rounded text-xs font-bold transition flex items-center shadow cursor-pointer">
+            <i class="fa-solid fa-dice mr-1.5 text-amber-400"></i> 역할 무작위 배정 (방장)
           </button>
           <div class="text-xs text-neutral-400">
             접속 인원: <span id="playerCount" class="font-bold text-neutral-200">0</span> / 최대 5명
@@ -334,7 +335,7 @@
             
             <div id="hostWhisperAssignArea" class="hidden space-y-2 pt-1 border-t border-amber-800/40">
               <p class="text-[11px] text-neutral-300 leading-tight">
-                <strong>[방장 전용]</strong> 밀담룸으로 보낼 인원을 체크 후 배정하세요.
+                <strong>[방장 전용]</strong> 각 룸으로 보낼 플레이어를 체크 후 배정하세요. (한 플레이어는 한 룸에만 배정됩니다)
               </p>
               
               <div class="grid grid-cols-2 gap-2">
@@ -342,7 +343,7 @@
                   <span class="text-[11px] font-bold text-amber-400 block mb-1">밀담룸 1 배정</span>
                   <div id="whisperRoom1Checkboxes" class="space-y-1"></div>
                   <button id="btnAssignRoom1" class="w-full mt-2 py-1 bg-amber-800 hover:bg-amber-700 text-[10px] font-bold text-white rounded">
-                    룸 1로 전송
+                    룸 1 배정 완료
                   </button>
                 </div>
 
@@ -350,7 +351,7 @@
                   <span class="text-[11px] font-bold text-indigo-400 block mb-1">밀담룸 2 배정</span>
                   <div id="whisperRoom2Checkboxes" class="space-y-1"></div>
                   <button id="btnAssignRoom2" class="w-full mt-2 py-1 bg-indigo-800 hover:bg-indigo-700 text-[10px] font-bold text-white rounded">
-                    룸 2로 전송
+                    룸 2 배정 완료
                   </button>
                 </div>
               </div>
@@ -362,15 +363,15 @@
             </div>
           </div>
 
-          <!-- 현장 증거물품 수색 버튼 -->
+          <!-- 2 & 4. 현장 증거물품 수색 버튼 ('남은 덱' 문구 제거 및 라운드당 1회 제한) -->
           <div class="pt-2 border-t border-neutral-800">
             <button id="btnDrawClue" class="w-full py-2.5 bg-gradient-to-r from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-amber-100 text-xs font-bold rounded border border-amber-600/70 shadow transition flex items-center justify-center">
-              <i class="fa-solid fa-magnifying-glass-arrow-right mr-1.5 text-amber-300"></i> 현장 증거 수색하기 (남은 덱: <span id="clueDeckCount" class="ml-1">24</span>개)
+              <i class="fa-solid fa-magnifying-glass-arrow-right mr-1.5 text-amber-300"></i> 현장 증거 수색하기
             </button>
           </div>
         </div>
 
-        <!-- 우측: 내 단서 보관함 -->
+        <!-- 3. 우측: 내 단서 보관함 -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-briefcase mr-1.5"></i> 내 단서 보관함</h4>
@@ -396,7 +397,7 @@
 
       </div>
 
-      <!-- 5R 최후의 지목 투표 패널 -->
+      <!-- 7. 5R 최후의 지목 투표 패널 -->
       <div id="finalVoteSection" class="hidden noir-card p-5 sm:p-6 rounded-xl border-2 border-red-600 bg-black/90 space-y-5 text-center shadow-2xl">
         <div>
           <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
@@ -447,6 +448,32 @@
     </div>
 
   </main>
+
+  <!-- 5. 다음 단계 조기 진행 스킵 찬반 투표 모달 -->
+  <div id="skipVoteModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-sm w-full p-5 rounded-xl border border-amber-600 shadow-2xl space-y-4 text-center">
+      <h3 class="text-base font-bold text-amber-200"><i class="fa-solid fa-forward mr-1.5 text-amber-400"></i> 다음 단계 진행 동의 요청</h3>
+      <p class="text-xs text-neutral-300">방장이 다음 라운드로의 조기 진행을 요청했습니다.<br>토론을 종료하고 다음 단계로 넘어가시겠습니까?</p>
+      <div id="skipVoteStatusText" class="text-xs font-semibold text-amber-400">전원 찬성 시 즉시 진행됩니다.</div>
+      <div class="flex justify-center space-x-3 pt-2">
+        <button id="btnSkipVoteYes" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-bold transition">찬성</button>
+        <button id="btnSkipVoteNo" class="px-5 py-2 bg-rose-800 hover:bg-rose-700 text-white rounded text-xs font-bold transition">반대</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 밀담존 이동 알림 모달 -->
+  <div id="whisperNoticeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-sm w-full p-6 rounded-xl border-2 border-amber-500 shadow-2xl space-y-4 text-center">
+      <div class="text-amber-400 text-3xl"><i class="fa-solid fa-headset animate-bounce"></i></div>
+      <h3 class="text-lg font-bold text-amber-200">디스코드 음성 채널 이동 안내</h3>
+      <p id="whisperNoticeRoomText" class="text-sm font-bold text-neutral-100 bg-neutral-900/90 py-2.5 rounded border border-neutral-700">
+        배정 룸 확인 중...
+      </p>
+      <p class="text-xs text-neutral-400">5분간 지정된 디스코드 음성 채널에서 밀담을 나누세요.<br>화면 중앙에서 카드를 실물 공유할 수 있습니다.</p>
+      <button id="btnCloseWhisperNotice" class="w-full py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">확인</button>
+    </div>
+  </div>
 
   <!-- 규칙 모달 -->
   <div id="rulesModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -499,12 +526,11 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-    // 1. Firebase 실제 인증 설정 (적용 완료)
     const firebaseConfig = {
       apiKey: "AIzaSyC_t7MbZDPqc1_myKz7li0oZXzYQCeuyIo",
       authDomain: "winchester-game-150ff.firebaseapp.com",
       projectId: "winchester-game-150ff",
-      storageStorageBucket: "winchester-game-150ff.firebasestorage.app",
+      storageBucket: "winchester-game-150ff.firebasestorage.app",
       messagingSenderId: "965882936080",
       appId: "1:965882936080:web:8598738b4adca24d1e4395"
     };
@@ -520,21 +546,18 @@
     let currentThemeId = "winchester";
     let myPlayerId = null;
 
-    // 타이머 제어 변수
     let timerInterval = null;
     let localTimerSeconds = 900;
     let currentPhase = null;
     let isCurrentHost = false;
+    let hasShownWhisperNotice = false;
 
-    // Web Audio Engine
     let audioCtx = null;
     let isBgmPlaying = false;
     let noiseNode = null;
 
     function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     function toggleRainBGM() {
@@ -575,7 +598,7 @@
         return currentScenario;
       } catch (err) {
         console.error("시나리오 로드 실패:", err);
-        alert("시나리오 파일을 불러올 수 없습니다. scenario-" + scenarioId + ".js 파일이 올바른 위치에 있는지 확인하세요.");
+        alert("시나리오 파일을 불러올 수 없습니다. scenario-" + scenarioId + ".js 파일 위치를 확인하세요.");
         return null;
       }
     }
@@ -615,7 +638,7 @@
     signInAnonymously(auth).then(cred => {
       currentUser = cred.user;
       myPlayerId = currentUser.uid;
-    }).catch(err => console.error("Firebase 익명 로그인 오류:", err));
+    }).catch(err => console.error("Firebase 로그인 오류:", err));
 
     document.getElementById('btnToggleBGM').addEventListener('click', toggleRainBGM);
     document.getElementById('btnBackToThemeSelect').addEventListener('click', () => switchView('viewThemeSelect'));
@@ -626,6 +649,10 @@
     document.getElementById('btnCloseRulesModal').addEventListener('click', () => rulesModal.classList.add('hidden'));
     document.getElementById('btnConfirmRules').addEventListener('click', () => rulesModal.classList.add('hidden'));
 
+    document.getElementById('btnCloseWhisperNotice').addEventListener('click', () => {
+      document.getElementById('whisperNoticeModal').classList.add('hidden');
+    });
+
     // 방 생성
     document.getElementById('btnCreateRoom').addEventListener('click', async () => {
       const nick = document.getElementById('inputNickname').value.trim();
@@ -635,7 +662,6 @@
       const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
       currentRoomCode = roomCode;
 
-      // 초기 알리바이 덱 생성 (각 캐릭터별 5장 인덱스 [0, 1, 2, 3, 4])
       const initialAlibiPool = {};
       currentScenario.characters.forEach(c => {
         initialAlibiPool[c.id] = [0, 1, 2, 3, 4];
@@ -656,6 +682,8 @@
         drawnClues: {},
         playerInventories: {},
         roundInvestigateDone: {},
+        roundClueDone: {}, // 라운드별 증거 수색 여부
+        skipVote: null, // 스킵 투표 상태
         whisperRooms: { room1: [], room2: [] },
         votes: {},
         announcement: ""
@@ -697,7 +725,7 @@
       });
     }
 
-    // 1초마다 남은 시간 타이머 진행 (방장 클라이언트가 기준 카운트다운을 Firestore에 동기화)
+    // 타이머 엔진
     function setupTimer(data) {
       localTimerSeconds = data.timerSeconds ?? 900;
       updateTimerDisplay(localTimerSeconds);
@@ -710,8 +738,6 @@
           if (localTimerSeconds > 0) {
             localTimerSeconds--;
             updateTimerDisplay(localTimerSeconds);
-
-            // 방장 클라이언트가 5초마다 Firestore에 주기적으로 동기화 저장
             if (isCurrentHost && localTimerSeconds % 5 === 0) {
               updateDoc(doc(db, "rooms", currentRoomCode), { timerSeconds: localTimerSeconds });
             }
@@ -741,7 +767,6 @@
       document.getElementById('displayRoomCode').innerText = data.roomCode;
       document.getElementById('playerCount').innerText = pCount;
 
-      // 방장 공지사항
       const banner = document.getElementById('hostAnnouncementBanner');
       if (data.announcement) {
         document.getElementById('hostAnnouncementText').innerText = data.announcement;
@@ -750,18 +775,21 @@
         banner.classList.add('hidden');
       }
 
-      // 1. 타이머 동기화
       setupTimer(data);
 
-      // 2. 방장 전용 '다음 단계 요청' 버튼 노출 제어 (방장에게만 보임)
       const hostNextControl = document.getElementById('hostNextPhaseControl');
-      if (isCurrentHost && !['LOBBY', 'PROLOGUE', 'ENDING'].includes(data.phase)) {
+      if (isCurrentHost && !['LOBBY', 'PROLOGUE', 'FINAL_VOTE', 'ENDING'].includes(data.phase)) {
         hostNextControl.classList.remove('hidden');
       } else {
         hostNextControl.classList.add('hidden');
       }
 
-      // 화면 라우팅
+      // 5. 스킵 투표 모달 감지
+      handleSkipVoteModal(data);
+
+      // 6. 밀담존 배정 알림 감지
+      handleWhisperNotice(data);
+
       if (data.phase === 'LOBBY') {
         switchView('viewCharacterSelect');
         renderCharacterSelection(data);
@@ -780,12 +808,11 @@
         return;
       }
 
-      // 인게임 대시보드
       switchView('viewGame');
       renderInGameDashboard(data);
     }
 
-    // 캐릭터 선택 대기실
+    // 1. 캐릭터 선택 및 방장 전용 무작위 배정 복구
     function renderCharacterSelection(data) {
       const grid = document.getElementById('characterCardGrid');
       grid.innerHTML = "";
@@ -793,6 +820,17 @@
       const is5P = pCount >= 5;
 
       document.getElementById('scenarioModeBadge').innerText = is5P ? "5인 완전 범죄 모드" : `${pCount}인 일반 모드`;
+
+      const myInfo = data.players[myPlayerId];
+      const randomBtn = document.getElementById('btnRandomAssign');
+
+      // 방장 전용 역할 무작위 배정 버튼 표시
+      if (myInfo && myInfo.isHost) {
+        randomBtn.classList.remove('hidden');
+        randomBtn.onclick = () => assignRandomCharacters(data);
+      } else {
+        randomBtn.classList.add('hidden');
+      }
 
       currentScenario.characters.forEach(char => {
         const isLocked = !char.isDefault && !is5P;
@@ -830,8 +868,6 @@
         grid.appendChild(card);
       });
 
-      // 방장 시작 제어
-      const myInfo = data.players[myPlayerId];
       const startBtn = document.getElementById('btnStartGame');
       const allSelected = Object.values(data.players).every(p => p.charId !== null);
       if (myInfo && myInfo.isHost) {
@@ -846,6 +882,25 @@
       } else {
         startBtn.classList.add('hidden');
       }
+    }
+
+    async function assignRandomCharacters(data) {
+      const pids = Object.keys(data.players);
+      const is5P = pids.length >= 5;
+      const availableChars = currentScenario.characters.filter(c => c.isDefault || is5P).map(c => c.id);
+
+      // Fisher-Yates shuffle
+      for (let i = availableChars.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableChars[i], availableChars[j]] = [availableChars[j], availableChars[i]];
+      }
+
+      const updates = {};
+      pids.forEach((pid, idx) => {
+        updates[`players.${pid}.charId`] = availableChars[idx];
+      });
+
+      await updateDoc(doc(db, "rooms", currentRoomCode), updates);
     }
 
     window.pickCharacter = async function(charId) {
@@ -885,16 +940,86 @@
         phase: 'R1',
         round: 1,
         timerSeconds: 900,
-        roundInvestigateDone: {}
+        roundInvestigateDone: {},
+        roundClueDone: {},
+        skipVote: null
       });
     });
 
-    // 2 & 3. 방장 다음 단계 전환 로직
+    // 5. 다음 단계 요청 시 스킵 투표 개시
     document.getElementById('btnRequestNextPhase').addEventListener('click', async () => {
       if (!isCurrentHost) return;
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
       if (!snap.exists()) return;
-      proceedNextPhase(snap.data());
+      const data = snap.data();
+
+      if (data.skipVote && data.skipVote.status === 'VOTING') {
+        return alert("이미 스킵 투표가 진행 중입니다.");
+      }
+
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        skipVote: {
+          status: 'VOTING',
+          votes: { [myPlayerId]: true } // 방장은 자동 찬성
+        }
+      });
+    });
+
+    function handleSkipVoteModal(data) {
+      const modal = document.getElementById('skipVoteModal');
+      const sv = data.skipVote;
+      if (!sv || sv.status !== 'VOTING') {
+        modal.classList.add('hidden');
+        return;
+      }
+
+      const pids = Object.keys(data.players || {});
+      const myVote = sv.votes && sv.votes[myPlayerId];
+
+      if (myVote === undefined) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+
+      // 찬반 투표 결과 판정 (방장 클라이언트가 전담)
+      if (isCurrentHost) {
+        const votes = sv.votes || {};
+        const voteCount = Object.keys(votes).length;
+
+        // 반대가 1표라도 나오면 즉시 부결
+        const hasNo = Object.values(votes).some(v => v === false);
+        if (hasNo) {
+          updateDoc(doc(db, "rooms", currentRoomCode), {
+            skipVote: null,
+            announcement: "다음 단계 스킵 요청이 부결되었습니다. (반대 발생)"
+          });
+          setTimeout(() => {
+            updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "" });
+          }, 4000);
+          return;
+        }
+
+        // 전원 찬성 시 다음 페이즈로 진행
+        if (voteCount === pids.length && Object.values(votes).every(v => v === true)) {
+          updateDoc(doc(db, "rooms", currentRoomCode), { skipVote: null });
+          proceedNextPhase(data);
+        }
+      }
+    }
+
+    document.getElementById('btnSkipVoteYes').addEventListener('click', async () => {
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        [`skipVote.votes.${myPlayerId}`]: true
+      });
+      document.getElementById('skipVoteModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnSkipVoteNo').addEventListener('click', async () => {
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        [`skipVote.votes.${myPlayerId}`]: false
+      });
+      document.getElementById('skipVoteModal').classList.add('hidden');
     });
 
     async function proceedNextPhase(data) {
@@ -911,7 +1036,7 @@
         case 'R2':
           nextPhase = 'R2_WHISPER';
           nextRound = 2;
-          nextTimer = 300; // 5분 밀담
+          nextTimer = 300;
           break;
         case 'R2_WHISPER':
           nextPhase = 'R3';
@@ -926,12 +1051,12 @@
         case 'R4':
           nextPhase = 'R4_WHISPER';
           nextRound = 4;
-          nextTimer = 300; // 5분 밀담
+          nextTimer = 300;
           break;
         case 'R4_WHISPER':
           nextPhase = 'R5_DEFENSE';
           nextRound = 5;
-          nextTimer = 600; // 10분 최후 변론
+          nextTimer = 600;
           break;
         case 'R5_DEFENSE':
           nextPhase = 'FINAL_VOTE';
@@ -947,8 +1072,33 @@
         round: nextRound,
         timerSeconds: nextTimer,
         roundInvestigateDone: {},
-        whisperRooms: { room1: [], room2: [] }
+        roundClueDone: {}, // 새 라운드 수색 초기화
+        skipVote: null,
+        whisperRooms: { room1: [], room2: [] },
+        announcement: nextPhase.includes('WHISPER') ? "밀담 페이즈가 시작되었습니다. 방장의 채널 배정을 확인하세요!" : ""
       });
+    }
+
+    // 6. 밀담존 채널 이동 알림 제어
+    function handleWhisperNotice(data) {
+      const isWhisper = data.phase.includes('WHISPER');
+      if (!isWhisper) {
+        hasShownWhisperNotice = false;
+        return;
+      }
+
+      const r1 = data.whisperRooms?.room1 || [];
+      const r2 = data.whisperRooms?.room2 || [];
+
+      if ((r1.length > 0 || r2.length > 0) && !hasShownWhisperNotice) {
+        let text = "현재 [메인 토론방] 대기 상태입니다.";
+        if (r1.includes(myPlayerId)) text = "🎧 [디스코드 밀담방 1]로 이동하세요!";
+        if (r2.includes(myPlayerId)) text = "🎧 [디스코드 밀담방 2]로 이동하세요!";
+
+        document.getElementById('whisperNoticeRoomText').innerText = text;
+        document.getElementById('whisperNoticeModal').classList.remove('hidden');
+        hasShownWhisperNotice = true;
+      }
     }
 
     // 인게임 메인 대시보드 렌더링
@@ -962,7 +1112,6 @@
         document.getElementById('myCharName').innerText = myChar.name;
         document.getElementById('myCharRole').innerText = myChar.role;
 
-        // 비밀 & 타임라인 시트 바인딩
         const secretBox = document.getElementById('mySecretContent');
         secretBox.innerHTML = `
           <div class="p-2.5 bg-black/60 rounded border border-neutral-800">
@@ -978,7 +1127,6 @@
         `;
       }
 
-      // 라운드 및 배지 텍스트
       const phaseTitles = {
         R1: "1라운드: 사건 발생 & 상호 알리바이",
         R2: "2라운드: 현장 조사 토론",
@@ -992,7 +1140,6 @@
       document.getElementById('gameRoundLabel').innerText = phaseTitles[data.phase] || `${data.round}라운드 진행 중`;
       document.getElementById('gamePhaseBadge').innerText = data.phase.includes('WHISPER') ? '비밀 밀담' : (data.phase === 'FINAL_VOTE' ? '최종 투표' : '토론 & 수색');
 
-      // 5R 변론 및 투표 패널 제어
       if (data.phase === 'R5_DEFENSE') {
         document.getElementById('defenseTopNotice').classList.remove('hidden');
         document.getElementById('finalVoteSection').classList.add('hidden');
@@ -1005,20 +1152,13 @@
         document.getElementById('finalVoteSection').classList.add('hidden');
       }
 
-      // 4. 알리바이 조사 영역 렌더링
       renderAlibiSection(data, myInfo);
-
-      // 5. 현장 증거 수집 영역 렌더링
       renderClueSection(data);
-
-      // 6. 단서 보관함 (인벤토리) 렌더링
       renderInventory(data);
-
-      // 7. 듀얼 밀담실 렌더링
       renderWhisperSection(data);
     }
 
-    // 4. 알리바이 조사 렌더링 및 기능 복구
+    // 알리바이 조사 렌더링
     function renderAlibiSection(data, myInfo) {
       const container = document.getElementById('alibiInvestigateButtons');
       const badge = document.getElementById('alibiCountBadge');
@@ -1038,7 +1178,6 @@
         return;
       }
 
-      // 다른 플레이어들의 캐릭터 목록 버튼 생성
       Object.entries(data.players).forEach(([pid, p]) => {
         if (pid === myPlayerId || !p.charId) return;
         const targetChar = currentScenario.characters.find(c => c.id === p.charId);
@@ -1070,7 +1209,6 @@
       const pool = data.alibiPool && data.alibiPool[targetCharId];
       if (!pool || pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
 
-      // 무작위 1장 선택 후 풀에서 제거
       const randomIndex = Math.floor(Math.random() * pool.length);
       const cardNum = pool[randomIndex];
       const newPool = [...pool];
@@ -1096,26 +1234,30 @@
         [`roundInvestigateDone.${myPlayerId}`]: doneCount
       });
 
-      alert(`[${targetChar.name}의 알리바이 #${cardNum + 1} 확보]\n\n"${cardText}"\n\n내 단서 보관함에 저장되었습니다.`);
+      alert(`[${targetChar.name}의 알리바이 #${cardNum + 1} 확보]\n\n"${cardText}"\n\n내 단서 보관함에 보관되었습니다.`);
     }
 
-    // 5. 증거 수색 복구
+    // 2 & 4. 증거 수색 렌더링 및 1회 제한
     function renderClueSection(data) {
       const btn = document.getElementById('btnDrawClue');
-      const countEl = document.getElementById('clueDeckCount');
       const poolCount = (data.cluePool || []).length;
-      countEl.innerText = poolCount;
+      const isWhisperOrVote = data.phase.includes('WHISPER') || data.phase === 'FINAL_VOTE' || data.phase === 'R5_DEFENSE';
+      const hasDrawnThisRound = !!(data.roundClueDone && data.roundClueDone[myPlayerId]);
 
-      const isWhisperOrVote = data.phase.includes('WHISPER') || data.phase === 'FINAL_VOTE';
-
-      if (isWhisperOrVote || poolCount === 0) {
+      if (isWhisperOrVote || poolCount === 0 || hasDrawnThisRound) {
         btn.disabled = true;
         btn.className = "w-full py-2 bg-neutral-900 text-neutral-500 text-xs font-semibold rounded border border-neutral-800 cursor-not-allowed";
-        btn.innerHTML = `<i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> ${poolCount === 0 ? '현장 증거 전량 수색 완료' : '밀담 중 수색 불가'}`;
+        if (hasDrawnThisRound) {
+          btn.innerHTML = `<i class="fa-solid fa-check mr-1.5 text-emerald-500"></i> 이번 라운드 증거 수색 완료 (라운드당 1회)`;
+        } else if (poolCount === 0) {
+          btn.innerHTML = `<i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 현장 증거 전량 수색 완료`;
+        } else {
+          btn.innerHTML = `<i class="fa-solid fa-lock mr-1.5 text-neutral-600"></i> 현재 단계 수색 불가`;
+        }
       } else {
         btn.disabled = false;
         btn.className = "w-full py-2.5 bg-gradient-to-r from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-amber-100 text-xs font-bold rounded border border-amber-600/70 shadow transition flex items-center justify-center cursor-pointer";
-        btn.innerHTML = `<i class="fa-solid fa-magnifying-glass-arrow-right mr-1.5 text-amber-300"></i> 현장 증거 수색하기 (남은 덱: ${poolCount}개)`;
+        btn.innerHTML = `<i class="fa-solid fa-magnifying-glass-arrow-right mr-1.5 text-amber-300"></i> 현장 증거 수색하기`;
       }
     }
 
@@ -1123,6 +1265,11 @@
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
       if (!snap.exists()) return;
       const data = snap.data();
+      
+      if (data.roundClueDone && data.roundClueDone[myPlayerId]) {
+        return alert("현장 증거는 라운드당 1회만 수색할 수 있습니다.");
+      }
+
       const pool = data.cluePool || [];
       if (pool.length === 0) return alert("더 이상 수색할 현장 증거가 없습니다.");
 
@@ -1137,13 +1284,14 @@
 
       await updateDoc(doc(db, "rooms", currentRoomCode), {
         cluePool: newPool,
-        [`playerInventories.${myPlayerId}.clues`]: updatedClues
+        [`playerInventories.${myPlayerId}.clues`]: updatedClues,
+        [`roundClueDone.${myPlayerId}`]: true
       });
 
       alert(`[현장 증거 발견: ${clueObj ? clueObj.name : clueId}]\n\n"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`);
     });
 
-    // 단서 보관함 렌더링
+    // 3. 단서 보관함 렌더링
     function renderInventory(data) {
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const alibiList = document.getElementById('myAlibiCardsList');
@@ -1180,7 +1328,7 @@
       }
     }
 
-    // 듀얼 밀담실 렌더링
+    // 6. 듀얼 밀담실 렌더링 (상호 배타적 체크박스 적용)
     function renderWhisperSection(data) {
       const box = document.getElementById('secretMeetingBox');
       const isWhisperPhase = data.phase.includes('WHISPER');
@@ -1228,27 +1376,43 @@
       Object.entries(data.players).forEach(([pid, p]) => {
         c1.innerHTML += `
           <label class="flex items-center space-x-1.5 text-xs text-neutral-200">
-            <input type="checkbox" value="${pid}" class="chk-whisper-1 rounded bg-neutral-800 border-neutral-600">
+            <input type="checkbox" value="${pid}" onchange="window.toggleWhisperCheck('${pid}', 1)" class="chk-whisper-1 chk-w1-${pid} rounded bg-neutral-800 border-neutral-600">
             <span>${p.nickname}</span>
           </label>
         `;
         c2.innerHTML += `
           <label class="flex items-center space-x-1.5 text-xs text-neutral-200">
-            <input type="checkbox" value="${pid}" class="chk-whisper-2 rounded bg-neutral-800 border-neutral-600">
+            <input type="checkbox" value="${pid}" onchange="window.toggleWhisperCheck('${pid}', 2)" class="chk-whisper-2 chk-w2-${pid} rounded bg-neutral-800 border-neutral-600">
             <span>${p.nickname}</span>
           </label>
         `;
       });
     }
 
+    window.toggleWhisperCheck = function(pid, roomNum) {
+      if (roomNum === 1) {
+        const other = document.querySelector(`.chk-w2-${pid}`);
+        if (other && other.checked) other.checked = false;
+      } else {
+        const other = document.querySelector(`.chk-w1-${pid}`);
+        if (other && other.checked) other.checked = false;
+      }
+    };
+
     document.getElementById('btnAssignRoom1').addEventListener('click', async () => {
       const selected = Array.from(document.querySelectorAll('.chk-whisper-1:checked')).map(el => el.value);
-      await updateDoc(doc(db, "rooms", currentRoomCode), { 'whisperRooms.room1': selected });
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        'whisperRooms.room1': selected,
+        announcement: "밀담룸 1 배정이 갱신되었습니다. 디스코드 채널로 이동하세요!"
+      });
     });
 
     document.getElementById('btnAssignRoom2').addEventListener('click', async () => {
       const selected = Array.from(document.querySelectorAll('.chk-whisper-2:checked')).map(el => el.value);
-      await updateDoc(doc(db, "rooms", currentRoomCode), { 'whisperRooms.room2': selected });
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        'whisperRooms.room2': selected,
+        announcement: "밀담룸 2 배정이 갱신되었습니다. 디스코드 채널로 이동하세요!"
+      });
     });
 
     function renderWhisperCards(data) {
@@ -1275,7 +1439,7 @@
       });
     }
 
-    // 5R 최후 지목 투표 패널
+    // 7. 5R 최후 지목 투표 및 결과 전환
     function renderFinalVoteSection(data) {
       const grid = document.getElementById('voteButtonsGrid');
       const board = document.getElementById('liveVoteBoard');
@@ -1295,7 +1459,6 @@
         const targetChar = currentScenario.characters.find(c => c.id === p.charId);
         if (!targetChar) return;
 
-        // 지목 투표 버튼
         if (!myVote) {
           const btn = document.createElement('button');
           btn.className = "px-4 py-2 bg-red-950 hover:bg-red-900 border border-red-700 text-red-200 text-xs font-bold rounded flex items-center space-x-2 transition cursor-pointer";
@@ -1304,7 +1467,6 @@
           grid.appendChild(btn);
         }
 
-        // 실시간 투표 현황판
         const votedTargetId = data.votes && data.votes[pid];
         let votedName = '<span class="text-neutral-500 italic">고민 중...</span>';
         if (votedTargetId) {
@@ -1324,17 +1486,14 @@
     async function submitVote(targetCharId, data) {
       if (!confirm("정말 이 인물을 진범으로 지목하시겠습니까? 지목 후 변경할 수 없습니다.")) return;
 
-      const votes = { ...(data.votes || {}), [myPlayerId]: targetCharId };
-      await updateDoc(doc(db, "rooms", currentRoomCode), { votes });
+      const updatedVotes = { ...(data.votes || {}), [myPlayerId]: targetCharId };
+      const playerIds = Object.keys(data.players || {});
+      const allVoted = playerIds.every(pid => !!updatedVotes[pid]);
 
-      // 전원 투표 완료 여부 확인
-      const playerIds = Object.keys(data.players);
-      const allVoted = playerIds.every(pid => !!votes[pid]);
-
-      if (allVoted && isCurrentHost) {
-        // 결과 판정
+      if (allVoted) {
+        // 결과 즉시 집계 및 엔딩 분기
         const tally = {};
-        Object.values(votes).forEach(cid => {
+        Object.values(updatedVotes).forEach(cid => {
           tally[cid] = (tally[cid] || 0) + 1;
         });
 
@@ -1349,20 +1508,23 @@
           }
         });
 
-        // 진범 찾기 (윈체스터: elena, 설원특급: vivian)
         const killerId = currentScenario.killerId || ((data.themeId === 'winchester') ? 'elena' : 'vivian');
         let winner = 'KILLER';
 
-        // 단독 1위 득표자가 진범일 때만 시민 승리
         if (topCandidates.length === 1 && topCandidates[0] === killerId) {
           winner = 'CITIZEN';
         } else {
-          winner = 'KILLER'; // 동률이거나 오지목인 경우 진범 승리
+          winner = 'KILLER'; // 오지목 또는 동률 시 진범 승리
         }
 
         await updateDoc(doc(db, "rooms", currentRoomCode), {
+          votes: updatedVotes,
           phase: 'ENDING',
           winner: winner
+        });
+      } else {
+        await updateDoc(doc(db, "rooms", currentRoomCode), {
+          votes: updatedVotes
         });
       }
     }
