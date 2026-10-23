@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 셀렉션 (ver.11.11 완성본)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 셀렉션</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -47,7 +47,7 @@
 
   <!-- 글로벌 상단 헤더 -->
   <header class="w-full border-b border-neutral-800 bg-[#0b0c10]/90 backdrop-blur sticky top-0 z-40 px-4 py-3">
-    <div class="max-w-5xl mx-auto flex items-center justify-between">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-2">
         <i class="fa-solid fa-fingerprint text-amber-500 text-xl"></i>
         <span class="font-title font-bold text-sm sm:text-base tracking-wider text-neutral-100">MURDER MYSTERY SUITE</span>
@@ -70,7 +70,7 @@
 
   <!-- 방장 공지 전송 컨트롤 -->
   <div id="hostAnnouncementInputBox" class="hidden w-full bg-neutral-900 border-b border-neutral-800 py-1.5 px-4 text-xs">
-    <div class="max-w-5xl mx-auto flex items-center space-x-2">
+    <div class="max-w-6xl mx-auto flex items-center space-x-2">
       <span class="text-amber-400 font-bold whitespace-nowrap"><i class="fa-solid fa-bullhorn mr-1"></i> 방장 긴급공지:</span>
       <input type="text" id="inputHostNotice" placeholder="전체 플레이어 화면 상단에 띄울 공지사항 입력..." class="flex-1 bg-black border border-neutral-700 rounded px-2.5 py-1 text-neutral-100 focus:outline-none focus:border-amber-500">
       <button id="btnSendHostNotice" class="px-3 py-1 bg-amber-700 hover:bg-amber-600 text-white rounded font-bold">전송</button>
@@ -79,17 +79,18 @@
   </div>
 
   <!-- 메인 컨테이너 -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-center">
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-center">
 
-    <!-- [VIEW 0: 시나리오 테마 선택 화면] -->
-    <div id="viewThemeSelect" class="w-full max-w-3xl space-y-6">
+    <!-- [VIEW 0: 시나리오 테마 선택 화면 - 3열 그리드 적용] -->
+    <div id="viewThemeSelect" class="w-full space-y-6">
       <div class="text-center space-y-2">
         <span class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-700">Scenario Selection</span>
         <h2 class="text-2xl sm:text-3xl font-bold font-title text-amber-100">머더 미스터리 시나리오 선택</h2>
         <p class="text-xs sm:text-sm text-neutral-400">플레이할 사건 시나리오를 선택한 뒤 로비로 입장하세요.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
+        
         <!-- 테마 1: 폭풍우 치는 윈체스터 별장 -->
         <div class="noir-card rounded-2xl overflow-hidden border border-amber-700/60 hover:border-amber-400 transition-all duration-300 shadow-xl flex flex-col justify-between group">
           <div>
@@ -101,7 +102,7 @@
             </div>
             <div class="p-4 space-y-2">
               <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-amber-200">폭풍우 치는 윈체스터 별장: 사라진 유언장</h3>
+                <h3 class="text-lg font-bold text-amber-200">폭풍우 치는 윈체스터 별장</h3>
                 <span class="text-[10px] text-amber-400 px-2 py-0.5 rounded bg-amber-950 border border-amber-800">2~5인</span>
               </div>
               <p class="text-xs text-neutral-400 leading-relaxed break-keep">
@@ -127,7 +128,7 @@
             </div>
             <div class="p-4 space-y-2">
               <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-cyan-200">황야의 설원 특급: 사라진 황금 탄환</h3>
+                <h3 class="text-lg font-bold text-cyan-200">황야의 설원 특급</h3>
                 <span class="text-[10px] text-cyan-400 px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800">2~5인</span>
               </div>
               <p class="text-xs text-neutral-400 leading-relaxed break-keep">
@@ -139,33 +140,35 @@
             <button onclick="selectThemeAndGoToLobby('express')" class="w-full py-2.5 bg-gradient-to-r from-cyan-900 to-cyan-700 hover:from-cyan-800 hover:to-cyan-600 text-cyan-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
               <i class="fa-solid fa-play mr-2 text-cyan-300"></i> 이 시나리오로 시작하기
             </button>
-            <!-- 테마 3: 안개 낀 폐쇄병원 -->
-    <div class="noir-card rounded-2xl overflow-hidden border border-emerald-800/60 hover:border-emerald-400 transition-all duration-300 shadow-xl flex flex-col justify-between group">
-      <div>
-        <div class="relative w-full h-44 overflow-hidden border-b border-neutral-800">
-          <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80" alt="폐쇄병원" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-3">
-            <span class="text-[11px] font-bold text-emerald-300 bg-black/60 px-2 py-0.5 rounded border border-emerald-900/60">1987 산간 폐쇄병원</span>
           </div>
         </div>
-        <div class="p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-emerald-200">안개 낀 폐쇄병원: 침묵의 병동</h3>
-            <span class="text-[10px] text-emerald-400 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">2~5인</span>
+
+        <!-- 테마 3: 안개 낀 폐쇄병원 -->
+        <div class="noir-card rounded-2xl overflow-hidden border border-emerald-800/60 hover:border-emerald-400 transition-all duration-300 shadow-xl flex flex-col justify-between group">
+          <div>
+            <div class="relative w-full h-44 overflow-hidden border-b border-neutral-800">
+              <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80" alt="폐쇄병원" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-3">
+                <span class="text-[11px] font-bold text-emerald-300 bg-black/60 px-2 py-0.5 rounded border border-emerald-900/60">1987 산간 폐쇄병원</span>
+              </div>
+            </div>
+            <div class="p-4 space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-emerald-200">안개 낀 폐쇄병원</h3>
+                <span class="text-[10px] text-emerald-400 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800">2~5인</span>
+              </div>
+              <p class="text-xs text-neutral-400 leading-relaxed break-keep">
+                산사태로 고립된 요양병원 3층에서 추락사한 원장. 사라진 불법 임상실험 일지와 목에 남은 의문의 주사 자국.
+              </p>
+            </div>
           </div>
-          <p class="text-xs text-neutral-400 leading-relaxed break-keep">
-            산사태로 고립된 산골 요양병원 3층에서 추락사한 원장. 사라진 불법 임상실험 일지와 목에 남은 의문의 주사 자국.
-          </p>
-        </div>
-      </div>
-      <div class="p-4 pt-0">
-        <button onclick="selectThemeAndGoToLobby('hospital')" class="w-full py-2.5 bg-gradient-to-r from-emerald-900 to-emerald-700 hover:from-emerald-800 hover:to-emerald-600 text-emerald-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
-          <i class="fa-solid fa-play mr-2 text-emerald-300"></i> 이 시나리오로 시작하기
-        </button>
-      </div>
-    </div>
+          <div class="p-4 pt-0">
+            <button onclick="selectThemeAndGoToLobby('hospital')" class="w-full py-2.5 bg-gradient-to-r from-emerald-900 to-emerald-700 hover:from-emerald-800 hover:to-emerald-600 text-emerald-100 text-xs sm:text-sm font-bold rounded-lg shadow-lg transition flex items-center justify-center">
+              <i class="fa-solid fa-play mr-2 text-emerald-300"></i> 이 시나리오로 시작하기
+            </button>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -533,69 +536,37 @@
     </div>
   </div>
 
-  <!-- 공식 룰북 모달 -->
+  <!-- 규칙 모달 -->
   <div id="rulesModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="noir-card max-w-2xl w-full p-5 sm:p-6 rounded-xl border border-amber-700/60 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto custom-scroll">
+    <div class="noir-card max-w-xl w-full p-5 sm:p-6 rounded-xl border border-amber-700/60 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto custom-scroll">
       <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
         <h3 class="text-lg font-bold text-amber-200 font-title"><i class="fa-solid fa-scroll mr-2"></i> 머더 미스터리 공식 규칙서</h3>
         <button id="btnCloseRulesModal" class="text-neutral-400 hover:text-neutral-100 text-lg">&times;</button>
       </div>
 
-      <div class="text-xs text-neutral-300 space-y-4 leading-relaxed break-keep">
-        
-        <!-- 핵심 거짓말 제한 원칙 -->
-        <div class="p-3 bg-red-950/30 border border-red-900/50 rounded-lg">
+      <div class="text-xs text-neutral-300 space-y-3.5 leading-relaxed break-keep">
+        <div class="p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg">
+          <strong class="text-amber-200 block mb-1 text-sm">🎯 핵심 콘셉트 & 목표</strong>
+          • <strong>일반 플레이어(시민)</strong>: 단서 수집과 심문을 통해 용의자 중 '단 한 명의 진범'을 찾아 투표로 검거.<br>
+          • <strong>진범 플레이어</strong>: 자신의 정체를 숨기고 다른 무고한 사람에게 누명을 씌워 최종 생존.
+        </div>
+
+        <div class="p-3 bg-red-950/20 border border-red-900/40 rounded-lg">
           <strong class="text-red-300 block mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> [필독] 거짓말 제한 룰</strong>
-          • <strong>진범 플레이어</strong>: 자신의 범행 사실, 알리바이, 동기 등 모든 항목에 대해 <strong>완전한 거짓말과 허위 날조 진술이 가능</strong>합니다.<br>
+          • <strong>진범 플레이어</strong>: 범행 사실, 알리바이, 동기 등 모든 항목에 대해 <strong>완전한 거짓말과 허위 날조 진술이 가능</strong>합니다.<br>
           • <strong>일반 플레이어(시민)</strong>: 개인적인 약점을 숨기거나 침묵할 수는 있으나, <strong>사실과 다른 허위 사실을 날조(거짓말)하는 것은 엄격히 금지</strong>됩니다.
         </div>
 
-        <!-- 7단계 진행 규칙 -->
-        <div class="space-y-3">
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">1. 준비 및 규칙 설명 (인트로)</h4>
-            <p class="text-neutral-400">• <strong>세계관 파악</strong>: 플레이어 중 한 명이 시나리오의 배경(세계관)과 사건의 개요(프롤로그 시놉시스)를 소리 내어 함께 읽습니다.<br>
-            • <strong>규칙 숙지</strong>: 게임의 기본적인 라운드 진행 방식과 주의사항을 숙지합니다.</p>
-          </div>
-
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">2. 캐릭터 선택 및 설정집 숙지</h4>
-            <p class="text-neutral-400">• <strong>캐릭터 선택</strong>: 이름, 직업, 한 줄 소개 등을 보고 원하는 용의자 캐릭터를 하나씩 고릅니다.<br>
-            • <strong>개인 시크릿 시트 정독</strong>: 본인이 맡은 캐릭터의 상세한 과거, 사건 당일 타임라인, 비밀(진범 여부 등), 개인 목표를 혼자서만 조용히 읽고 파악합니다.<br>
-            • <strong>주의사항</strong>: 진범은 정체를 숨겨야 하고, 다른 이들은 각자의 비밀을 지키며 진상을 파악해야 합니다.</p>
-          </div>
-
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">3. 자기소개 및 사건 발생 상황 공유</h4>
-            <p class="text-neutral-400">• <strong>역할 연기 (롤플레잉)</strong>: 1라운드가 시작되면 각자 선택한 캐릭터의 특징을 살려 자신을 소개합니다.<br>
-            • <strong>알리바이 공유</strong>: 사건 발생 전후로 자신이 어디서 무엇을 하고 있었는지를 이야기하며 본격적인 대화를 시작합니다.</p>
-          </div>
-
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">4. 1차 탐사 및 추리 (1~2라운드)</h4>
-            <p class="text-neutral-400">• <strong>단서 조사</strong>: 다른 캐릭터의 알리바이 카드를 조사하고 현장 증거를 수색하여 단서 카드를 획득합니다.<br>
-            • <strong>전체 회의 & 밀담</strong>: 얻은 단서를 바탕으로 다 함께 토론하거나, 2라운드 종료 후 [밀담방 1, 2]로 이동하여 5분간 비밀 연대를 맺고 증거 실물을 공유합니다.</p>
-          </div>
-
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">5. 2차 탐사 및 심층 추리 (3~4라운드)</h4>
-            <p class="text-neutral-400">• <strong>추가 단서 해금</strong>: 라운드별로 새로운 현장 증거를 추가 수색합니다.<br>
-            • <strong>심층 추리</strong>: 사건의 타임라인을 맞추고, 각자의 모순된 알리바이나 숨겨진 범행 동기를 집요하게 파고들며 범인을 좁혀 나갑니다. (4라운드 종료 후 2차 밀담 5분 진행)</p>
-          </div>
-
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">6. 최종 변론 및 투표 (5라운드)</h4>
-            <p class="text-neutral-400">• <strong>최종 변론 (10분)</strong>: 투표 전 마지막으로 각자 소지한 단서들을 확인하며 자신이 범인이 아닌 이유를 변론하거나, 자신이 추리한 진범을 지목하는 발언을 나눕니다.<br>
-            • <strong>범인 지목 투표</strong>: 변론 종료 후 모든 플레이어가 사건의 진범이라고 생각하는 용의자에게 투표합니다 (자신 지목 불가, 다수결 원칙).</p>
-          </div>
-
-          <div class="border-l-2 border-amber-600 pl-3">
-            <h4 class="font-bold text-amber-200 text-sm mb-1">7. 엔딩 및 진상 규명 (결말)</h4>
-            <p class="text-neutral-400">• <strong>결말 확인</strong>: 투표 결과에 따른 엔딩 분기를 확인합니다 (단독 1위 득표가 진범이면 시민 승리, 오지목 또는 <strong>동률 득표 시 진범 승리</strong>).<br>
-            • <strong>진상 규명 & 에필로그</strong>: 사건의 진짜 내막과 트릭, 각 인물별 후일담 에필로그가 공개됩니다.</p>
-          </div>
+        <div>
+          <strong class="text-amber-400 block mb-1.5 text-sm">⏱️ 라운드 진행 프로세스</strong>
+          <ul class="space-y-1.5 pl-2 border-l border-amber-800/60">
+            <li><strong>[1R: 토론 & 수색 (15분)]</strong> 각자 알리바이 조사 및 현장 증거 1회를 수색하고 음성 토론을 진행합니다.</li>
+            <li><strong>[2R: 토론(15분) & 듀얼 밀담(5분)]</strong> 토론 후 [밀담방 1], [밀담방 2]로 이동하여 비밀 대화를 나눕니다. 밀담 중에는 증거 실물만 공개 가능합니다.</li>
+            <li><strong>[3R: 심층 추궁 (15분)]</strong> 모순된 타임라인을 파고들며 압박합니다.</li>
+            <li><strong>[4R: 토론(15분) & 2차 밀담(5분)]</strong> 최종 증거를 토대로 결론을 도출합니다.</li>
+            <li><strong>[5R: 최후 변론(10분) & 최종 지목 투표]</strong> 마지막 무죄 변론 후 공개 지목 투표를 실시합니다. 동률 시 진범이 승리합니다.</li>
+          </ul>
         </div>
-
       </div>
 
       <div class="pt-2 border-t border-neutral-800 text-right">
@@ -642,24 +613,6 @@
     let isCurrentHost = false;
     let lastHandledShareTimestamp = 0;
     let lastNotifiedWhisperPhase = null;
-
-    // 시나리오 파일에 지정된 1:1 고유 이미지를 최우선 보장하는 헬퍼 함수
-    function getCardImage(cardObj) {
-      if (!cardObj) return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80";
-      if (cardObj.img) return cardObj.img;
-      if (cardObj.imgUrl) return cardObj.imgUrl;
-      if (cardObj.image) return cardObj.image;
-
-      const text = `${cardObj.name || cardObj.title || ''} ${cardObj.desc || cardObj.text || ''}`.toLowerCase();
-      if (text.includes("권총") || text.includes("리볼버") || text.includes("탄환")) return "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80";
-      if (text.includes("증서") || text.includes("유언장") || text.includes("편지") || text.includes("장부")) return "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80";
-      if (text.includes("시계")) return "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80";
-      if (text.includes("독") || text.includes("약") || text.includes("앰플")) return "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80";
-      if (text.includes("열쇠") || text.includes("금고")) return "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80";
-      if (text.includes("잔") || text.includes("찻잔") || text.includes("위스키")) return "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80";
-
-      return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80";
-    }
 
     let audioCtx = null;
     let isBgmPlaying = false;
@@ -728,18 +681,29 @@
       const loaded = await loadScenarioModule(themeId);
       if (!loaded) return;
 
+      const themeTag = document.getElementById('lobbyThemeTag');
+      const coverImg = document.getElementById('lobbyCoverImg');
+      const coverSub = document.getElementById('lobbyCoverSub');
+      const title = document.getElementById('lobbyTitle');
+
       if (themeId === 'winchester') {
-        document.getElementById('lobbyThemeTag').innerText = "폭풍우 치는 윈체스터 별장";
-        document.getElementById('lobbyThemeTag').className = "text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800";
-        document.getElementById('lobbyCoverImg').src = loaded.prologue.bannerImg;
-        document.getElementById('lobbyCoverSub').innerText = "Penthouse in the Storm";
-        document.getElementById('lobbyTitle').innerText = loaded.title;
-      } else {
-        document.getElementById('lobbyThemeTag').innerText = "황야의 설원 특급";
-        document.getElementById('lobbyThemeTag').className = "text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
-        document.getElementById('lobbyCoverImg').src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80";
-        document.getElementById('lobbyCoverSub').innerText = "Aurora Express in Blizzard";
-        document.getElementById('lobbyTitle').innerText = loaded.title;
+        themeTag.innerText = "폭풍우 치는 윈체스터 별장";
+        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800";
+        coverImg.src = loaded.prologue.bannerImg;
+        coverSub.innerText = "Penthouse in the Storm";
+        title.innerText = loaded.title;
+      } else if (themeId === 'express') {
+        themeTag.innerText = "황야의 설원 특급";
+        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
+        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80";
+        coverSub.innerText = "Aurora Express in Blizzard";
+        title.innerText = loaded.title;
+      } else if (themeId === 'hospital') {
+        themeTag.innerText = "안개 낀 폐쇄병원";
+        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800";
+        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80";
+        coverSub.innerText = "Saint Helena Asylum 1987";
+        title.innerText = loaded.title;
       }
       switchView('viewLobby');
     };
@@ -1290,7 +1254,7 @@
                          (share.roomType === 'room2' && data.whisperRooms?.room2?.includes(myPlayerId));
         if (inMyRoom) {
           document.getElementById('cardShareSenderText').innerText = `${share.senderName}님이 증거를 실물 공유했습니다.`;
-          document.getElementById('cardShareImg').src = share.cardImg || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80";
+          document.getElementById('cardShareImg').src = share.cardImg || "";
           document.getElementById('cardShareTitle').innerText = share.cardTitle;
           document.getElementById('cardShareDesc').innerText = share.cardDesc;
           document.getElementById('cardShareModal').classList.remove('hidden');
@@ -1418,19 +1382,9 @@
       const targetChar = currentScenario.characters.find(c => c.id === targetCharId);
       const cardObj = targetChar.alibiCards[cardNum];
       
-      let cardText = "";
-      let cardImg = "";
-      let cardTitle = "";
-
-      if (typeof cardObj === 'object' && cardObj !== null) {
-        cardTitle = cardObj.name || cardObj.title || `${targetChar.name}의 알리바이 #${cardNum + 1}`;
-        cardText = cardObj.desc || cardObj.text || "";
-        cardImg = getCardImage(cardObj);
-      } else {
-        cardTitle = `${targetChar.name}의 알리바이 #${cardNum + 1}`;
-        cardText = cardObj || "기록된 알리바이가 없습니다.";
-        cardImg = getCardImage({ name: cardTitle, desc: cardText });
-      }
+      let cardTitle = cardObj.name || `${targetChar.name}의 알리바이 #${cardNum + 1}`;
+      let cardText = cardObj.desc || "";
+      let cardImg = cardObj.img || "";
 
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const updatedAlibis = [...(myInv.alibis || []), {
@@ -1516,11 +1470,10 @@
 
       if (myInv.alibis && myInv.alibis.length > 0) {
         alibiList.innerHTML = myInv.alibis.map(a => {
-          const cardImg = a.img || getCardImage(a);
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
-                <img src="${cardImg}" onclick="window.openImageDetail('${cardImg}', '${a.charName} 알리바이 (#${a.cardNum}/5)')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
+                <img src="${a.img}" onclick="window.openImageDetail('${a.img}', '${a.charName} 알리바이 (#${a.cardNum}/5)')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
                 <div class="min-w-0 flex-1">
                   <div class="text-amber-400 font-bold text-[11px] truncate">[알리바이 #${a.cardNum}/5] ${a.charName}</div>
                   <div class="text-neutral-200 text-[10px] truncate font-semibold">${a.title || ''}</div>
@@ -1537,19 +1490,17 @@
       if (myInv.clues && myInv.clues.length > 0) {
         clueList.innerHTML = myInv.clues.map(cid => {
           const c = currentScenario.clues.find(x => x.id === cid);
-          const clueName = c ? c.name : cid;
-          const clueDesc = c ? c.desc : '';
-          const clueImg = getCardImage(c);
+          const clueImg = c?.img || "";
 
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
-                <img src="${clueImg}" onclick="window.openImageDetail('${clueImg}', '[현장 증거] ${clueName}')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
+                <img src="${clueImg}" onclick="window.openImageDetail('${clueImg}', '[현장 증거] ${c ? c.name : cid}')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
                 <div class="min-w-0 flex-1">
-                  <span class="text-amber-400 font-bold text-[11px] block truncate">[현장 증거] ${clueName}</span>
+                  <span class="text-amber-400 font-bold text-[11px] block truncate">[현장 증거] ${c ? c.name : cid}</span>
                 </div>
               </div>
-              <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${clueDesc}</p>
+              <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${c ? c.desc : ''}</p>
             </div>
           `;
         }).join('');
@@ -1685,7 +1636,7 @@
       clues.forEach(cid => {
         const c = currentScenario.clues.find(x => x.id === cid);
         if (!c) return;
-        const clueImg = getCardImage(c);
+        const clueImg = c.img || "";
 
         const item = document.createElement('div');
         item.className = "flex items-center justify-between p-1.5 bg-black/40 rounded border border-neutral-800 text-[11px]";
@@ -1790,7 +1741,7 @@
           }
         });
 
-        const killerId = currentScenario.killerId || ((data.themeId === 'winchester') ? 'elena' : 'vivian');
+        const killerId = currentScenario.killerId || 'elena';
         let winner = 'KILLER';
 
         if (topCandidates.length === 1 && topCandidates[0] === killerId) {
@@ -1816,7 +1767,7 @@
       document.getElementById('endingTruthText').innerText = truth;
       
       const citizenWin = (data.winner === 'CITIZEN');
-      const killerId = currentScenario.killerId || ((data.themeId === 'winchester') ? 'elena' : 'vivian');
+      const killerId = currentScenario.killerId || 'elena';
       
       const myInfo = data.players[myPlayerId];
       const isMeKiller = (myInfo && myInfo.charId === killerId);
