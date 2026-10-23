@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.7)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.8)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,7 +41,7 @@
   <!-- 글로벌 상단 헤더 -->
   <header class="w-full border-b border-neutral-800 bg-[#0b0c10]/95 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
-      <!-- 클릭 시 시나리오 선택 화면으로 복귀하는 헤더 타이틀 -->
+      <!-- 1. 클릭 시 시나리오 선택 화면으로 복귀하는 헤더 타이틀 -->
       <button id="btnHeaderHome" class="flex items-center space-x-2 text-left hover:opacity-80 transition cursor-pointer">
         <i class="fa-solid fa-fingerprint text-amber-500 text-xl"></i>
         <span class="font-title font-bold text-sm sm:text-base tracking-wider text-neutral-100">MURDER MYSTERY SUITE</span>
@@ -57,17 +57,17 @@
       </div>
     </div>
 
-    <!-- 방장 전용 전체 긴급 공지 작성 컨트롤 바 -->
+    <!-- 2. 방장 전용 전체 긴급 공지 작성 컨트롤 바 (엔터 전송 지원) -->
     <div id="hostAnnouncementControl" class="hidden bg-amber-950/40 border-t border-amber-900/60 px-4 py-2">
       <div class="max-w-6xl mx-auto flex items-center space-x-2">
         <span class="text-[11px] font-bold text-amber-400 shrink-0"><i class="fa-solid fa-bullhorn mr-1"></i>방장 전체 공지:</span>
-        <input type="text" id="inputHostAnnouncement" placeholder="디스코드 채널 이동 지시나 긴급 공지를 입력하세요..." class="flex-1 bg-black/60 border border-amber-800/60 rounded px-2.5 py-1 text-xs text-neutral-200 focus:outline-none focus:border-amber-500">
+        <input type="text" id="inputHostAnnouncement" placeholder="공지 입력 후 Enter를 누르면 즉시 전송됩니다 (1분 뒤 자동 삭제)..." class="flex-1 bg-black/60 border border-amber-800/60 rounded px-2.5 py-1 text-xs text-neutral-200 focus:outline-none focus:border-amber-500">
         <button id="btnSendHostAnnouncement" class="px-3 py-1 bg-amber-800 hover:bg-amber-700 text-amber-100 text-xs font-bold rounded transition shrink-0">전송</button>
         <button id="btnClearHostAnnouncement" class="px-2 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded transition shrink-0">지우기</button>
       </div>
     </div>
 
-    <!-- 상단 실시간 방장 공지 동기화 배너 -->
+    <!-- 상단 실시간 방장 공지 동기화 배너 (1분 후 자동 소멸) -->
     <div id="hostAnnouncementBanner" class="hidden w-full bg-amber-900/90 text-amber-100 text-xs sm:text-sm py-2 px-4 border-t border-amber-600 text-center font-bold">
       <i class="fa-solid fa-circle-info mr-1 text-amber-300"></i>
       <span id="hostAnnouncementText">긴급 공지사항이 여기에 표시됩니다.</span>
@@ -292,7 +292,7 @@
     <!-- [VIEW 3: 메인 게임 인게임 대시보드] -->
     <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-3">
       
-      <!-- ★ [복구 완료] 진행단계, 남은시간, 내 역할 상단에 위치하는 맞춤 시스템 전체 공지판 -->
+      <!-- 인게임 대시보드 바로 위 시스템 맞춤 전체 공지판 -->
       <div id="systemDiscordGuideBanner" class="w-full p-2.5 rounded-lg border border-amber-600/70 bg-gradient-to-r from-amber-950/80 via-neutral-900 to-amber-950/80 flex items-center justify-between text-xs shadow-md">
         <div class="flex items-center space-x-2">
           <span class="px-2 py-0.5 rounded bg-amber-600 text-black font-bold text-[10px] tracking-wide uppercase"><i class="fa-brands fa-discord mr-1"></i>전체 안내</span>
@@ -376,7 +376,7 @@
               <div id="whisperRoom2Status" class="text-neutral-300">• 밀담룸 2: <span class="text-neutral-500 italic">비어 있음</span></div>
             </div>
             
-            <!-- 방장 전용 밀담 배정 (RP 이름 표기 및 중복 배정 방지) -->
+            <!-- 방장 전용 밀담 배정 (RP 이름 표기 및 중복 배정 방지 유지) -->
             <div id="hostWhisperAssignArea" class="hidden space-y-2 pt-1 border-t border-amber-800/40">
               <p class="text-[11px] text-neutral-300 leading-tight">
                 <strong>[방장 전용]</strong> 각 룸으로 보낼 플레이어를 체크 후 배정하세요. (한 플레이어는 한 룸에만 배정됩니다)
@@ -694,6 +694,7 @@
     let currentPhase = null;
     let isCurrentHost = false;
     let hasShownWhisperNotice = false;
+    let announcementTimer = null;
 
     let audioCtx = null;
     let isBgmPlaying = false;
@@ -815,18 +816,31 @@
       document.getElementById('cardShareReceiveModal').classList.add('hidden');
     });
 
-    // 방장 전체 공지 전송 및 삭제 핸들러
-    document.getElementById('btnSendHostAnnouncement').addEventListener('click', async () => {
+    // 1 & 2. 방장 전체 공지 전송 함수 (전송 시 timestamp 기록하여 1분 후 자동 소멸)
+    async function sendHostAnnouncement() {
       if (!currentRoomCode) return;
       const val = document.getElementById('inputHostAnnouncement').value.trim();
       if (!val) return;
-      await updateDoc(doc(db, "rooms", currentRoomCode), { announcement: val });
+      await updateDoc(doc(db, "rooms", currentRoomCode), { 
+        announcement: val,
+        announcementTime: Date.now()
+      });
       document.getElementById('inputHostAnnouncement').value = "";
+    }
+
+    document.getElementById('btnSendHostAnnouncement').addEventListener('click', sendHostAnnouncement);
+
+    // 1. 엔터키(Enter) 입력 시 즉시 전송
+    document.getElementById('inputHostAnnouncement').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendHostAnnouncement();
+      }
     });
 
     document.getElementById('btnClearHostAnnouncement').addEventListener('click', async () => {
       if (!currentRoomCode) return;
-      await updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "" });
+      await updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "", announcementTime: null });
     });
 
     // 방 생성
@@ -863,7 +877,8 @@
         whisperRooms: { room1: [], room2: [] },
         sharedCardEvent: null,
         votes: {},
-        announcement: ""
+        announcement: "",
+        announcementTime: null
       };
 
       await setDoc(doc(db, "rooms", roomCode), roomData);
@@ -950,11 +965,32 @@
         hostCtrl.classList.add('hidden');
       }
 
-      // 전체 방장 공지 배너 제어
+      // 2. 전체 방장 공지 배너 제어 (60초 초과 시 자동 소멸)
       const banner = document.getElementById('hostAnnouncementBanner');
+      if (announcementTimer) clearTimeout(announcementTimer);
+
       if (data.announcement) {
-        document.getElementById('hostAnnouncementText').innerText = data.announcement;
-        banner.classList.remove('hidden');
+        const now = Date.now();
+        const sentTime = data.announcementTime || now;
+        const elapsed = now - sentTime;
+        const remaining = 60000 - elapsed;
+
+        if (remaining > 0) {
+          document.getElementById('hostAnnouncementText').innerText = data.announcement;
+          banner.classList.remove('hidden');
+
+          announcementTimer = setTimeout(() => {
+            banner.classList.add('hidden');
+            if (isCurrentHost) {
+              updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "", announcementTime: null });
+            }
+          }, remaining);
+        } else {
+          banner.classList.add('hidden');
+          if (isCurrentHost) {
+            updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "", announcementTime: null });
+          }
+        }
       } else {
         banner.classList.add('hidden');
       }
@@ -994,7 +1030,7 @@
       renderInGameDashboard(data);
     }
 
-    // ★ [복구 완료] 대시보드 상단 실시간 시스템 맞춤 공지 렌더링 함수
+    // 대시보드 상단 실시간 시스템 맞춤 공지 렌더링 함수
     function updateSystemDiscordGuide(data) {
       const guideText = document.getElementById('systemDiscordGuideText');
       const timeTag = document.getElementById('systemPhaseTimeTag');
@@ -1239,11 +1275,9 @@
         if (hasNo) {
           updateDoc(doc(db, "rooms", currentRoomCode), {
             skipVote: null,
-            announcement: "다음 단계 스킵 요청이 부결되었습니다. (반대 발생)"
+            announcement: "다음 단계 스킵 요청이 부결되었습니다. (반대 발생)",
+            announcementTime: Date.now()
           });
-          setTimeout(() => {
-            updateDoc(doc(db, "rooms", currentRoomCode), { announcement: "" });
-          }, 4000);
           return;
         }
 
@@ -1336,7 +1370,8 @@
         skipVote: null,
         whisperRooms: { room1: [], room2: [] },
         sharedCardEvent: null,
-        announcement: nextPhase.includes('WHISPER') ? "밀담 페이즈가 시작되었습니다. 방장의 채널 배정을 확인하세요!" : ""
+        announcement: nextPhase.includes('WHISPER') ? "밀담 페이즈가 시작되었습니다. 방장의 채널 배정을 확인하세요!" : "",
+        announcementTime: nextPhase.includes('WHISPER') ? Date.now() : null
       });
     }
 
