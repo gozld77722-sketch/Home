@@ -45,7 +45,7 @@ export default {
       id: "elena",
       name: "엘레나 바스커빌",
       role: "주치의 / 에드워드 경의 전담 의사",
-      isKiller: true, // ★ 진범
+      isKiller: true, // 진범
       isDefault: true,
       avatarImg: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
       description: "오랫동안 에드워드 경의 만성 지병을 돌봐온 실력 있는 여성 주치의.",
