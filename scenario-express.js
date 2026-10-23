@@ -1,185 +1,179 @@
-// [시나리오 2: 황야의 설원 특급 - 사라진 황금 탄환]
+// scenario-express.js (Western Noir Snow Blizzard Express ver)
 export default {
   id: "express",
   title: "황야의 설원 특급: 사라진 황금 탄환",
-  subtitle: "1898 알래스카 설원 열차 살인 사건",
-  era: "Winter 1898 • Yukon Pass Aurora Express",
-  victim: "패트릭 밴더빌트",
-  killerId: "vivian",
+  subtitle: "눈보라로 협곡에 고립된 호화 열차 특실 살인 사건",
+  era: "1898년 알래스카 설원 횡단 열차",
+  victim: "실베스터 골드버그 (알래스카 금광 재벌)",
+  killerId: "doc", // 진범 ID: 닥터 할러데이
 
   // 1. 프롤로그 스토리
   prologue: {
     bannerImg: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
-    location: "Winter 1898 • Yukon Pass Aurora Express",
+    location: "알래스카 화이트 패스 협곡 횡단 특급열차 1등 칸",
     story: [
-      "1898년 혹한의 겨울, 골드러시 열풍이 휘몰아치는 알래스카 유콘 협곡을 달리던 호화 침대열차 '오로라 익스프레스'가 눈사태로 철로에 갇히며 멈춰 섰습니다. 외부 온도는 영하 30도, 다음 정차역까지는 걸어서 빠져나갈 수 없는 절체절명의 고립 상태입니다.",
-      "열차 1등 칸 특실에는 이번 골드러시의 최대 수혜자이자 거대한 금광주 패트릭 밴더빌트가 10만 달러 상당의 순금괴를 실은 이동식 금고와 함께 탑승해 있었습니다.",
-      "그러나 22시 정각, 기관실 기적 소리와 함께 총성이 어둠을 갈랐습니다.",
-      "잠긴 특실 안에서 패트릭은 이마에 단 한 발의 황금 탄환을 맞고 즉사한 채 발견되었으며, 금고 안의 금괴와 그의 상징이었던 황금 리볼버가 감쪽같이 사라졌습니다. 열차는 달리는 밀실이었으며, 살인자는 눈보라 속으로 도망치지 못했습니다.",
-      "살인범과 훔친 황금은 지금 이 열차 객차 안에 있습니다."
+      "1898년 유콘 골드러시의 한겨울, 영하 30도의 눈보라와 눈사태로 인해 알래스카 화이트 패스 협곡 철교 위에 호화 대륙 횡단 열차가 완전히 고립되었습니다.",
+      "밀폐된 1호 특등 침대차 안에서 알래스카 최대 금광주이자 재벌인 실베스터 골드버그가 이마에 총탄을 맞고 숨진 채 발견되었습니다.",
+      "그가 열차 금고에 보관하고 있던 거대한 '순금괴 100온스'와 호신용으로 지니고 다니던 '황금 리볼버 탄환' 6발이 흔적도 없이 사라졌습니다.",
+      "통신선마저 눈보라로 단선되어 외부의 구원병은 오지 않습니다. 폭설이 멈추기 전, 움직이는 설원의 밀실 속에서 진범을 밝혀내야 합니다."
     ]
   },
 
   // 2. 캐릭터 풀 (5인)
   characters: [
     {
-      id: "jack",
-      name: "잭 칼라일",
-      role: "카우보이 & 현상금 사냥꾼",
+      id: "shane",
+      name: "셰인 와일더",
+      role: "은퇴한 연방 보안관 (승객)",
+      isKiller: false,
+      isDefault: true,
+      avatarImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      description: "오랫동안 서부 개척지를 누비다 은퇴 후 시애틀로 향하던 전직 연방 보안관.",
+      secret: "당신은 사실 골드버그를 체포하기 위해 신분을 숨기고 열차에 탑승했습니다. 과거 당신의 가족이 살던 마을이 골드버그의 불법 금광 수탈 조직에게 몰살당했고, 그 범죄 장부를 확보하려 했습니다. 20:50경 마스터 열쇠로 특실에 잠입했으나, 이미 골드버그는 사살된 상태였습니다. 당황한 채 품속의 범죄 비밀 장부만 챙겨 달아났습니다.",
+      timeline: [
+        "20:20 - 3등 식당칸에서 독주를 마시며 승객들을 관찰",
+        "20:50 - 특실 문을 피킹 도구로 따고 들어갔으나 이미 죽어있는 골드버그 발견",
+        "20:55 - 골드버그의 서류 가방에서 토지 강탈 장부만 챙겨 복도로 탈출"
+      ],
+      alibiCards: [
+        { id: "sha_1", name: "자켓의 화약 연기 냄새", desc: "셰인의 외투에서 희미하게 맡아지는 오래된 흑색 화약 냄새.", img: "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=600&q=80" },
+        { id: "sha_2", name: "품속의 강탈 피해자 장부", desc: "골드버그의 서명이 들어간 과거 불법 토지 매입 계약서 원본 묶음.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+        { id: "sha_3", name: "특수 금속 열쇠 피킹 핀", desc: "열차의 낡은 황동 자물쇠를 무력화할 수 있는 수제 따개 도구.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
+        { id: "sha_4", name: "장전된 .45 구경 콜트", desc: "탄환 6발이 모두 가득 채워져 있는 셰인의 은퇴 기념 리볼버.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
+        { id: "sha_5", name: "눈 덮인 외투 밑단", desc: "열차 외부 연결 통로를 급하게 지나치며 얼어붙은 눈송이 자국.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" }
+      ]
+    },
+    {
+      id: "doc",
+      name: "닥터 할러데이",
+      role: "열차 전담 촉탁 의사",
+      isKiller: true, // ★ 진범
+      isDefault: true,
+      avatarImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+      description: "폐결핵 요양 차 북부로 올라온 떠돌이 의사이자 전문 도박사.",
+      secret: "★ 당신이 진범입니다! 당신은 골드버그와의 비밀 고액 포커 도박판에서 빚진 돈 때문에 손가락이 잘릴 위기에 처해 있었습니다. 20:30경 청진기 진료를 핑계로 특실에 들어간 뒤, 소음 차단을 위해 베개로 총구를 감싸고 골드버그의 황금 탄환 리볼버를 빼앗아 그를 즉사시켰습니다. 금괴를 가방에 챙긴 후 살해 흉기인 탄환 탄피를 삼등칸 석탄 연료통에 던져 넣었습니다.",
+      timeline: [
+        "20:10 - 의료 가방을 챙겨 특등칸으로 향하는 모습이 목격됨",
+        "20:30 - 특실에 들어가 골드버그를 베개 소음기를 이용해 사살하고 금괴 탈취",
+        "21:00 - 사망 소식을 듣고 제일 먼저 현장에 달려와 사망 시각을 허위 감정함"
+      ],
+      alibiCards: [
+        { id: "doc_1", name: "타버린 깃털 베개 파편", desc: "닥터의 가방 밑바닥에 달라붙은 그을린 오리털과 깃털 조각.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
+        { id: "doc_2", name: "약품통에 숨겨진 금가루", desc: "몰핀 병 내부에서 검출된 골드버그의 순금괴에서 긁힌 순금 분말.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" },
+        { id: "doc_3", name: "골드버그 앞 사채 차용증", desc: "도박 빚 1만 달러를 오늘 밤 자정까지 갚지 못하면 신체 포기를 서약한 각서.", img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80" },
+        { id: "doc_4", name: "변조된 사망 진단 기록", desc: "사망 추정 시각을 20:30이 아닌 21:00 이후로 조작해 기재한 의사 수첩.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
+        { id: "doc_5", name: "석탄 가루 묻은 소매", desc: "증거 인멸을 위해 기관실 석탄 화덕 주변을 서성이다 묻은 검은 검댕.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" }
+      ]
+    },
+    {
+      id: "madame",
+      name: "마담 클로에",
+      role: "살롱 여주인 / 골드버그의 동행인",
+      isKiller: false,
+      isDefault: true,
+      avatarImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      description: "도슨 시티에서 거대 살롱을 운영하며 사교계 여왕으로 불리는 여인.",
+      secret: "당신은 골드버그의 약혼녀 행세를 하고 있었지만, 실제로는 철도 회사의 경쟁 파벌로부터 금괴 수송 시간표를 빼돌려 달라는 제안을 받았습니다. 20:40경 마스터 키로 금고를 털려 했으나 문이 잠겨 있어 실패했고, 방 안에서 인기척이 없어 발길을 돌렸습니다. 당신은 도둑일 뿐 살인자는 아닙니다.",
+      timeline: [
+        "20:15 - 살롱 바에서 샴페인을 주문하며 알리바이를 형성",
+        "20:40 - 골드버그 특실 문을 두드렸으나 대답이 없어 손잡이만 돌려봄",
+        "21:10 - 비명 소리가 들리자 라운지에서 뛰어나옴"
+      ],
+      alibiCards: [
+        { id: "mad_1", name: "벨벳 드레스의 붉은 잉크", desc: "금고 번호를 메모하려다 드레스 안쪽에 묻은 만년필 잉크 자국.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" },
+        { id: "mad_2", name: "경쟁 철도사의 비밀 전보", desc: "'골드버그의 금괴 운송이 중단되면 5만 달러를 지급하겠다'는 암호문.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+        { id: "mad_3", name: "특실 마스터 스페어 키", desc: "차장 몰래 복제한 1호 열차 객실 마스터 열쇠 복사본.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
+        { id: "mad_4", name: "샤넬 향수 잔여취", desc: "사건 현장 문손잡이와 문틀 주변에 짙게 남아 있는 특유의 장미 향기.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" },
+        { id: "mad_5", name: "보석상 위탁 보증서", desc: "최근 골드버그로부터 선물받은 고액 다이아몬드 목걸이의 진품 감정서.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" }
+      ]
+    },
+    {
+      id: "thomas",
+      name: "토마스 오코너",
+      role: "골드버그의 개인 경호원",
       isKiller: false,
       isDefault: true,
       avatarImg: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
-      description: "서부에서 악명 높은 총잡이. 최근 패트릭에게 고용되어 금괴 호송 경호를 맡음.",
-      secret: "사실 과거 패트릭의 부하들에게 동생을 잃은 복수를 위해 위장 취업했습니다. 오늘 밤 죽일 작정으로 침실에 잠입했으나, 이미 패트릭이 사살되어 있어 당황해 뛰쳐나왔습니다.",
+      description: "남북전쟁 참전 용사 출신으로, 거친 인상의 과묵한 전속 보디가드.",
+      secret: "당신은 골드버그가 평소 당신을 하인 취급하며 모욕하고 임금을 체불하자 앙심을 품고 있었습니다. 사건 당시 당신은 근무지를 무단 이탈해 식당칸에서 몰래 위스키를 훔쳐 마시고 취해 있었습니다. 경호 태만으로 해고당할 것이 두려워 현장 복도에 계속 서 있었다고 거짓말을 했습니다.",
       timeline: [
-        "20:30 - 식당 칸에서 패트릭과 호송 보수 잔금 지급을 두고 시비가 붙음.",
-        "21:10 - 바 칸에서 독한 버번 위스키를 마시며 총기 손질을 함.",
-        "21:45 - 특실 문 앞 복도를 지나가다 수상한 발소리를 듣고 수색함.",
-        "22:00 - 총성을 듣고 특실 문을 발로 차 부수고 진입함."
+        "20:00 - 특실 문 앞 보초 임무를 시작",
+        "20:25 - 추위와 스트레스를 못 이겨 식당 화물칸으로 숨어들어 술을 마심",
+        "21:05 - 총성 대신 울린 둔탁한 소리를 듣고 허겁지겁 복도로 복귀"
       ],
       alibiCards: [
-        { id: "j1", name: "화약 냄새 배인 장갑", desc: "오른손 가죽 장갑에 최근 발사된 흑색 화약 잔여물이 묻어 있다.", img: "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=600&q=80" },
-        { id: "j2", name: "특실 복도 족적", desc: "특실 앞 카펫에 잭의 징 박힌 박차 부츠 자국이 선명하다.", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" },
-        { id: "j3", name: "콜트 리볼버 탄약 부족", desc: "잭의 탄띠에서 44구경 실탄 1발이 빈 채 발견되었다.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
-        { id: "j4", name: "복수 선언 쪽지", desc: "잭의 안주머니에서 '네놈의 피로 동생의 원혼을 달래겠다'는 메모가 발견됨.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
-        { id: "j5", name: "깨진 버번 위스키 병", desc: "특실 쪽문 바닥에서 잭이 마시던 상표의 위스키 유리 파편이 발견되었다.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" }
+        { id: "tho_1", name: "몰래 숨겨둔 옥수수 위스키", desc: "식당칸 창고에서 훔쳐 반쯤 비워낸 밀주 병.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" },
+        { id: "tho_2", name: "체불 임금 청구서", desc: "골드버그에게 3개월간 밀린 급여를 지급하라고 요구한 피 묻은 편지.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+        { id: "tho_3", name: "너클과 가죽 장갑", desc: "폭력 진압용 쇠너클. 최근 누군가를 구타해 생긴 작은 핏자국이 남아있음.", img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" },
+        { id: "tho_4", name: "20:25 빈 보초 의자", desc: "특실 문 앞 경호원 간이 의자에 올려진 식어버린 커피잔.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
+        { id: "tho_5", name: "군용 윈체스터 소총", desc: "탄약이 단 한 발도 발사되지 않은 채 손질되어 있는 토마스의 제식 소총.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" }
       ]
     },
     {
-      id: "vivian",
-      name: "비비안 모로",
-      role: "살롱 가수 & 갬블러",
-      isKiller: true, // 진범
-      isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-      description: "라스베이거스와 시애틀을 주름잡는 매혹적인 살롱 가수이자 승부사.",
-      secret: "★ 당신이 바로 진범입니다! 패트릭은 당신의 가문을 몰락시킨 원수이자 당신을 도박 빚으로 위협해 왔습니다. 21:50경 소음용 쿠션을 대고 패트릭의 황금 리볼버로 이마를 쐈으며 금괴를 화물칸 석탄함에 숨겼습니다. 오직 당신만 거짓말이 가능합니다!",
-      timeline: [
-        "20:00 - 라운지 칸에서 감미로운 재즈 곡을 부르며 승객들의 시선을 끔.",
-        "21:00 - 패트릭의 특실에 초대받아 샴페인을 나누어 마심.",
-        "21:40 - 파우더룸으로 이동해 화장을 고치고 드레스를 정돈함.",
-        "22:00 - 총성을 듣고 승객들과 함께 비명을 지르며 특실로 달려옴."
-      ],
-      alibiCards: [
-        { id: "v1", name: "그을린 실크 드레스 단", desc: "비비안의 드레스 자락 끝부분에 총구 화염으로 인한 그을음 흔적이 있다.", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" },
-        { id: "v2", name: "가터벨트 속 황동 열쇠", desc: "허벅지 가터벨트 안쪽에 특실 이동 금고를 여는 소형 열쇠가 숨겨져 있다.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
-        { id: "v3", name: "구멍 뚫린 우단 베개", desc: "특실 소파의 벨벳 쿠션에 총탄이 관통하고 화약이 묻은 채 버려져 있다.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
-        { id: "v4", name: "석탄 가루 묻은 향수병", desc: "비비안의 핸드백 속 프랑스산 향수병에 검은 석탄 분말이 묻어 있다.", img: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80" },
-        { id: "v5", name: "찢어진 도박 채무 각서", desc: "화장실 휴지통에서 '패트릭에게 진 5만 달러 채무 각서' 조각이 발견되었다.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" }
-      ]
-    },
-    {
-      id: "samuel",
-      name: "사무엘 홉킨스",
-      role: "오로라 익스프레스 열차 승무장",
-      isKiller: false,
-      isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-      description: "20년간 유콘 횡단 철도를 지킨 노련한 차장. 열차의 모든 마스터키를 소지.",
-      secret: "열차 회사의 임금 체불로 궁지에 몰려, 패트릭의 금고 속 금괴 한 개를 슬쩍 빼돌려 기관실 공구함에 은닉해 두었습니다. 살인범으로 몰릴까 봐 전전긍긍하고 있습니다.",
-      timeline: [
-        "20:20 - 눈보라에 대비해 각 객실의 히터 배관과 차단기를 점검함.",
-        "21:20 - 패트릭의 룸서비스 요청으로 온수와 여분의 담요를 전달함.",
-        "21:50 - 폭설로 인한 긴급 정차 상황을 승객들에게 안내함.",
-        "22:00 - 총성을 듣고 마스터키로 특실 도어를 긴급 개방함."
-      ],
-      alibiCards: [
-        { id: "s1", name: "석탄재 묻은 승무원 외투", desc: "사무엘의 유니폼 소매에 기관실 석탄 가루와 윤활유 자국이 묻어 있다.", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80" },
-        { id: "s2", name: "공구함 속 순금괴 1개", desc: "사무엘의 전용 렌치 공구함 밑바닥에서 패트릭의 각인이 찍힌 금괴 1개가 발견됨.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-        { id: "s3", name: "휘어진 비상 마스터키", desc: "특실 문을 따려다 무리한 힘을 받아 끝부분이 휘어진 청동 열쇠.", img: "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80" },
-        { id: "s4", name: "사철(私鐵) 퇴직금 체불 통지서", desc: "안주머니에서 철도 회사가 파산 직전이라는 경영진의 비밀 통보문이 발견됨.", img: "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=600&q=80" },
-        { id: "s5", name: "핏자국 묻은 회중시계", desc: "사무엘의 은장 회중시계 뚜껑 테두리에 피 묻은 지문이 찍혀 있다.", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80" }
-      ]
-    },
-    {
-      id: "clara",
-      name: "클라라 밴더빌트",
-      role: "피해자의 외동딸 & 금광 상속녀",
-      isKiller: false,
-      isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
-      description: "동부 명문대를 졸업하고 부친의 사업을 물려받기 위해 동행한 상속녀.",
-      secret: "부친이 자신을 다른 부호와 정략결혼 시키려 하자 반발해 부친의 금광 양도 증서와 인장을 훔쳐 가방 속에 숨겨두었습니다. 유산과 양도증이 들통날까 봐 두려워합니다.",
-      timeline: [
-        "20:10 - 식당 칸에서 부친 패트릭의 폭력적이고 강압적인 태도에 항의함.",
-        "20:50 - 자신의 침대 칸에서 두통약을 먹고 독서를 하며 휴식함.",
-        "21:35 - 부친에게 사과하기 위해 특실 앞까지 갔으나 안에서 다투는 소리에 돌아섬.",
-        "22:00 - 총성을 듣고 경악하며 특실로 달려와 오열함."
-      ],
-      alibiCards: [
-        { id: "c1", name: "금광 양도 날인 증서", desc: "클라라의 여행 가방 바닥 안감에서 패트릭의 인장이 찍힌 금광 양도서가 발견됨.", img: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80" },
-        { id: "c2", name: "소형 진주 호신용 권총", desc: "가방 속 보석함에서 실탄 2발이 장전된 여성용 22구경 데린저 권총이 발견됨.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-        { id: "c3", name: "찢어진 정략결혼 계약서", desc: "클라라의 코트 주머니에서 부친이 강요한 결혼 계약서 파편이 발견됨.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80" },
-        { id: "c4", name: "21:35 특실 말소리 증언", desc: "21:35 특실 앞에서 여성의 날카로운 웃음소리를 들었다고 진술함.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80" },
-        { id: "c5", name: "피 묻은 레이스 손수건", desc: "특실 문 손잡이 바로 밑 바닥에서 클라라의 이니셜 'C.V' 손수건이 발견되었다.", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80" }
-      ]
-    },
-    {
-      id: "alexander",
-      name: "알렉산더 볼코프",
-      role: "러시아 모피 상인 & 지하 밀수업자 (5인 전용)",
+      id: "eliza",
+      name: "엘리자 헌터",
+      role: "핑커톤 여성 탐정 (5인 전용)",
       isKiller: false,
       isDefault: false,
-      avatarImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-      description: "시베리아와 알래스카를 오가며 진귀한 모피와 보석을 거래하는 거상.",
-      secret: "모피 상인은 위장일 뿐, 러시아 제국에서 도망쳐 나온 수배범입니다. 패트릭에게 거액의 금괴를 불법 러시아 채권과 맞바꾸자고 제안했다가 거절당해 앙심을 품고 있었습니다.",
+      avatarImg: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+      description: "열차 강도단을 추적하기 위해 수녀로 위장하고 열차에 잠입한 비밀 탐정.",
+      secret: "당신은 전설적인 '설원 열차 강도단'이 이번 골드버그의 금괴 열차를 노린다는 첩보를 입수하고 잠입했습니다. 수상한 인물들을 감시하느라 객차 지붕과 복도를 넘나들었을 뿐 살해 사건과는 직접적인 관련이 없습니다.",
       timeline: [
-        "20:00 - 바 칸에서 승객들에게 값비싼 보드카를 돌리며 재력을 과시함.",
-        "21:00 - 패트릭과 밀담을 나누며 미개간 금광 채굴권 계약을 논의함.",
-        "21:40 - 열차 화물 칸에 들러 자신의 모피 상자 상태를 점검함.",
-        "22:00 - 총성을 듣고 파이프 담배를 입에 문 채 복도로 걸어나옴."
+        "20:00 - 3등칸 승객 명부를 몰래 대조하며 강도단 추적",
+        "20:45 - 열차 외부 사다리를 타고 1등칸 통로로 침투",
+        "21:15 - 살인 현장 통제를 선언하고 탐정 신분을 공개"
       ],
       alibiCards: [
-        { id: "l1", name: "모피 코트에 묻은 피", desc: "곰 가죽 외투 깃 안쪽에 말라붙은 작은 핏방울 자국이 발견되었다.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
-        { id: "l2", name: "러시아 제국 비밀 체포영장", desc: "트렁크 깊숙한 곳에서 알렉산더의 본명과 사진이 인쇄된 지명수배 전단이 발견됨.", img: "https://images.unsplash.com/photo-1577744486770-020ab432da65?auto=format&fit=crop&w=600&q=80" },
-        { id: "l3", name: "금괴 계량용 천칭 저울", desc: "가방에서 순금괴의 순도와 무게를 달기 위한 정밀 황동 저울이 발견됨.", img: "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=600&q=80" },
-        { id: "l4", name: "화물칸 썰매 도주 장비", desc: "화물칸 구석에서 눈사태 속을 탈출하기 위해 개조된 설상 스키와 로프가 발견됨.", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-        { id: "l5", name: "독한 마취 클로로포름 병", desc: "외투 주머니에서 사람을 단시간에 기절시킬 수 있는 마취 약품 병이 발견되었다.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" }
+        { id: "eli_1", name: "핑커톤 사설 탐정 배지", desc: "수녀복 안주머니에 은밀히 숨겨져 있던 은색 탐정 공무 증표.", img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80" },
+        { id: "eli_2", name: "열차 강도단 수배 전단", desc: "알래스카 협곡을 무대로 활동하는 복면 강도단의 몽타주.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+        { id: "eli_3", name: "소형 더린저 권총", desc: "치마 속 홀스터에 장착된 2연발 소형 호신용 권총. 발사 흔적 없음.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
+        { id: "eli_4", name: "동상 걸린 가죽 부츠", desc: "눈보라 치는 열차 지붕을 수색하다 동결된 엘리자의 가죽 신발.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
+        { id: "eli_5", name: "망원경과 감시 일지", desc: "열차 탑승객들의 분 단위 이동 동선을 깨알같이 기록한 수첩.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" }
       ]
     }
   ],
 
   // 3. 현장 증거 24종 덱
   clues: [
-    { id: "c01", name: "탄피 없는 황금 총알", desc: "패트릭의 이마에서 적출된 24K 순금 도금 리볼버 탄환.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
-    { id: "c02", name: "열려있는 빈 이동식 금고", desc: "특실 침대 밑에 고정된 채 다이얼이 파손되어 열려 있는 철제 금고.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
-    { id: "c03", name: "소음용으로 쓰인 벨벳 방석", desc: "화약 그을음이 동그랗게 남은 채 찢겨진 특실의 우단 쿠션.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
-    { id: "c04", name: "석탄 더미 속 순금괴 묶음", desc: "화물칸 석탄 포대 아래 깊숙이 묻혀 있던 10만 달러 상당의 순금괴들.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-    { id: "c05", name: "비어 있는 황금 리볼버 케이스", desc: "패트릭의 서랍 속에 빈 채로 뚜껑이 열려 있는 자개 총기 상자.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-    { id: "c06", name: "깨진 샴페인 플루트 잔", desc: "특실 테이블 밑에 깨진 잔. 입술 연지(립스틱) 자국이 선명하다.", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80" },
-    { id: "c07", name: "차단된 비상 브레이크 밸브", desc: "객차 연결 통로에서 누군가 고의로 와이어를 자른 비상 정차 레버.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" },
-    { id: "c08", name: "핏자국이 남은 카드 한 장", desc: "스페이드 에이스 카드 뒷면에 피 묻은 지문이 찍혀 있다.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" },
-    { id: "c09", name: "기관실 석탄 삽", desc: "손잡이에 지문이 지워진 채 화물칸 통로에 던져져 있던 무거운 삽.", img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" },
-    { id: "c10", name: "외투에서 떨어진 은색 단추", desc: "피해자의 굳은 손아귀에 쥐어져 있던 고급 모피 코트 단추.", img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80" },
-    { id: "c11", name: "얼어붙은 창문 틈 로프", desc: "특실 외부 창틀에 걸려 있는 눈 묻은 마닐라 삼 로프 조각.", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80" },
-    { id: "c12", name: "채무 불이행 협박 전보", desc: "'이번 열차에서 지불하지 않으면 살아서 못 내린다'는 전보지.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
-    { id: "c13", name: "패트릭의 수첩", desc: "'비비안, 클라라, 잭... 모두가 날 노린다'고 적힌 메모.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
-    { id: "c14", name: "찢어진 양도 증서 모서리", desc: "바닥 틈새에서 발견된 공증인 도장이 찍힌 금광 문서 파편.", img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80" },
-    { id: "c15", name: "하바나 시가 재", desc: "특실 카펫 위에 털려 있는 최고급 수입 시가 재 분말.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" },
-    { id: "c16", name: "정체불명의 백색 마취 가루", desc: "샴페인 바닥에서 침전된 무색무취의 강력 진정제 성분.", img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" },
-    { id: "c17", name: "열차 마스터 다이어그램", desc: "각 침실의 환기구와 비밀 통로가 붉은 펜으로 표시된 도면.", img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=600&q=80" },
-    { id: "c18", name: "피 묻은 가죽 홀스터", desc: "특실 옷걸이 뒤에 숨겨져 있던 피가 튄 권총집.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
-    { id: "c19", name: "녹아내린 눈 발자국", desc: "복도 히터 바로 옆에 남아 있는 방수 가죽 장화의 물자국.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
-    { id: "c20", name: "금고 다이얼 파편", desc: "강한 충격이나 특수 키로 억지로 비틀어 뜯어낸 번호판 조각.", img: "https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80" },
-    { id: "c21", name: "러시아 화폐 루블 뭉치", desc: "화물칸 모피 상자 사이에서 발견된 피 묻은 거액의 지폐 뭉치.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
-    { id: "c22", name: "부러진 만년필 펜촉", desc: "계약서 서명 도중 짓눌려 잉크가 사방으로 튄 금장 펜.", img: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80" },
-    { id: "c23", name: "도청용 금속 청진관", desc: "특실 옆방 벽면에 부착되어 있던 얇은 청동 관.", img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=600&q=80" },
-    { id: "c24", name: "향수 냄새 나는 손수건", desc: "피해자의 얼굴을 덮고 있던 짙은 프랑스 장미향 손수건.", img: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=600&q=80" }
+    { id: "c01", name: "이마에 총상을 입은 사체", desc: "근거리에서 발사된 단 한 발의 총탄에 의해 이마 정중앙을 관통당해 즉사함.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" },
+    { id: "c02", name: "그을린 거위털 베개", desc: "총구에 밀착시켜 소음기로 사용된 특실 침대의 깃털 베개. 화약 그을음이 묻어 있음.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
+    { id: "c03", name: "비어 있는 금괴 보관함", desc: "특실 바닥에 열려 있는 강철 금고. 순금괴 100온스가 말끔히 사라져 있음.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
+    { id: "c04", name: "골드버그의 황금 리볼버", desc: "사체 옆 탁자에 놓여 있던 황금 도금 리볼버. 6발 중 단 1발만 발사된 채 남아 있음.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
+    { id: "c05", name: "의사 닥터의 청진기", desc: "특실 카펫 위에 떨어져 있던 촉탁 의사 닥터 할러데이의 이니셜 각인 청진기.", img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" },
+    { id: "c06", name: "20:50 도어락 강제 개방 흔적", desc: "문 손잡이 걸쇠 주변에 미세한 핀으로 긁힌 은퇴 보안관 셰인의 자국.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
+    { id: "c07", name: "특실 문 앞 장미 향수취", desc: "특실 복도 주변에서 마담 클로에가 애용하는 파리산 향수 냄새가 짙게 진동함.", img: "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=600&q=80" },
+    { id: "c08", name: "보초석의 식어버린 위스키", desc: "토마스가 서 있어야 할 경호석 밑에서 발견된 반쯤 남은 위스키 잔.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" },
+    { id: "c09", name: "지붕 환풍구의 밧줄 흔적", desc: "외부 지붕에서 1등실 환기구로 침투하려다 생긴 엘리자의 로프 마찰흔.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" },
+    { id: "c10", name: "기관실 화덕의 황금 탄피", desc: "석탄 가마 속에서 녹아내리다 만 골드버그 전용 황금 리볼버의 특수 탄피.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" },
+    { id: "c11", name: "피 묻은 도박 각서", desc: "골드버그의 가슴 안주머니에서 발견된 '닥터 할러데이의 도박 채무 확인서'.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+    { id: "c12", name: "토지 강탈 피해자 탄원서", desc: "셰인의 손에 들려 있던 서류와 같은 양식의 골드버그 횡령 고발장 초안.", img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80" },
+    { id: "c13", name: "클로에의 금고 마스터키 복사본", desc: "복도 화분 밑에서 수거된 열차 1등칸 특실용 황동 마스터 복제 열쇠.", img: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" },
+    { id: "c14", name: "토마스의 피 묻은 쇠너클", desc: "사건 전날 밤 누군가를 구타할 때 사용된 토마스의 보디가드 장비.", img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" },
+    { id: "c15", name: "위장 수녀 신분증", desc: "엘리자 헌터가 소지하고 있던 위조된 시애틀 성당 소속 수녀 신분 증서.", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" },
+    { id: "c16", name: "파손된 열차 비상 브레이크", desc: "열차가 협곡에 멈춰 서게 만든 원인인 강제 절단된 공기압 밸브 와이어.", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" },
+    { id: "c17", name: "사망 추정 시각 조작 진술서", desc: "닥터가 초기에 '21시 이후 사망'이라 주장했으나 사체 경직은 20:30분을 가리킴.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+    { id: "c18", name: "금가루가 묻은 의사 메스 가방", desc: "닥터 할러데이의 가죽 왕진 가방 모서리 틈새에 끼어 있는 반짝이는 순금 입자.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
+    { id: "c19", name: "경쟁 철도사 비밀 자금 전표", desc: "마담 클로에의 화장대 거울 뒤에서 발견된 거액의 공작금 지급 보증서.", img: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80" },
+    { id: "c20", name: "셰인의 낡은 수색 영장", desc: "정식 효력이 만료되었으나 골드버그를 압박하기 위해 위조된 체포 영장.", img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80" },
+    { id: "c21", name: "식당칸 창고의 깨진 술병", desc: "토마스가 몰래 술을 마시며 은신했던 증거인 알래스카 특산 위스키 빈 병.", img: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80" },
+    { id: "c22", name: "눈사태 경고 무전 기록", desc: "화이트 패스 협곡 진입 직전 수신된 폭설 경고 전보문.", img: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&w=600&q=80" },
+    { id: "c23", name: "피해자의 깨진 회중시계", desc: "골드버그의 손목에서 떨어진 시계. 범인과 몸싸움을 벌이다 20:30분에 바늘이 멈춤.", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80" },
+    { id: "c24", name: "황금 탄환 박스의 빈자리", desc: "6발 들이 벨벳 케이스에서 단 1발만 꺼내져 사용된 흔적.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" }
   ],
 
-  // 4. 최종 엔딩 및 에필로그 (진범: 비비안 모로)
+  // 4. 최종 엔딩 및 에필로그 (시민 승리 vs 진범 승리)
   endings: {
-    truth: "사건의 진실: 알래스카 금광 재벌 패트릭을 사살한 진범은 살롱 가수 **'비비안 모로'**입니다. 비비안은 패트릭이 과거 자신의 부친을 파멸시키고 자신을 도박 빚으로 협박해 온 것에 앙심을 품고 복수를 계획했습니다. 21:00 특실에서 샴페인을 마시며 패트릭의 주의를 돌린 뒤, 21:50경 열차 소파의 벨벳 쿠션을 소음기로 삼아 패트릭의 황금 리볼버로 이마를 쐈습니다. 이후 금괴를 기관실 화물칸 석탄함 속에 숨겨두었으며, 다른 용의자들의 원한과 탐욕을 이용해 수사망을 교란했습니다.",
+    truth: "사건의 진실: 알래스카 금광 재벌 골드버그를 사살한 진범은 열차 촉탁 의사 **'닥터 할러데이'**입니다. 닥터는 막대한 도박 빚으로 신체 포기 위기에 몰리자, 진료를 핑계로 20:30분 특실에 들어가 베개로 총구를 막고 피해자의 황금 탄환 리볼버로 즉사시켰습니다. 금괴를 훔친 후 탄피를 기관실 화덕에 던져 은멸하려 했으나, 멈춰버린 회중시계와 가방 속 금가루로 인해 범행이 탄로 났습니다.",
     citizenWin: {
       title: "설원의 정의: 탐욕의 종착역 (시민 승리)",
       badge: "JUSTICE IN BLIZZARD",
       bannerImg: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
       epilogues: {
-        jack: "잭 칼라일: 살인 누명을 벗었으나 원수를 직접 처단하지 못한 씁쓸함을 안은 채, 다음 역에서 설원을 향해 홀로 말을 타고 떠납니다.",
-        vivian: "비비안 모로: 다음 간이역에 도착한 연방 보안관에게 황금 탄환과 리볼버를 압수당하고 차디찬 철창으로 호송되며 비극적인 복수극의 막을 내립니다.",
-        samuel: "사무엘 홉킨스: 금괴 1개를 숨겼던 죄는 진범 검거 협조로 기소유예 처분을 받고, 명예롭게 승무장 직을 은퇴하여 손주들에게 돌아갑니다.",
-        clara: "클라라 밴더빌트: 부친의 억압에서 마침내 벗어나 금광의 정당한 단독 상속인으로서 동부로 돌아가 대사업가로 거듭납니다.",
-        alexander: "알렉산더 볼코프: 신분이 노출될 뻔한 위기를 넘기고 혼란을 틈타 다음 역에서 종적을 감춘 뒤 시베리아 국경으로 달아납니다."
+        shane: "셰인: 골드버그의 범죄 장부를 무사히 지켜내어 은퇴 후 고향 유족들에게 보상금을 전달하고 명예를 회복합니다.",
+        doc: "닥터: 완벽하다고 자부했던 알리바이와 사망 시각 조작이 간파당하며 체포됩니다. 다음 역에서 연방 법원으로 인도됩니다.",
+        madame: "클로에: 살인 혐의는 벗었으나 산업 스파이 혐의로 열차 회사에 고소당해 사교계에서 영구 추방됩니다.",
+        thomas: "토마스: 직무 유기 혐의로 보디가드 업계에서 퇴출당하지만 살인 누명은 벗고 알래스카 탄광 광부로 새 출발을 합니다.",
+        eliza: "엘리자: 살인범 검거와 특급 열차 승객 보호 임무를 성공적으로 완수하여 핑커톤 본부의 수석 특별 수사관으로 승진합니다."
       }
     },
     killerWin: {
@@ -187,11 +181,11 @@ export default {
       badge: "FROZEN CRIME",
       bannerImg: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
       epilogues: {
-        jack: "잭 칼라일: 진범의 완벽한 연기에 속아 무고한 사람을 몰아세운 죄책감과 과거의 악명 때문에 방랑자로 전락합니다.",
-        vivian: "비비안 모로 [우승]: 완벽한 연기로 무고한 사람에게 누명을 씌운 뒤, 눈보라가 잦아든 틈을 타 석탄함 속 순금괴를 챙겨 샌프란시스코행 배에 몸을 싣고 화려하게 사라집니다.",
-        samuel: "사무엘 홉킨스: 숨겨둔 금괴 1개가 발견되어 강도살인범으로 지목되거나, 평생을 바친 열차의 비극을 막지 못했다는 자책으로 철도를 떠납니다.",
-        clara: "클라라 밴더빌트: 부친을 잃고 유산마저 진범에게 빼앗긴 채 상속권 박탈 위기 속에서 쓸쓸히 고립됩니다.",
-        alexander: "알렉산더 볼코프: 러시아 수배범이라는 사실이 들통나 살인범으로 둔갑되거나, 금괴를 독점하지 못하고 보안관의 눈을 피해 도망치는 신세가 됩니다."
+        shane: "셰인: 현장에 남아 있던 피킹 도구와 체포 영장 때문에 원한에 의한 계획 살인범으로 몰려 철창에 갇히게 됩니다.",
+        doc: "닥터: 의심을 완전히 피한 채 순금괴 100온스를 챙겨 폭설이 멎자마자 썰매를 타고 캐나다 국경을 넘어 사라집니다.",
+        madame: "클로에: 특실 문앞 향수 냄새와 마스터키로 인해 살인 배후 교사범으로 지목되어 전 재산을 압류당합니다.",
+        thomas: "토마스: 알리바이를 증명하지 못한 채 흉폭한 경호원이라는 편견 탓에 공범으로 지목되어 무기징역을 선고받습니다.",
+        eliza: "엘리자: 신분을 속이고 잠입했다는 이유로 열차 강도단의 내부 첩자로 몰려 탐정 배지를 빼앗깁니다."
       }
     }
   }
