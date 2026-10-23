@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.6)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.7)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,7 +41,7 @@
   <!-- 글로벌 상단 헤더 -->
   <header class="w-full border-b border-neutral-800 bg-[#0b0c10]/95 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
-      <!-- 1. 클릭 시 시나리오 선택 화면으로 복귀하는 헤더 타이틀 -->
+      <!-- 클릭 시 시나리오 선택 화면으로 복귀하는 헤더 타이틀 -->
       <button id="btnHeaderHome" class="flex items-center space-x-2 text-left hover:opacity-80 transition cursor-pointer">
         <i class="fa-solid fa-fingerprint text-amber-500 text-xl"></i>
         <span class="font-title font-bold text-sm sm:text-base tracking-wider text-neutral-100">MURDER MYSTERY SUITE</span>
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <!-- 2. 방장 전용 전체 긴급 공지 작성 컨트롤 바 -->
+    <!-- 방장 전용 전체 긴급 공지 작성 컨트롤 바 -->
     <div id="hostAnnouncementControl" class="hidden bg-amber-950/40 border-t border-amber-900/60 px-4 py-2">
       <div class="max-w-6xl mx-auto flex items-center space-x-2">
         <span class="text-[11px] font-bold text-amber-400 shrink-0"><i class="fa-solid fa-bullhorn mr-1"></i>방장 전체 공지:</span>
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <!-- 상단 실시간 공지 동기화 배너 -->
+    <!-- 상단 실시간 방장 공지 동기화 배너 -->
     <div id="hostAnnouncementBanner" class="hidden w-full bg-amber-900/90 text-amber-100 text-xs sm:text-sm py-2 px-4 border-t border-amber-600 text-center font-bold">
       <i class="fa-solid fa-circle-info mr-1 text-amber-300"></i>
       <span id="hostAnnouncementText">긴급 공지사항이 여기에 표시됩니다.</span>
@@ -290,9 +290,18 @@
     </div>
 
     <!-- [VIEW 3: 메인 게임 인게임 대시보드] -->
-    <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-4">
+    <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-3">
       
-      <!-- 인게임 상단 바 -->
+      <!-- ★ [복구 완료] 진행단계, 남은시간, 내 역할 상단에 위치하는 맞춤 시스템 전체 공지판 -->
+      <div id="systemDiscordGuideBanner" class="w-full p-2.5 rounded-lg border border-amber-600/70 bg-gradient-to-r from-amber-950/80 via-neutral-900 to-amber-950/80 flex items-center justify-between text-xs shadow-md">
+        <div class="flex items-center space-x-2">
+          <span class="px-2 py-0.5 rounded bg-amber-600 text-black font-bold text-[10px] tracking-wide uppercase"><i class="fa-brands fa-discord mr-1"></i>전체 안내</span>
+          <span id="systemDiscordGuideText" class="text-amber-200 font-semibold">디스코드 메인 토론방에서 상호 알리바이 및 현장 증거 수색을 진행하세요.</span>
+        </div>
+        <span id="systemPhaseTimeTag" class="text-[11px] text-neutral-400 font-mono hidden sm:inline">15분 토론</span>
+      </div>
+
+      <!-- 인게임 3단 상단 바 (진행단계, 남은시간, 내 역할) -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div class="noir-card p-2.5 sm:p-3 rounded-lg border border-neutral-800 flex items-center justify-between">
           <div>
@@ -748,7 +757,7 @@
       });
     }
 
-    // 1. 헤더 타이틀 클릭 시 시나리오 선택 화면으로 복귀
+    // 헤더 타이틀 클릭 시 시나리오 선택 화면으로 복귀
     document.getElementById('btnHeaderHome').addEventListener('click', () => {
       switchView('viewThemeSelect');
     });
@@ -806,7 +815,7 @@
       document.getElementById('cardShareReceiveModal').classList.add('hidden');
     });
 
-    // 2. 방장 전체 공지 전송 및 삭제 핸들러
+    // 방장 전체 공지 전송 및 삭제 핸들러
     document.getElementById('btnSendHostAnnouncement').addEventListener('click', async () => {
       if (!currentRoomCode) return;
       const val = document.getElementById('inputHostAnnouncement').value.trim();
@@ -933,7 +942,7 @@
       document.getElementById('displayRoomCode').innerText = data.roomCode;
       document.getElementById('playerCount').innerText = pCount;
 
-      // 2. 방장 전용 전체 공지 입력창 표시 제어
+      // 방장 전용 전체 공지 입력창 제어
       const hostCtrl = document.getElementById('hostAnnouncementControl');
       if (isCurrentHost && currentRoomCode) {
         hostCtrl.classList.remove('hidden');
@@ -941,7 +950,7 @@
         hostCtrl.classList.add('hidden');
       }
 
-      // 전체 공지 배너 제어
+      // 전체 방장 공지 배너 제어
       const banner = document.getElementById('hostAnnouncementBanner');
       if (data.announcement) {
         document.getElementById('hostAnnouncementText').innerText = data.announcement;
@@ -983,6 +992,57 @@
 
       switchView('viewGame');
       renderInGameDashboard(data);
+    }
+
+    // ★ [복구 완료] 대시보드 상단 실시간 시스템 맞춤 공지 렌더링 함수
+    function updateSystemDiscordGuide(data) {
+      const guideText = document.getElementById('systemDiscordGuideText');
+      const timeTag = document.getElementById('systemPhaseTimeTag');
+      if (!guideText) return;
+
+      const pCount = Object.keys(data.players || {}).length;
+
+      switch(data.phase) {
+        case 'R1':
+          guideText.innerHTML = `🎧 <strong>[디스코드 메인 토론방]</strong> 1라운드 시작! 자유롭게 알리바이를 조사하고 현장 증거(1회)를 수색하세요.`;
+          timeTag.innerText = "15분 토론";
+          break;
+        case 'R2':
+          guideText.innerHTML = (pCount === 2)
+            ? `🎧 <strong>[디스코드 메인 토론방]</strong> 2라운드 심층 토론 진행 중 (2인은 1:1 대화로 밀담 없이 3R 직행).`
+            : `🎧 <strong>[디스코드 메인 토론방]</strong> 2라운드 전체 토론 진행 중. 타임라인의 모순점을 찾으세요.`;
+          timeTag.innerText = "15분 토론";
+          break;
+        case 'R2_WHISPER':
+          guideText.innerHTML = `🤫 <strong>[디스코드 밀담방 1 & 2]</strong> 1차 듀얼 밀담 진행 중! 배정된 플레이어는 지정된 밀담방으로 이동하세요.`;
+          timeTag.innerText = "5분 밀담";
+          break;
+        case 'R3':
+          guideText.innerHTML = `🎧 <strong>[디스코드 메인 토론방 복귀]</strong> 3라운드 심층 추궁! 전원 메인 토론방으로 모여 알리바이를 압박하세요.`;
+          timeTag.innerText = "15분 토론";
+          break;
+        case 'R4':
+          guideText.innerHTML = (pCount === 2)
+            ? `🎧 <strong>[디스코드 메인 토론방]</strong> 4라운드 마지막 토론 진행 중 (2인은 밀담 없이 5R 직행).`
+            : `🎧 <strong>[디스코드 메인 토론방]</strong> 4라운드 마지막 토론 진행 중. 결정적인 물증을 비교하세요.`;
+          timeTag.innerText = "15분 토론";
+          break;
+        case 'R4_WHISPER':
+          guideText.innerHTML = `🤫 <strong>[디스코드 밀담방 1 & 2]</strong> 2차 듀얼 밀담 진행 중! 최종 비밀 연대 및 물증을 실물 공유하세요.`;
+          timeTag.innerText = "5분 밀담";
+          break;
+        case 'R5_DEFENSE':
+          guideText.innerHTML = `⚖️ <strong>[디스코드 메인 토론방]</strong> 5라운드 최후의 무죄 변론! 보관함의 단서를 보며 결백을 변론하세요.`;
+          timeTag.innerText = "10분 변론";
+          break;
+        case 'FINAL_VOTE':
+          guideText.innerHTML = `🚨 <strong>[최후의 지목 투표]</strong> 변론 종료! 의심스러운 진범을 화면에서 지목하세요 (자신 지목 불가).`;
+          timeTag.innerText = "최종 투표";
+          break;
+        default:
+          guideText.innerText = `사건 조사를 진행하세요.`;
+          timeTag.innerText = "";
+      }
     }
 
     // 밀담 실물 공유 수신 핸들러 (텍스트 기반)
@@ -1280,7 +1340,7 @@
       });
     }
 
-    // 3. 밀담존 이동 알림 모달 타겟팅 (전체가 아닌 실제 배정된 플레이어에게만 노출)
+    // 밀담존 이동 알림 모달 타겟팅 (배정된 본인에게만 노출)
     function handleWhisperNotice(data) {
       const isWhisper = data.phase.includes('WHISPER');
       if (!isWhisper) {
@@ -1294,7 +1354,6 @@
       const inR1 = r1.includes(myPlayerId);
       const inR2 = r2.includes(myPlayerId);
 
-      // 내가 룸 1 또는 룸 2에 실제로 배정되었을 때만 팝업 알림 노출
       if ((inR1 || inR2) && !hasShownWhisperNotice) {
         let text = inR1 ? "🎧 [디스코드 밀담방 1]로 이동하세요!" : "🎧 [디스코드 밀담방 2]로 이동하세요!";
         document.getElementById('whisperNoticeRoomText').innerText = text;
@@ -1341,6 +1400,9 @@
       document.getElementById('gameRoundLabel').innerText = phaseTitles[data.phase] || `${data.round}라운드 진행 중`;
       document.getElementById('gamePhaseBadge').innerText = data.phase.includes('WHISPER') ? '비밀 밀담' : (data.phase === 'FINAL_VOTE' ? '최종 투표' : '토론 & 수색');
 
+      // 시스템 맞춤 공지 갱신
+      updateSystemDiscordGuide(data);
+
       if (data.phase === 'R5_DEFENSE') {
         document.getElementById('defenseTopNotice').classList.remove('hidden');
         document.getElementById('finalVoteSection').classList.add('hidden');
@@ -1359,7 +1421,7 @@
       renderWhisperSection(data);
     }
 
-    // 알리바이 조사 렌더링 (2인 플레이 시 미선택 캐릭터 NPC 노출)
+    // 알리바이 조사 렌더링 (2인 플레이 시 NPC 노출)
     function renderAlibiSection(data, myInfo) {
       const container = document.getElementById('alibiInvestigateButtons');
       const badge = document.getElementById('alibiCountBadge');
@@ -1507,7 +1569,7 @@
       alert(`[현장 증거 발견: ${clueObj ? clueObj.name : clueId}]\n\n"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`);
     });
 
-    // 단서 보관함 렌더링 (텍스트 카드 집중형 UI)
+    // 단서 보관함 렌더링
     function renderInventory(data) {
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const alibiList = document.getElementById('myAlibiCardsList');
@@ -1566,7 +1628,6 @@
       const room1 = data.whisperRooms?.room1 || [];
       const room2 = data.whisperRooms?.room2 || [];
 
-      // 3. 밀담 현황 보드에 RP 캐릭터명 (닉네임) 표기
       const formatRPNames = (pids) => {
         if (!pids || pids.length === 0) return '<span class="text-neutral-500 italic">비어 있음</span>';
         return pids.map(id => {
@@ -1600,14 +1661,12 @@
       }
     }
 
-    // 3. 체크박스 렌더링 시 RP 이름 표기 및 순서 고정
     function renderWhisperCheckboxes(data) {
       const c1 = document.getElementById('whisperRoom1Checkboxes');
       const c2 = document.getElementById('whisperRoom2Checkboxes');
       c1.innerHTML = "";
       c2.innerHTML = "";
 
-      // 캐릭터 순서대로 고정하여 순서가 계속 바뀌지 않도록 정렬
       currentScenario.characters.forEach(char => {
         const foundEntry = Object.entries(data.players).find(([_, p]) => p.charId === char.id);
         if (!foundEntry) return;
@@ -1630,7 +1689,6 @@
       });
     }
 
-    // 3. 밀담룸 상호 배타 체크 강제 (한 사람이 양쪽 방에 동시 체크 방지)
     window.toggleWhisperCheck = function(pid, roomNum) {
       if (roomNum === 1) {
         const other = document.querySelector(`.chk-w2-${pid}`);
@@ -1641,7 +1699,6 @@
       }
     };
 
-    // 3. 룸 1 배정 시 룸 2에서 중복 제거 및 체크 해제
     document.getElementById('btnAssignRoom1').addEventListener('click', async () => {
       const selected = Array.from(document.querySelectorAll('.chk-whisper-1:checked')).map(el => el.value);
       if (selected.length === 0) return alert("밀담방 1로 보낼 인원을 체크해주세요.");
@@ -1656,12 +1713,10 @@
         'whisperRooms.room2': updatedRoom2
       });
 
-      // 체크박스 초기화
       document.querySelectorAll('.chk-whisper-1').forEach(cb => cb.checked = false);
       alert("밀담방 1 배정이 완료되었습니다. 해당 플레이어에게 이동 안내가 전송되었습니다.");
     });
 
-    // 3. 룸 2 배정 시 룸 1에서 중복 제거 및 체크 해제
     document.getElementById('btnAssignRoom2').addEventListener('click', async () => {
       const selected = Array.from(document.querySelectorAll('.chk-whisper-2:checked')).map(el => el.value);
       if (selected.length === 0) return alert("밀담방 2로 보낼 인원을 체크해주세요.");
@@ -1676,7 +1731,6 @@
         'whisperRooms.room1': updatedRoom1
       });
 
-      // 체크박스 초기화
       document.querySelectorAll('.chk-whisper-2').forEach(cb => cb.checked = false);
       alert("밀담방 2 배정이 완료되었습니다. 해당 플레이어에게 이동 안내가 전송되었습니다.");
     });
@@ -1807,7 +1861,6 @@
         const killerId = currentScenario.killerId;
         let winner = 'KILLER';
 
-        // 단독 최다 득표이면서 진범인 경우만 시민 승리, 동률 또는 오지목 시 진범 승리
         if (topCandidates.length === 1 && topCandidates[0] === killerId) {
           winner = 'CITIZEN';
         } else {
@@ -1826,7 +1879,6 @@
       }
     }
 
-    // 4. 엔딩 렌더링 (진범 vs 시민 플레이어별 맞춤 승패 배지 및 타이틀 분기)
     function renderEnding(data) {
       const killerId = currentScenario.killerId;
       const myCharId = data.players[myPlayerId]?.charId;
@@ -1839,7 +1891,6 @@
       const resultObj = isCitizenWin ? currentScenario.endings.citizenWin : currentScenario.endings.killerWin;
       document.getElementById('endingBannerImg').src = resultObj.bannerImg;
 
-      // 개인별 승패 표기 분기
       if (isCitizenWin) {
         if (amIKiller) {
           document.getElementById('endingResultBadge').innerText = "ARRESTED (DEFEAT)";
