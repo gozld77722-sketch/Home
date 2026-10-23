@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.8)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.10)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,6 +34,13 @@
       background: #2d3139;
       border-radius: 3px;
     }
+    @keyframes alert-pulse {
+      0%, 100% { border-color: rgba(220, 38, 38, 0.4); box-shadow: 0 0 10px rgba(220, 38, 38, 0.2); }
+      50% { border-color: rgba(220, 38, 38, 0.9); box-shadow: 0 0 20px rgba(220, 38, 38, 0.6); }
+    }
+    .timer-alert-active {
+      animation: alert-pulse 1s infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-600 selection:text-white">
@@ -41,13 +48,16 @@
   <!-- 글로벌 상단 헤더 -->
   <header class="w-full border-b border-neutral-800 bg-[#0b0c10]/95 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
-      <!-- 1. 클릭 시 시나리오 선택 화면으로 복귀하는 헤더 타이틀 -->
+      <!-- 클릭 시 시나리오 선택 화면으로 복귀 -->
       <button id="btnHeaderHome" class="flex items-center space-x-2 text-left hover:opacity-80 transition cursor-pointer">
         <i class="fa-solid fa-fingerprint text-amber-500 text-xl"></i>
         <span class="font-title font-bold text-sm sm:text-base tracking-wider text-neutral-100">MURDER MYSTERY SUITE</span>
       </button>
 
       <div class="flex items-center space-x-2">
+        <button id="btnOpenTimelineModal" class="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-700 text-xs text-neutral-300 hover:text-amber-300 transition flex items-center">
+          <i class="fa-solid fa-timeline mr-1.5 text-amber-500"></i> 타임라인 보드
+        </button>
         <button id="btnToggleBGM" class="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-700 text-xs text-neutral-300 hover:text-amber-300 transition flex items-center">
           <i class="fa-solid fa-cloud-rain mr-1.5 text-neutral-400"></i> BGM 토글
         </button>
@@ -57,7 +67,7 @@
       </div>
     </div>
 
-    <!-- 2. 방장 전용 전체 긴급 공지 작성 컨트롤 바 (엔터 전송 지원) -->
+    <!-- 방장 전용 전체 긴급 공지 작성 컨트롤 바 -->
     <div id="hostAnnouncementControl" class="hidden bg-amber-950/40 border-t border-amber-900/60 px-4 py-2">
       <div class="max-w-6xl mx-auto flex items-center space-x-2">
         <span class="text-[11px] font-bold text-amber-400 shrink-0"><i class="fa-solid fa-bullhorn mr-1"></i>방장 전체 공지:</span>
@@ -311,7 +321,8 @@
           <span id="gamePhaseBadge" class="text-[11px] sm:text-xs px-2 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 font-semibold">토론 & 수색</span>
         </div>
         
-        <div class="noir-card p-2.5 sm:p-3 rounded-lg border border-neutral-800 flex items-center justify-between">
+        <!-- 남은 시간 타이머 (종료 10초 전 점멸) -->
+        <div id="gameTimerCard" class="noir-card p-2.5 sm:p-3 rounded-lg border border-neutral-800 flex items-center justify-between transition-all">
           <div>
             <span class="text-[10px] sm:text-xs text-neutral-400 block">남은 시간</span>
             <span id="gameTimer" class="font-mono text-lg sm:text-xl font-bold text-amber-400">15:00</span>
@@ -342,7 +353,7 @@
       <!-- 메인 3단 조작 레이아웃 -->
       <div id="normalGameStage" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
-        <!-- 좌측: 내 시크릿 시트 -->
+        <!-- 좌측: 내 시크릿 시트 (진범 전용 날조 타임라인 공개 버튼 연동) -->
         <div class="noir-card p-3 sm:p-4 rounded-xl border border-neutral-800 space-y-3">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <h4 class="text-xs sm:text-sm font-bold text-amber-300"><i class="fa-solid fa-user-secret mr-1.5"></i> 나의 비밀 & 타임라인</h4>
@@ -376,7 +387,7 @@
               <div id="whisperRoom2Status" class="text-neutral-300">• 밀담룸 2: <span class="text-neutral-500 italic">비어 있음</span></div>
             </div>
             
-            <!-- 방장 전용 밀담 배정 (RP 이름 표기 및 중복 배정 방지 유지) -->
+            <!-- 방장 전용 밀담 배정 (체크 자동 해제 완벽 방어) -->
             <div id="hostWhisperAssignArea" class="hidden space-y-2 pt-1 border-t border-amber-800/40">
               <p class="text-[11px] text-neutral-300 leading-tight">
                 <strong>[방장 전용]</strong> 각 룸으로 보낼 플레이어를 체크 후 배정하세요. (한 플레이어는 한 룸에만 배정됩니다)
@@ -493,6 +504,29 @@
     </div>
 
   </main>
+
+  <!-- 사건 종합 타임라인 보드 모달 -->
+  <div id="timelineBoardModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-2xl w-full p-5 sm:p-6 rounded-xl border border-amber-600/70 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto custom-scroll">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-timeline text-amber-500 text-lg"></i>
+          <h3 class="text-base sm:text-lg font-bold text-amber-200 font-title">사건 현장 종합 공개 타임라인</h3>
+        </div>
+        <button id="btnCloseTimelineModal" class="text-neutral-400 hover:text-neutral-100 text-xl font-bold transition">&times;</button>
+      </div>
+
+      <p class="text-xs text-neutral-400">플레이어들이 각자 자신의 시크릿 시트에서 공개한 타임라인이 실시간 등록됩니다. (진범은 거짓 알리바이를 섞어 등록했을 수 있습니다)</p>
+      
+      <div id="publicTimelineEntries" class="space-y-2 pt-1 text-xs">
+        <p class="text-neutral-500 italic text-center py-4">아직 공개된 타임라인 행적이 없습니다. 내 시크릿 시트에서 행적을 공개해 보세요.</p>
+      </div>
+
+      <div class="pt-2 border-t border-neutral-800 text-right">
+        <button id="btnConfirmTimelineModal" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 다음 단계 조기 진행 스킵 찬반 투표 모달 -->
   <div id="skipVoteModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -696,12 +730,54 @@
     let hasShownWhisperNotice = false;
     let announcementTimer = null;
 
+    // 밀담룸 방장 로컬 체크 상태 메모리 보존
+    const localWhisperSelection = {
+      room1: new Set(),
+      room2: new Set()
+    };
+
+    // Web Audio API
     let audioCtx = null;
     let isBgmPlaying = false;
     let noiseNode = null;
 
     function initAudio() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playBeepSound() {
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) { console.warn("사운드 재생 제한:", e); }
+    }
+
+    function playRoundEndChime() {
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 1.2);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.2);
+      } catch (e) { console.warn("사운드 재생 제한:", e); }
     }
 
     function toggleRainBGM() {
@@ -758,12 +834,15 @@
       });
     }
 
-    // 헤더 타이틀 클릭 시 시나리오 선택 화면으로 복귀
     document.getElementById('btnHeaderHome').addEventListener('click', () => {
       switchView('viewThemeSelect');
     });
 
-    // 3개 시나리오 테마 선택 및 로비 연동
+    const timelineModal = document.getElementById('timelineBoardModal');
+    document.getElementById('btnOpenTimelineModal').addEventListener('click', () => timelineModal.classList.remove('hidden'));
+    document.getElementById('btnCloseTimelineModal').addEventListener('click', () => timelineModal.classList.add('hidden'));
+    document.getElementById('btnConfirmTimelineModal').addEventListener('click', () => timelineModal.classList.add('hidden'));
+
     window.selectThemeAndGoToLobby = async function(themeId) {
       currentThemeId = themeId;
       const loaded = await loadScenarioModule(themeId);
@@ -816,7 +895,6 @@
       document.getElementById('cardShareReceiveModal').classList.add('hidden');
     });
 
-    // 1 & 2. 방장 전체 공지 전송 함수 (전송 시 timestamp 기록하여 1분 후 자동 소멸)
     async function sendHostAnnouncement() {
       if (!currentRoomCode) return;
       const val = document.getElementById('inputHostAnnouncement').value.trim();
@@ -830,7 +908,6 @@
 
     document.getElementById('btnSendHostAnnouncement').addEventListener('click', sendHostAnnouncement);
 
-    // 1. 엔터키(Enter) 입력 시 즉시 전송
     document.getElementById('inputHostAnnouncement').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -878,7 +955,8 @@
         sharedCardEvent: null,
         votes: {},
         announcement: "",
-        announcementTime: null
+        announcementTime: null,
+        publicTimelines: []
       };
 
       await setDoc(doc(db, "rooms", roomCode), roomData);
@@ -929,11 +1007,17 @@
           if (localTimerSeconds > 0) {
             localTimerSeconds--;
             updateTimerDisplay(localTimerSeconds);
+
+            if (localTimerSeconds <= 10 && localTimerSeconds > 0) {
+              playBeepSound();
+            }
+
             if (isCurrentHost && localTimerSeconds % 5 === 0) {
               updateDoc(doc(db, "rooms", currentRoomCode), { timerSeconds: localTimerSeconds });
             }
           } else {
             clearInterval(timerInterval);
+            playRoundEndChime();
             if (isCurrentHost) {
               proceedNextPhase(data);
             }
@@ -946,7 +1030,16 @@
       const m = Math.floor(sec / 60);
       const s = sec % 60;
       const el = document.getElementById('gameTimer');
+      const timerCard = document.getElementById('gameTimerCard');
       if (el) el.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      
+      if (timerCard) {
+        if (sec <= 10 && sec > 0) {
+          timerCard.classList.add('timer-alert-active');
+        } else {
+          timerCard.classList.remove('timer-alert-active');
+        }
+      }
     }
 
     function handleStateUpdate(data) {
@@ -957,7 +1050,6 @@
       document.getElementById('displayRoomCode').innerText = data.roomCode;
       document.getElementById('playerCount').innerText = pCount;
 
-      // 방장 전용 전체 공지 입력창 제어
       const hostCtrl = document.getElementById('hostAnnouncementControl');
       if (isCurrentHost && currentRoomCode) {
         hostCtrl.classList.remove('hidden');
@@ -965,7 +1057,6 @@
         hostCtrl.classList.add('hidden');
       }
 
-      // 2. 전체 방장 공지 배너 제어 (60초 초과 시 자동 소멸)
       const banner = document.getElementById('hostAnnouncementBanner');
       if (announcementTimer) clearTimeout(announcementTimer);
 
@@ -1007,6 +1098,7 @@
       handleSkipVoteModal(data);
       handleWhisperNotice(data);
       handleCardShareEvent(data);
+      renderPublicTimelineBoard(data);
 
       if (data.phase === 'LOBBY') {
         switchView('viewCharacterSelect');
@@ -1030,7 +1122,28 @@
       renderInGameDashboard(data);
     }
 
-    // 대시보드 상단 실시간 시스템 맞춤 공지 렌더링 함수
+    // 사건 종합 공개 타임라인 렌더링
+    function renderPublicTimelineBoard(data) {
+      const box = document.getElementById('publicTimelineEntries');
+      if (!box) return;
+      const list = data.publicTimelines || [];
+
+      if (list.length === 0) {
+        box.innerHTML = `<p class="text-neutral-500 italic text-center py-4">아직 공개된 타임라인 행적이 없습니다. 내 시크릿 시트에서 행적을 공개해 보세요.</p>`;
+        return;
+      }
+
+      box.innerHTML = list.map(item => `
+        <div class="p-2.5 bg-neutral-900/90 rounded border border-neutral-800 flex items-start space-x-2.5">
+          <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-800 text-[10px] shrink-0">
+            ${item.charName}
+          </span>
+          <p class="text-neutral-200 text-xs leading-relaxed break-keep flex-1">${item.text}</p>
+        </div>
+      `).join('');
+    }
+
+    // 대시보드 상단 실시간 시스템 맞춤 공지 렌더링
     function updateSystemDiscordGuide(data) {
       const guideText = document.getElementById('systemDiscordGuideText');
       const timeTag = document.getElementById('systemPhaseTimeTag');
@@ -1375,7 +1488,7 @@
       });
     }
 
-    // 밀담존 이동 알림 모달 타겟팅 (배정된 본인에게만 노출)
+    // 밀담존 이동 알림 모달 타겟팅
     function handleWhisperNotice(data) {
       const isWhisper = data.phase.includes('WHISPER');
       if (!isWhisper) {
@@ -1397,6 +1510,24 @@
       }
     }
 
+    // 진범 전용 날조(거짓 알리바이) 텍스트 프리셋
+    function getFakeTimelinePreset(scenarioId, charId, originalText) {
+      if (scenarioId === 'winchester' && charId === 'elena') {
+        if (originalText.includes("20:10") || originalText.includes("나노 독소") || originalText.includes("21:30")) {
+          return "21:30 - 약제실에서 환자 차트를 정리하며 야간 복용약을 분류하고 있었음";
+        }
+      } else if (scenarioId === 'express' && charId === 'doc') {
+        if (originalText.includes("20:30") || originalText.includes("황금 탄환") || originalText.includes("리볼버")) {
+          return "20:30 - 3등 식당칸에서 다른 승객들과 체스를 두며 여유롭게 티타임을 가짐";
+        }
+      } else if (scenarioId === 'hospital' && charId === 'han') {
+        if (originalText.includes("21:30") || originalText.includes("근이완제") || originalText.includes("추락")) {
+          return "21:30 - 응급 주사실에서 야간 약품 재고를 검수하며 수간호사 일지를 작성함";
+        }
+      }
+      return null;
+    }
+
     function renderInGameDashboard(data) {
       const myInfo = data.players[myPlayerId];
       if (!myInfo || !myInfo.charId) return;
@@ -1407,16 +1538,45 @@
         document.getElementById('myCharName').innerText = myChar.name;
         document.getElementById('myCharRole').innerText = myChar.role;
 
+        const publicTimelines = data.publicTimelines || [];
+        const isKiller = (myChar.id === currentScenario.killerId || myChar.isKiller);
         const secretBox = document.getElementById('mySecretContent');
+
         secretBox.innerHTML = `
           <div class="p-2.5 bg-black/60 rounded border border-neutral-800">
             <span class="text-amber-400 font-bold block mb-1">내면의 비밀</span>
             <p class="leading-relaxed">${myChar.secret}</p>
           </div>
           <div class="p-2.5 bg-black/60 rounded border border-neutral-800">
-            <span class="text-amber-400 font-bold block mb-1">사건 당일 타임라인</span>
-            <ul class="space-y-1 list-disc pl-4 text-[11px] text-neutral-300">
-              ${myChar.timeline.map(t => `<li>${t}</li>`).join('')}
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-amber-400 font-bold">사건 당일 타임라인</span>
+              <span class="text-[10px] text-neutral-400">${isKiller ? '진범: 거짓말 날조 가능' : '선택적 공개 가능'}</span>
+            </div>
+            <ul class="space-y-1.5 text-[11px] text-neutral-300">
+              ${myChar.timeline.map((t) => {
+                const isAlreadyPublic = publicTimelines.some(pt => pt.charId === myChar.id && (pt.text === t || pt.originalRef === t));
+                const fakePreset = isKiller ? getFakeTimelinePreset(currentThemeId, myChar.id, t) : null;
+
+                return `
+                  <li class="p-1.5 bg-black/40 rounded border border-neutral-800 space-y-1">
+                    <div class="flex items-start justify-between">
+                      <span class="pr-2 leading-tight flex-1 text-neutral-300">• ${t}</span>
+                      ${isAlreadyPublic 
+                        ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800 font-bold shrink-0">보드 등록됨</span>`
+                        : `<button onclick="window.shareTimelineToBoard('${myChar.id}', '${myChar.name}', '${t.replace(/'/g, "\\'")}', false)" class="text-[9px] px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-600 transition shrink-0">공개</button>`
+                      }
+                    </div>
+                    ${
+                      (!isAlreadyPublic && fakePreset) 
+                        ? `<div class="pt-1 border-t border-neutral-800/80 flex items-center justify-between">
+                             <span class="text-[10px] text-rose-400/90 italic truncate pr-1">가짜 알리바이: "${fakePreset.substring(0, 24)}..."</span>
+                             <button onclick="window.shareTimelineToBoard('${myChar.id}', '${myChar.name}', '${fakePreset.replace(/'/g, "\\'")}', true, '${t.replace(/'/g, "\\'")}')" class="text-[9px] px-2 py-0.5 rounded bg-rose-950 hover:bg-rose-900 text-rose-200 border border-rose-800 font-bold transition shrink-0">날조 공개</button>
+                           </div>`
+                        : ''
+                    }
+                  </li>
+                `;
+              }).join('')}
             </ul>
           </div>
         `;
@@ -1435,7 +1595,6 @@
       document.getElementById('gameRoundLabel').innerText = phaseTitles[data.phase] || `${data.round}라운드 진행 중`;
       document.getElementById('gamePhaseBadge').innerText = data.phase.includes('WHISPER') ? '비밀 밀담' : (data.phase === 'FINAL_VOTE' ? '최종 투표' : '토론 & 수색');
 
-      // 시스템 맞춤 공지 갱신
       updateSystemDiscordGuide(data);
 
       if (data.phase === 'R5_DEFENSE') {
@@ -1456,7 +1615,32 @@
       renderWhisperSection(data);
     }
 
-    // 알리바이 조사 렌더링 (2인 플레이 시 NPC 노출)
+    // 타임라인 보드 등록 함수 (날조 행적 지원)
+    window.shareTimelineToBoard = async function(charId, charName, text, isFake = false, originalRef = null) {
+      const confirmMsg = isFake 
+        ? `[날조 알리바이 공개]\n"${text}"\n\n이 거짓 행적을 종합 타임라인 보드에 공개하시겠습니까? (다른 플레이어에게는 진짜처럼 표시됩니다)`
+        : `[실제 행적 공개]\n"${text}"\n\n이 타임라인을 모든 플레이어의 [타임라인 보드]에 공개하시겠습니까?`;
+      
+      if (!confirm(confirmMsg)) return;
+
+      const snap = await getDoc(doc(db, "rooms", currentRoomCode));
+      const curList = snap.data()?.publicTimelines || [];
+      const updated = [...curList, { 
+        charId, 
+        charName, 
+        text, 
+        isFake: !!isFake, 
+        originalRef: originalRef || text, 
+        timestamp: Date.now() 
+      }];
+
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        publicTimelines: updated
+      });
+      alert(isFake ? "거짓 알리바이가 성공적으로 공개 보드에 위장 등록되었습니다." : "종합 타임라인 보드에 행적이 공개되었습니다.");
+    };
+
+    // 알리바이 조사 렌더링
     function renderAlibiSection(data, myInfo) {
       const container = document.getElementById('alibiInvestigateButtons');
       const badge = document.getElementById('alibiCountBadge');
@@ -1604,7 +1788,6 @@
       alert(`[현장 증거 발견: ${clueObj ? clueObj.name : clueId}]\n\n"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`);
     });
 
-    // 단서 보관함 렌더링
     function renderInventory(data) {
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const alibiList = document.getElementById('myAlibiCardsList');
@@ -1613,7 +1796,6 @@
 
       document.getElementById('totalInventoryCount').innerText = `총 ${totalCount}건`;
 
-      // 타인 및 NPC 알리바이 목록
       if (myInv.alibis && myInv.alibis.length > 0) {
         alibiList.innerHTML = myInv.alibis.map(a => `
           <div class="p-3 bg-neutral-900/90 border border-neutral-700/80 rounded-lg space-y-1 shadow">
@@ -1631,7 +1813,6 @@
         alibiList.innerHTML = `<p class="text-xs text-neutral-600 italic">확보한 알리바이가 없습니다.</p>`;
       }
 
-      // 현장 증거 목록
       if (myInv.clues && myInv.clues.length > 0) {
         clueList.innerHTML = myInv.clues.map(cid => {
           const c = currentScenario.clues.find(x => x.id === cid);
@@ -1708,16 +1889,18 @@
 
         const [pid, p] = foundEntry;
         const displayName = `${char.name} (${p.nickname})`;
+        const isChecked1 = localWhisperSelection.room1.has(pid);
+        const isChecked2 = localWhisperSelection.room2.has(pid);
 
         c1.innerHTML += `
           <label class="flex items-center space-x-1.5 text-xs text-neutral-200 cursor-pointer">
-            <input type="checkbox" value="${pid}" onchange="window.toggleWhisperCheck('${pid}', 1)" class="chk-whisper-1 chk-w1-${pid} rounded bg-neutral-800 border-neutral-600">
+            <input type="checkbox" value="${pid}" ${isChecked1 ? 'checked' : ''} onchange="window.toggleWhisperCheck('${pid}', 1)" class="chk-whisper-1 chk-w1-${pid} rounded bg-neutral-800 border-neutral-600">
             <span>${displayName}</span>
           </label>
         `;
         c2.innerHTML += `
           <label class="flex items-center space-x-1.5 text-xs text-neutral-200 cursor-pointer">
-            <input type="checkbox" value="${pid}" onchange="window.toggleWhisperCheck('${pid}', 2)" class="chk-whisper-2 chk-w2-${pid} rounded bg-neutral-800 border-neutral-600">
+            <input type="checkbox" value="${pid}" ${isChecked2 ? 'checked' : ''} onchange="window.toggleWhisperCheck('${pid}', 2)" class="chk-whisper-2 chk-w2-${pid} rounded bg-neutral-800 border-neutral-600">
             <span>${displayName}</span>
           </label>
         `;
@@ -1726,16 +1909,30 @@
 
     window.toggleWhisperCheck = function(pid, roomNum) {
       if (roomNum === 1) {
-        const other = document.querySelector(`.chk-w2-${pid}`);
-        if (other && other.checked) other.checked = false;
+        const cb1 = document.querySelector(`.chk-w1-${pid}`);
+        if (cb1 && cb1.checked) {
+          localWhisperSelection.room1.add(pid);
+          localWhisperSelection.room2.delete(pid);
+          const cb2 = document.querySelector(`.chk-w2-${pid}`);
+          if (cb2) cb2.checked = false;
+        } else {
+          localWhisperSelection.room1.delete(pid);
+        }
       } else {
-        const other = document.querySelector(`.chk-w1-${pid}`);
-        if (other && other.checked) other.checked = false;
+        const cb2 = document.querySelector(`.chk-w2-${pid}`);
+        if (cb2 && cb2.checked) {
+          localWhisperSelection.room2.add(pid);
+          localWhisperSelection.room1.delete(pid);
+          const cb1 = document.querySelector(`.chk-w1-${pid}`);
+          if (cb1) cb1.checked = false;
+        } else {
+          localWhisperSelection.room2.delete(pid);
+        }
       }
     };
 
     document.getElementById('btnAssignRoom1').addEventListener('click', async () => {
-      const selected = Array.from(document.querySelectorAll('.chk-whisper-1:checked')).map(el => el.value);
+      const selected = Array.from(localWhisperSelection.room1);
       if (selected.length === 0) return alert("밀담방 1로 보낼 인원을 체크해주세요.");
 
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
@@ -1748,12 +1945,13 @@
         'whisperRooms.room2': updatedRoom2
       });
 
-      document.querySelectorAll('.chk-whisper-1').forEach(cb => cb.checked = false);
+      localWhisperSelection.room1.clear();
+      renderWhisperCheckboxes(snap.data());
       alert("밀담방 1 배정이 완료되었습니다. 해당 플레이어에게 이동 안내가 전송되었습니다.");
     });
 
     document.getElementById('btnAssignRoom2').addEventListener('click', async () => {
-      const selected = Array.from(document.querySelectorAll('.chk-whisper-2:checked')).map(el => el.value);
+      const selected = Array.from(localWhisperSelection.room2);
       if (selected.length === 0) return alert("밀담방 2로 보낼 인원을 체크해주세요.");
 
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
@@ -1766,7 +1964,8 @@
         'whisperRooms.room1': updatedRoom1
       });
 
-      document.querySelectorAll('.chk-whisper-2').forEach(cb => cb.checked = false);
+      localWhisperSelection.room2.clear();
+      renderWhisperCheckboxes(snap.data());
       alert("밀담방 2 배정이 완료되었습니다. 해당 플레이어에게 이동 안내가 전송되었습니다.");
     });
 
@@ -1809,7 +2008,6 @@
       });
     }
 
-    // 5R 투표 버튼 렌더링 (NPC 용의자 포함)
     function renderFinalVoteSection(data) {
       const grid = document.getElementById('voteButtonsGrid');
       const board = document.getElementById('liveVoteBoard');
@@ -1851,7 +2049,6 @@
         }
       });
 
-      // 실시간 투표 현황 보드
       Object.entries(data.players).forEach(([pid, p]) => {
         const votedTargetId = data.votes && data.votes[pid];
         let votedName = '<span class="text-neutral-500 italic">고민 중...</span>';
