@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.0.11)</title>
+  <title>온라인 머더 미스터리 웹 보드게임 (ver.12.1.0)</title>
   
   <!-- Tailwind CSS & FontAwesome CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -75,7 +75,7 @@
     </div>
 
     <!-- 상단 실시간 방장 공지 동기화 배너 (1분 후 자동 소멸) -->
-    <div id="hostAnnouncementBanner" class="hidden w-full bg-amber-900/90 text-amber-100 text-xs sm:text-sm py-2 px-4 border-t border-amber-600 text-center font-bold">
+    <div id="hostAnnouncementBanner" class="hidden w-full bg-amber-900/90 text-amber-100 text-xs sm:text-sm py-2 px-4 border-b border-amber-600 text-center font-bold">
       <i class="fa-solid fa-circle-info mr-1 text-amber-300"></i>
       <span id="hostAnnouncementText">긴급 공지사항이 여기에 표시됩니다.</span>
     </div>
@@ -207,7 +207,7 @@
       <div class="p-3 mb-4 rounded bg-black/40 border border-neutral-800 text-xs text-neutral-400 leading-relaxed space-y-1">
         <p class="font-semibold text-amber-300"><i class="fa-solid fa-headset mr-1"></i> 음성 채널 권장 사항</p>
         <p>• 디스코드에 <strong>[메인 토론방]</strong>과 <strong>[밀담방 1]</strong>, <strong>[밀담방 2]</strong>를 준비하세요.</p>
-        <p>• 방장이 다음 단계 요청 시 플레이어 전원 스킵 투표를 진행합니다.</p>
+        <p>• 플레이어 이탈 시 게임이 안전하게 일시정지되며 재접속 시 자동 복구됩니다.</p>
       </div>
 
       <div class="space-y-4">
@@ -450,7 +450,7 @@
 
       </div>
 
-      <!-- ★ [1 & 2번 항목 구현] 상시 노출 사건 종합 타임라인 보드 (사건 공통 행적 기본 공개 & 빈칸 추리 연동) -->
+      <!-- 상시 노출 사건 종합 타임라인 보드 (사건 공통 행적 기본 공개 & 빈칸 추리 연동) -->
       <div class="noir-card p-4 rounded-xl border border-amber-700/60 shadow-xl space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-neutral-800 pb-2">
           <div class="flex items-center space-x-2">
@@ -518,6 +518,25 @@
     </div>
 
   </main>
+
+  <!-- [복구 완료] 플레이어 이탈 시 일시정지 및 재접속 대기 모달 -->
+  <div id="pauseModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-md w-full p-6 rounded-xl border-2 border-red-600 shadow-2xl text-center space-y-4">
+      <div class="text-red-500 text-4xl"><i class="fa-solid fa-triangle-exclamation animate-pulse"></i></div>
+      <h3 class="text-lg font-bold text-red-300">게임 일시 정지 (접속 끊김 감지)</h3>
+      <p id="pauseModalText" class="text-xs text-neutral-300 leading-relaxed break-keep">
+        플레이어의 연결이 끊겨 공정한 조사를 위해 타이머가 일시 정지되었습니다.<br>이탈한 플레이어의 재접속을 기다리고 있습니다...
+      </p>
+      <div class="p-2.5 bg-black/60 rounded border border-neutral-800 text-[11px] text-amber-300">
+        <i class="fa-solid fa-rotate mr-1"></i> 이탈한 플레이어는 동일한 닉네임과 방 코드로 재입장 시 기존 캐릭터와 단서가 즉시 복원됩니다.
+      </div>
+      <div id="hostResumeControl" class="hidden pt-2 border-t border-neutral-800">
+        <button id="btnHostForceResume" class="w-full py-2 bg-amber-800 hover:bg-amber-700 text-amber-100 text-xs font-bold rounded transition">
+          일시정지 강제 해제하고 계속 진행 (방장)
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 다음 단계 조기 진행 스킵 찬반 투표 모달 -->
   <div id="skipVoteModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -720,6 +739,7 @@
     let isCurrentHost = false;
     let hasShownWhisperNotice = false;
     let announcementTimer = null;
+    let heartbeatInterval = null;
 
     // 밀담룸 방장 로컬 체크 메모리
     const localWhisperSelection = {
@@ -881,6 +901,15 @@
       document.getElementById('cardShareReceiveModal').classList.add('hidden');
     });
 
+    // 1. 방장 일시정지 강제 해제 핸들러
+    document.getElementById('btnHostForceResume').addEventListener('click', async () => {
+      if (!isCurrentHost || !currentRoomCode) return;
+      await updateDoc(doc(db, "rooms", currentRoomCode), {
+        isPaused: false,
+        pausedReason: ""
+      });
+    });
+
     async function sendHostAnnouncement() {
       if (!currentRoomCode) return;
       const val = document.getElementById('inputHostAnnouncement').value.trim();
@@ -927,8 +956,10 @@
         phase: 'LOBBY',
         round: 1,
         timerSeconds: 900,
+        isPaused: false,
+        pausedReason: "",
         players: {
-          [myPlayerId]: { nickname: nick, charId: null, isHost: true }
+          [myPlayerId]: { nickname: nick, charId: null, isHost: true, lastSeen: Date.now(), isOnline: true }
         },
         alibiPool: initialAlibiPool,
         cluePool: currentScenario.clues.map(c => c.id),
@@ -947,9 +978,10 @@
 
       await setDoc(doc(db, "rooms", roomCode), roomData);
       listenToRoom(roomCode);
+      startHeartbeat(roomCode);
     });
 
-    // 방 참가
+    // 방 참가 (1. 재접속 지원)
     document.getElementById('btnJoinRoom').addEventListener('click', async () => {
       const nick = document.getElementById('inputNickname').value.trim();
       const code = document.getElementById('inputRoomCode').value.trim().toUpperCase();
@@ -965,12 +997,68 @@
         await loadScenarioModule(currentThemeId);
       }
 
-      await updateDoc(roomRef, {
-        [`players.${myPlayerId}`]: { nickname: nick, charId: null, isHost: false }
+      // 동일 닉네임으로 이탈했던 플레이어가 재입장하는지 확인
+      let existingPid = null;
+      Object.entries(rData.players || {}).forEach(([pid, p]) => {
+        if (p.nickname === nick) existingPid = pid;
       });
+
+      const updates = {};
+      if (existingPid && existingPid !== myPlayerId) {
+        // 기존 플레이어 슬롯 승계 복원
+        const oldPlayerData = rData.players[existingPid];
+        updates[`players.${myPlayerId}`] = {
+          ...oldPlayerData,
+          lastSeen: Date.now(),
+          isOnline: true
+        };
+        // 기존 인벤토리 및 투표권 이관
+        if (rData.playerInventories && rData.playerInventories[existingPid]) {
+          updates[`playerInventories.${myPlayerId}`] = rData.playerInventories[existingPid];
+        }
+      } else {
+        updates[`players.${myPlayerId}`] = { 
+          nickname: nick, 
+          charId: rData.players?.[myPlayerId]?.charId || null, 
+          isHost: (rData.hostId === myPlayerId),
+          lastSeen: Date.now(),
+          isOnline: true
+        };
+      }
+
+      // 일시정지 상태였다면 자동 재개
+      if (rData.isPaused) {
+        updates.isPaused = false;
+        updates.pausedReason = "";
+      }
+
+      await updateDoc(roomRef, updates);
       currentRoomCode = code;
       listenToRoom(code);
+      startHeartbeat(code);
     });
+
+    // 1. 하트비트 전송 (5초마다 내 생존 신호 갱신)
+    function startHeartbeat(code) {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      heartbeatInterval = setInterval(async () => {
+        if (!currentRoomCode || !myPlayerId) return;
+        try {
+          await updateDoc(doc(db, "rooms", currentRoomCode), {
+            [`players.${myPlayerId}.lastSeen`]: Date.now(),
+            [`players.${myPlayerId}.isOnline`]: true
+          });
+        } catch (e) { console.warn("하트비트 실패:", e); }
+      }, 5000);
+
+      window.addEventListener('beforeunload', () => {
+        if (currentRoomCode && myPlayerId) {
+          updateDoc(doc(db, "rooms", currentRoomCode), {
+            [`players.${myPlayerId}.isOnline`]: false
+          });
+        }
+      });
+    }
 
     function listenToRoom(roomCode) {
       if (roomUnsubscribe) roomUnsubscribe();
@@ -981,7 +1069,62 @@
       });
     }
 
+    // 1. 플레이어 이탈 여부 감시 및 일시정지 제어
+    function checkPlayerDisconnections(data) {
+      const pauseModal = document.getElementById('pauseModal');
+      const hostResumeCtrl = document.getElementById('hostResumeControl');
+
+      if (isCurrentHost) {
+        hostResumeCtrl.classList.remove('hidden');
+      } else {
+        hostResumeCtrl.classList.add('hidden');
+      }
+
+      // 게임 중일 때만 접속 끊김 감지 활성화
+      const isIngame = ['R1', 'R2', 'R2_WHISPER', 'R3', 'R4', 'R4_WHISPER', 'R5_DEFENSE', 'FINAL_VOTE'].includes(data.phase);
+      if (!isIngame) {
+        pauseModal.classList.add('hidden');
+        return;
+      }
+
+      const now = Date.now();
+      let disconnectedNick = null;
+
+      Object.entries(data.players || {}).forEach(([pid, p]) => {
+        if (p.charId) {
+          // 15초 이상 하트비트가 없거나 명시적으로 isOnline=false인 경우
+          const isTimedOut = p.lastSeen && (now - p.lastSeen > 18000);
+          if (p.isOnline === false || isTimedOut) {
+            disconnectedNick = p.nickname;
+          }
+        }
+      });
+
+      if (disconnectedNick && !data.isPaused && isCurrentHost) {
+        updateDoc(doc(db, "rooms", currentRoomCode), {
+          isPaused: true,
+          pausedReason: `플레이어 [${disconnectedNick}] 님의 연결이 끊어졌습니다.`
+        });
+      }
+
+      if (data.isPaused) {
+        document.getElementById('pauseModalText').innerHTML = `
+          <strong>${data.pausedReason || "플레이어 연결 끊김 감지"}</strong><br><br>
+          공정한 추리 및 타이머 보존을 위해 조사가 일시정지되었습니다.<br>이탈한 플레이어의 재접속을 기다리는 중입니다...
+        `;
+        pauseModal.classList.remove('hidden');
+      } else {
+        pauseModal.classList.add('hidden');
+      }
+    }
+
     function setupTimer(data) {
+      // 1. 일시정지 중이면 타이머 중단
+      if (data.isPaused) {
+        if (timerInterval) clearInterval(timerInterval);
+        return;
+      }
+
       localTimerSeconds = data.timerSeconds ?? 900;
       updateTimerDisplay(localTimerSeconds);
 
@@ -1073,6 +1216,7 @@
       }
 
       setupTimer(data);
+      checkPlayerDisconnections(data); // 1. 플레이어 이탈 및 일시정지 체크
 
       const hostNextControl = document.getElementById('hostNextPhaseControl');
       if (isCurrentHost && !['LOBBY', 'PROLOGUE', 'FINAL_VOTE', 'ENDING'].includes(data.phase)) {
@@ -1108,7 +1252,6 @@
       renderInGameDashboard(data);
     }
 
-    // 2. 시나리오별 사건 공식 타임라인(스토리상 공통 사건 및 피해자 행적) 프리셋 반환
     function getScenarioOfficialTimelines(themeId) {
       if (themeId === 'winchester') {
         return [
@@ -1135,7 +1278,6 @@
       return [];
     }
 
-    // 1 & 2 & 3. 사건 종합 공개 타임라인 보드 상시 렌더링
     function renderPublicTimelineBoard(data) {
       const box = document.getElementById('publicTimelineEntries');
       if (!box) return;
@@ -1166,7 +1308,6 @@
         })
       ];
 
-      // 시간 순서대로 정렬
       combined.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 
       box.innerHTML = combined.map(item => {
@@ -1185,7 +1326,6 @@
       }).join('');
     }
 
-    // 대시보드 상단 실시간 시스템 맞춤 공지 렌더링
     function updateSystemDiscordGuide(data) {
       const guideText = document.getElementById('systemDiscordGuideText');
       const timeTag = document.getElementById('systemPhaseTimeTag');
@@ -1236,7 +1376,6 @@
       }
     }
 
-    // 밀담 실물 공유 수신 핸들러
     let lastHandledShareTime = 0;
     function handleCardShareEvent(data) {
       const ev = data.sharedCardEvent;
@@ -1376,7 +1515,6 @@
       await updateDoc(doc(db, "rooms", currentRoomCode), { phase: 'PROLOGUE' });
     });
 
-    // 3. 2~3인 플레이 시 미선택 NPC 타임라인 선공개 및 NPC 범인 시 날조 알리바이 우선 공개
     document.getElementById('btnProceedToRound1').addEventListener('click', async () => {
       const snap = await getDoc(doc(db, "rooms", currentRoomCode));
       const rData = snap.data();
@@ -1385,7 +1523,6 @@
 
       const npcTimelinesToPublish = [];
 
-      // 2인 또는 3인 플레이 시 미선택 기본 4인 캐릭터를 NPC로 등록
       if (pCount <= 3) {
         const unselectedNpcChars = currentScenario.characters.filter(c => c.isDefault && !selectedCharIds.includes(c.id));
 
@@ -1394,7 +1531,6 @@
           
           npc.timeline.forEach(t => {
             let textToPublish = t;
-            // 3. NPC가 진범인 경우 범행 시간대를 날조 알리바이로 덮어써서 보드에 우선 등록
             if (isNpcKiller) {
               const fakePreset = getFakeTimelinePreset(currentThemeId, npc.id, t);
               if (fakePreset) textToPublish = fakePreset;
@@ -1586,7 +1722,6 @@
       }
     }
 
-    // 진범 전용 날조(거짓 알리바이) 텍스트 프리셋
     function getFakeTimelinePreset(scenarioId, charId, originalText) {
       if (scenarioId === 'winchester' && charId === 'elena') {
         if (originalText.includes("20:10") || originalText.includes("나노 독소") || originalText.includes("21:30")) {
@@ -1691,7 +1826,6 @@
       renderWhisperSection(data);
     }
 
-    // 타임라인 보드 등록 함수
     window.shareTimelineToBoard = async function(charId, charName, text, isFake = false, originalRef = null) {
       const confirmMsg = isFake 
         ? `[날조 알리바이 공개]\n"${text}"\n\n이 거짓 행적을 종합 타임라인 보드에 공개하시겠습니까? (다른 플레이어에게는 진짜처럼 표시됩니다)`
@@ -1716,7 +1850,6 @@
       alert(isFake ? "거짓 알리바이가 성공적으로 공개 보드에 위장 등록되었습니다." : "종합 타임라인 보드에 행적이 공개되었습니다.");
     };
 
-    // 알리바이 조사 렌더링
     function renderAlibiSection(data, myInfo) {
       const container = document.getElementById('alibiInvestigateButtons');
       const badge = document.getElementById('alibiCountBadge');
@@ -1742,7 +1875,7 @@
       const targetCharacters = currentScenario.characters.filter(char => {
         if (char.id === myInfo.charId) return false;
         if (selectedCharIds.includes(char.id)) return true;
-        if (pCount === 2 && char.isDefault) return true;
+        if (pCount <= 3 && char.isDefault) return true;
         if (is5P) return true;
         return false;
       });
@@ -2105,7 +2238,7 @@
       const voteTargets = currentScenario.characters.filter(char => {
         if (char.id === myCharId) return false;
         if (selectedCharIds.includes(char.id)) return true;
-        if (pCount === 2 && char.isDefault) return true;
+        if (pCount <= 3 && char.isDefault) return true;
         return false;
       });
 
