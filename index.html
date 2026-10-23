@@ -535,35 +535,129 @@
     </div>
   </div>
 
-  <!-- 규칙 모달 -->
-  <div id="rulesModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="noir-card max-w-xl w-full p-5 sm:p-6 rounded-xl border border-amber-700/60 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto custom-scroll">
+<!-- 규칙 모달 (인원별 맞춤 개정 룰북) -->
+  <div id="rulesModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-2xl w-full p-5 sm:p-6 rounded-xl border border-amber-700/60 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
+      
+      <!-- 헤더 -->
       <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
-        <h3 class="text-lg font-bold text-amber-200 font-title"><i class="fa-solid fa-scroll mr-2"></i> 머더 미스터리 공식 규칙서</h3>
-        <button id="btnCloseRulesModal" class="text-neutral-400 hover:text-neutral-100 text-lg">&times;</button>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-book-skull text-amber-500 text-lg"></i>
+          <h3 class="text-base sm:text-lg font-bold text-amber-200 font-title">머더 미스터리 공식 규칙서 (규정 개정본)</h3>
+        </div>
+        <button id="btnCloseRulesModal" class="text-neutral-400 hover:text-neutral-100 text-xl font-bold transition">&times;</button>
       </div>
 
-      <div class="text-xs text-neutral-300 space-y-3.5 leading-relaxed break-keep">
-        <div class="p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg">
-          <strong class="text-amber-200 block mb-1 text-sm">🎯 핵심 콘셉트 & 인원별 룰</strong>
-          • <strong>일반 플레이어(시민)</strong>: 단서 수집과 심문을 통해 용의자 중 '진범'을 찾아 투표로 검거.<br>
-          • <strong>진범 플레이어</strong>: 정체를 숨기고 다른 무고한 사람에게 누명을 씌워 생존.<br>
-          • <strong>2인 플레이 특화 룰</strong>: 밀담 이동 없이 메인 토론방에서 상호 및 NPC 용의자를 조사(라운드당 2회)합니다.<br>
-          • <strong>3인 이상 플레이 룰</strong>: 2R 및 4R 종료 후 5분간 디스코드 듀얼 밀담방(1, 2)으로 나뉘어 비밀 대화를 나눕니다.
+      <div class="text-xs text-neutral-300 space-y-4 leading-relaxed break-keep">
+
+        <!-- 1. 승리 조건 & 거짓말 원칙 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div class="p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg">
+            <strong class="text-amber-300 block mb-1 text-xs"><i class="fa-solid fa-bullseye mr-1"></i> 게임 목표 및 승리 조건</strong>
+            • <strong>시민(용의자)</strong>: 단독 최다 득표로 <strong>단 한 명의 진범</strong>을 지목하면 승리합니다.<br>
+            • <strong>진범</strong>: 최다 득표를 피하거나, <strong>동률 득표로 진범 특정을 무력화</strong>시키면 승리합니다.
+          </div>
+          <div class="p-3 bg-red-950/30 border border-red-900/50 rounded-lg">
+            <strong class="text-red-300 block mb-1 text-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> [필독] 거짓말 제한 룰</strong>
+            • <strong>진범 플레이어</strong>: 알리바이, 동기, 현장 행적 등 모든 발언에 대해 <strong>완전한 거짓말과 날조가 허용</strong>됩니다.<br>
+            • <strong>일반 시민 플레이어</strong>: 약점이나 비밀을 침묵할 수는 있으나, <strong>없는 사실을 거짓으로 꾸며내는 것은 엄격히 금지</strong>됩니다.
+          </div>
         </div>
 
-        <div class="p-3 bg-red-950/20 border border-red-900/40 rounded-lg">
-          <strong class="text-red-300 block mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> [필독] 거짓말 제한 룰</strong>
-          • <strong>진범 플레이어</strong>: 범행 사실, 알리바이, 동기 등 모든 항목에 대해 <strong>완전한 거짓말과 허위 날조 진술이 가능</strong>합니다.<br>
-          • <strong>일반 플레이어(시민)</strong>: 개인적인 약점을 숨기거나 침묵할 수는 있으나, <strong>사실과 다른 허위 사실을 날조(거짓말)하는 것은 엄격히 금지</strong>됩니다.
+        <!-- 2. 인원수별 맞춤 가변 규칙 -->
+        <div class="p-3 bg-neutral-900/90 border border-neutral-700/80 rounded-lg space-y-1.5">
+          <strong class="text-amber-400 block text-xs"><i class="fa-solid fa-users-gear mr-1"></i> [인원별 맞춤 규칙 (2인 ~ 5인 대응)]</strong>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px] text-neutral-300">
+            <div class="p-2 bg-black/40 rounded border border-neutral-800">
+              <span class="font-bold text-amber-300 block mb-0.5">• 2인 플레이 모드</span>
+              - 알리바이 조사 기회: 라운드당 <strong>2회</strong> 제공<br>
+              - <strong>밀담존 자동 생략</strong>: 2인은 이미 1:1 대화 상태이므로 2R/4R 밀담 없이 즉시 다음 라운드로 직행
+            </div>
+            <div class="p-2 bg-black/40 rounded border border-neutral-800">
+              <span class="font-bold text-amber-300 block mb-0.5">• 3인 ~ 5인 플레이 모드</span>
+              - 알리바이 조사 기회: 라운드당 <strong>1회</strong> 제공<br>
+              - <strong>듀얼 밀담존 진행</strong>: 2R 및 4R 종료 후 5분간 지정된 디스코드 밀담방으로 이동하여 비밀 연대 진행<br>
+              - 5인 접속 시: 5인 전용 추가 캐릭터(탐정) 해금
+            </div>
+          </div>
         </div>
+
+        <!-- 3. 전체 5라운드 상세 프로세스 -->
+        <div class="space-y-2.5">
+          <strong class="text-amber-400 block text-xs"><i class="fa-solid fa-timeline mr-1"></i> 전체 라운드 구성 및 진행 프로세스</strong>
+
+          <!-- 대기 & 프롤로그 -->
+          <div class="border-l-2 border-neutral-600 pl-3">
+            <h4 class="font-bold text-neutral-200 text-xs mb-0.5">[도입] 캐릭터 선택 및 프롤로그 숙지</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • 본인의 시크릿 시트(과거사, 당일 타임라인, 비밀)를 숙지합니다.<br>
+              • 사건 개요 및 프롤로그를 함께 읽은 뒤 1라운드를 시작합니다.
+            </p>
+          </div>
+
+          <!-- 1라운드 -->
+          <div class="border-l-2 border-amber-600 pl-3">
+            <h4 class="font-bold text-amber-200 text-xs mb-0.5">[1라운드] 사건 발생 및 상호 탐색 (토론 15분)</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • <strong>자기소개 및 알리바이 진술</strong>: 각자의 입장에서 당일 행적을 밝힙니다.<br>
+              • <strong>기본 조사</strong>: 타인의 알리바이 카드 조사 및 현장 증거 수색(라운드당 1회)을 진행하며 단서를 확보합니다.
+            </p>
+          </div>
+
+          <!-- 2라운드 -->
+          <div class="border-l-2 border-amber-600 pl-3">
+            <h4 class="font-bold text-amber-200 text-xs mb-0.5">[2라운드] 현장 심층 조사 (토론 15분) + [1차 밀담 (5분)]</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • <strong>전체 토론 (15분)</strong>: 추가 알리바이 조사와 현장 증거를 수색하며 모순점을 찾습니다.<br>
+              • <strong>1차 듀얼 밀담 (5분 / 3인 이상)</strong>: 방장이 배정한 [밀담방 1/2]로 이동하여 1:1 또는 소수 비밀 대화를 진행합니다. 밀담 중에는 <strong>[현장 증거 물품 카드 실물 공유]</strong>가 가능합니다. (2인 플레이 시 밀담 생략 후 3R 직행)
+            </p>
+          </div>
+
+          <!-- 3라운드 -->
+          <div class="border-l-2 border-amber-600 pl-3">
+            <h4 class="font-bold text-amber-200 text-xs mb-0.5">[3라운드] 타임라인 균열 및 심층 추궁 (토론 15분)</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • 메인 토론방으로 전원 복귀하여 밀담에서 확인한 정보와 추가 현장 증거를 대조합니다.<br>
+              • 서로 충돌하는 타임라인과 알리바이의 빈틈을 집중적으로 추궁합니다.
+            </p>
+          </div>
+
+          <!-- 4라운드 -->
+          <div class="border-l-2 border-amber-600 pl-3">
+            <h4 class="font-bold text-amber-200 text-xs mb-0.5">[4라운드] 최종 물증 토론 (토론 15분) + [2차 밀담 (5분)]</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • <strong>전체 토론 (15분)</strong>: 범행 흉기, 독약 흔적, 결정적 물증을 중심으로 포위망을 좁힙니다.<br>
+              • <strong>2차 듀얼 밀담 (5분 / 3인 이상)</strong>: 투표 전 마지막 비밀 파트너와 신뢰를 구축하고 증거 실물을 최종 교환합니다. (2인 플레이 시 생략)
+            </p>
+          </div>
+
+          <!-- 5라운드 -->
+          <div class="border-l-2 border-red-600 pl-3">
+            <h4 class="font-bold text-red-300 text-xs mb-0.5">[5라운드] 최후의 무죄 변론 (10분) & 진범 지목 투표</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • <strong>최후 변론 (10분)</strong>: 각자 자신이 확보한 단서와 결백을 주장하며 마지막 변론을 진행합니다.<br>
+              • <strong>공개 지목 투표</strong>: 변론 종료 즉시 시스템을 통해 진범이라고 확신하는 인물에게 동시 투표합니다. (자신 지목 불가)
+            </p>
+          </div>
+
+          <!-- 결말 -->
+          <div class="border-l-2 border-neutral-600 pl-3">
+            <h4 class="font-bold text-neutral-200 text-xs mb-0.5">[결말] 엔딩 및 전말 공개</h4>
+            <p class="text-neutral-400 text-[11px]">
+              • 투표 결과에 따른 시민 승리 / 진범 승리 판정 및 사건의 진상 해설, 인물별 후일담(에필로그)이 공개됩니다.
+            </p>
+          </div>
+        </div>
+
       </div>
 
-      <div class="pt-2 border-t border-neutral-800 text-right">
-        <button id="btnConfirmRules" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold">
+      <!-- 모달 닫기 버튼 -->
+      <div class="pt-3 border-t border-neutral-800 text-right">
+        <button id="btnConfirmRules" class="px-5 py-2 bg-amber-700 hover:bg-amber-600 text-amber-100 rounded text-xs font-bold transition">
           규칙 숙지 완료
         </button>
       </div>
+
     </div>
   </div>
 
