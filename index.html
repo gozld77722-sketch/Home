@@ -499,14 +499,14 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-    // 1. Firebase 구성 정보 (본인의 키 사용)
+    // 1. Firebase 실제 인증 설정 (적용 완료)
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyC_t7MbZDPqc1_myKz7li0oZXzYQCeuyIo",
+      authDomain: "winchester-game-150ff.firebaseapp.com",
+      projectId: "winchester-game-150ff",
+      storageStorageBucket: "winchester-game-150ff.firebasestorage.app",
+      messagingSenderId: "965882936080",
+      appId: "1:965882936080:web:8598738b4adca24d1e4395"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -654,8 +654,8 @@
         alibiPool: initialAlibiPool,
         cluePool: currentScenario.clues.map(c => c.id),
         drawnClues: {},
-        playerInventories: {}, // { [pid]: { alibis: [{charId, index, text, name}], clues: [clueId] } }
-        roundInvestigateDone: {}, // { [pid]: count }
+        playerInventories: {},
+        roundInvestigateDone: {},
         whisperRooms: { room1: [], room2: [] },
         votes: {},
         announcement: ""
@@ -704,7 +704,6 @@
 
       if (timerInterval) clearInterval(timerInterval);
 
-      // 인게임 페이즈일 때만 카운트다운 가동
       const isIngame = ['R1', 'R2', 'R2_WHISPER', 'R3', 'R4', 'R4_WHISPER', 'R5_DEFENSE'].includes(data.phase);
       if (isIngame) {
         timerInterval = setInterval(() => {
@@ -719,7 +718,6 @@
           } else {
             clearInterval(timerInterval);
             if (isCurrentHost) {
-              // 시간이 다 되면 자동으로 다음 단계 트리거
               proceedNextPhase(data);
             }
           }
@@ -755,7 +753,7 @@
       // 1. 타이머 동기화
       setupTimer(data);
 
-      // 2. 방장 전용 '다음 단계 요청' 버튼 노출 제어 (방장만 노출)
+      // 2. 방장 전용 '다음 단계 요청' 버튼 노출 제어 (방장에게만 보임)
       const hostNextControl = document.getElementById('hostNextPhaseControl');
       if (isCurrentHost && !['LOBBY', 'PROLOGUE', 'ENDING'].includes(data.phase)) {
         hostNextControl.classList.remove('hidden');
@@ -1079,7 +1077,8 @@
       newPool.splice(randomIndex, 1);
 
       const targetChar = currentScenario.characters.find(c => c.id === targetCharId);
-      const cardText = targetChar.alibiCards[cardNum] || "기록된 알리바이가 없습니다.";
+      const cardObj = targetChar.alibiCards[cardNum];
+      const cardText = typeof cardObj === 'object' ? `${cardObj.name}: ${cardObj.desc}` : (cardObj || "기록된 알리바이가 없습니다.");
 
       const myInv = (data.playerInventories && data.playerInventories[myPlayerId]) || { alibis: [], clues: [] };
       const updatedAlibis = [...(myInv.alibis || []), {
@@ -1351,7 +1350,7 @@
         });
 
         // 진범 찾기 (윈체스터: elena, 설원특급: vivian)
-        const killerId = (data.themeId === 'winchester') ? 'elena' : 'vivian';
+        const killerId = currentScenario.killerId || ((data.themeId === 'winchester') ? 'elena' : 'vivian');
         let winner = 'KILLER';
 
         // 단독 1위 득표자가 진범일 때만 시민 승리
