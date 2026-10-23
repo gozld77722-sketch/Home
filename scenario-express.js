@@ -1,4 +1,4 @@
-// scenario-express.js (Western Noir Snow Blizzard Express ver)
+// scenario-express.js
 export default {
   id: "express",
   title: "황야의 설원 특급: 사라진 황금 탄환",
@@ -7,7 +7,6 @@ export default {
   victim: "실베스터 골드버그 (알래스카 금광 재벌)",
   killerId: "doc", // 진범 ID: 닥터 할러데이
 
-  // 1. 프롤로그 스토리
   prologue: {
     bannerImg: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
     location: "알래스카 화이트 패스 협곡 횡단 특급열차 1등 칸",
@@ -19,7 +18,6 @@ export default {
     ]
   },
 
-  // 2. 캐릭터 풀 (5인)
   characters: [
     {
       id: "shane",
@@ -47,7 +45,7 @@ export default {
       id: "doc",
       name: "닥터 할러데이",
       role: "열차 전담 촉탁 의사",
-      isKiller: true, // ★ 진범
+      isKiller: true, // 진범
       isDefault: true,
       avatarImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
       description: "폐결핵 요양 차 북부로 올라온 떠돌이 의사이자 전문 도박사.",
@@ -133,7 +131,6 @@ export default {
     }
   ],
 
-  // 3. 현장 증거 24종 덱
   clues: [
     { id: "c01", name: "이마에 총상을 입은 사체", desc: "근거리에서 발사된 단 한 발의 총탄에 의해 이마 정중앙을 관통당해 즉사함.", img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" },
     { id: "c02", name: "그을린 거위털 베개", desc: "총구에 밀착시켜 소음기로 사용된 특실 침대의 깃털 베개. 화약 그을음이 묻어 있음.", img: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=80" },
@@ -161,7 +158,6 @@ export default {
     { id: "c24", name: "황금 탄환 박스의 빈자리", desc: "6발 들이 벨벳 케이스에서 단 1발만 꺼내져 사용된 흔적.", img: "https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80" }
   ],
 
-  // 4. 최종 엔딩 및 에필로그 (시민 승리 vs 진범 승리)
   endings: {
     truth: "사건의 진실: 알래스카 금광 재벌 골드버그를 사살한 진범은 열차 촉탁 의사 **'닥터 할러데이'**입니다. 닥터는 막대한 도박 빚으로 신체 포기 위기에 몰리자, 진료를 핑계로 20:30분 특실에 들어가 베개로 총구를 막고 피해자의 황금 탄환 리볼버로 즉사시켰습니다. 금괴를 훔친 후 탄피를 기관실 화덕에 던져 은멸하려 했으나, 멈춰버린 회중시계와 가방 속 금가루로 인해 범행이 탄로 났습니다.",
     citizenWin: {
