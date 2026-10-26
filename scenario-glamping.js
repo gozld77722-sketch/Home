@@ -25,7 +25,8 @@ export default {
       role: "대기업 대리 / 피해자에게 전 재산을 맡긴 동창",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      // 피로와 스트레스가 묻어나는 평범한 30대 초반 회사원 청년
+      avatarImg: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
       description: "피해자 준혁의 말만 믿고 영끌 대출을 받아 코인에 2억을 투자했다가 전액 청산당해 파산 직전인 회사원.",
       secret: "당신은 오늘 밤 준혁에게 무릎을 꿇고 제발 원금의 일부라도 돌려달라고 애원하려 했습니다. 21:30경 바비큐장에서 실랑이를 벌이다 준혁이 당신을 비웃자 격분하여 멱살을 잡고 주먹다짐을 벌였습니다. 21:40경 준혁이 바닥에 나뒹굴자 겁이 나 자신의 텐트로 도망쳤을 뿐 살해하지 않았습니다.",
       timeline: [
@@ -47,7 +48,8 @@ export default {
       role: "글램핑장 대표 / 자금난에 빠진 사업가",
       isKiller: true, // ★ 진범
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+      // 아웃도어/캠핑 웨어를 입은 피로하고 야심 있는 젊은 캠핑장 대표
+      avatarImg: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=400&q=80",
       description: "무리한 시설 확장과 부채로 인해 글램핑장이 경매에 넘어가기 일보 직전인 사장.",
       secret: "★ 당신이 진범입니다! 준혁에게 사정사정해 사업 자금을 빌려달라고 애원했으나, 준혁은 당신의 글램핑장을 헐값에 경매로 낙찰받아 빼앗겠다고 조롱했습니다. 21:45경 취해서 비틀거리며 계곡 난간에 서 있던 준혁의 머리를 무거운 바비큐용 숯 집게로 후려쳐 기절시킨 뒤, 비바람 속에 발로 차서 절벽 아래 계곡 급류로 떨어뜨려 익사시켰습니다. 직후 그가 목에 걸고 있던 50억 상당의 콜드월렛 USB를 빼앗아 관리동 배전함 뒤에 은닉했습니다.",
       timeline: [
@@ -69,7 +71,8 @@ export default {
       role: "인테리어 디자이너 / 피해자의 약혼녀",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      // 도시적이고 세련된 인상의 30대 여성 디자이너
+      avatarImg: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
       description: "올가을 박준혁과 결혼을 앞둔 약혼녀이자 대학 동기. 겉으로는 완벽한 커플로 보임.",
       secret: "당신은 오늘 오후 우연히 준혁의 보조 스마트폰을 보았다가, 그가 동창 친구들을 속여 사기 코인 리딩방을 운영해 왔으며 자신 몰래 다른 여성과 양다리를 걸치고 있었다는 끔찍한 진실을 알게 되었습니다. 21:25경 VIP 텐트에서 파혼을 선언하며 결혼반지를 집어던졌습니다. 그 후 충격으로 텐트 안에서 울고 있었을 뿐 죽이지 않았습니다.",
       timeline: [
@@ -91,7 +94,8 @@ export default {
       role: "IT 보안 개발자 / 피해자의 절친",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+      // 뿔테 안경과 후드티 차림의 날카로운 인상의 현대 IT 개발자
+      avatarImg: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80",
       description: "학창 시절부터 박준혁의 그림자처럼 붙어 다닌 절친이자 코인 시스템 자문을 맡아준 개발자.",
       secret: "당신은 준혁의 50억 코인 지갑 복구 시드 구문(12자리 복구 암호)을 몰래 해킹하여 적어둔 메모지를 소지하고 있었습니다. 오늘 밤 준혁이 잠들면 콜드월렛을 바꿔치기해 코인을 전액 해외 거래소로 빼돌릴 계획이었습니다. 21:40경 준혁의 텐트에 몰래 침입해 가방을 뒤지다 발소리가 들려 황급히 숨어 나왔습니다.",
       timeline: [
@@ -113,7 +117,8 @@ export default {
       role: "글램핑장 야간 아르바이트생 / 대학생 (5인 전용)",
       isKiller: false,
       isDefault: false,
-      avatarImg: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+      // 또렷하고 야무진 눈빛을 지닌 수수한 20대 대학생
+      avatarImg: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
       description: "방학을 맞아 글램핑장에서 숙식하며 주방 보조와 야간 청소를 돕는 휴학생.",
       secret: "당신은 사실 불법 리딩방 사기로 부모님이 전 재산을 잃고 가정이 파탄 났으며, 그 리딩방의 총책이 박준혁이라는 것을 알고 복수하기 위해 일부러 이번 모임 글램핑장에 아르바이트로 지원했습니다. 21:10경 준혁의 위스키 잔에 설사 유도제와 수면제를 몰래 타 넣었으나, 살해까지 실행하지는 못하고 주방에서 떨고 있었습니다.",
       timeline: [
