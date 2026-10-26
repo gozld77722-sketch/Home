@@ -14,7 +14,7 @@ export default {
       "1987년 늦가을 밤, 짙은 산안개와 산사태로 유일한 진입로가 무너져 강원도 산골짜기의 세인트 헬레나 폐쇄병원은 완벽히 고립되었습니다.",
       "밤 10시 정각, 병원 폐업을 앞두고 환자 강제 이송을 지시하던 원장 백도현이 3층 원장실 창문 아래 안뜰 시멘트 바닥에서 싸늘한 주검으로 발견되었습니다.",
       "원장의 목에는 날카로운 약물 주사 바늘 자국이 남아 있었고, 그가 개인 금고에 보관 중이던 '극비 환자 생체 임상실험 일지' 원본이 감쪽같이 사라졌습니다.",
-      "외부 전화선마저 절단된 채 병원에 갇힌 용의자들. 오직 진범만이 거짓말을 할 수 있습니다. 동이 트기 전, 안개 속 묻힌 잔혹한 진실을 밝혀내야 합니다."
+      "외부 전화선마저 절단된 채 병원에 갇힌 5명의 사람들. 오직 진범만이 거짓말을 할 수 있습니다. 동이 트기 전, 안개 속 묻힌 잔혹한 진실을 밝혀내야 합니다."
     ]
   },
 
@@ -25,7 +25,8 @@ export default {
       role: "부원장 / 신경정신과 전문의",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      // 80년대 느낌의 단정한 가르마와 지적인 의사 인상
+      avatarImg: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80",
       description: "백도현 원장의 오랜 후배이자 병원의 실질적인 의료 행정을 도맡아온 신경정신과 의사.",
       secret: "당신은 백도현 원장이 당신 몰래 병원 공금을 횡령하고 환자 사망 사고의 책임을 당신에게 뒤집어씌우려던 고발 서류를 오늘 밤 폐기하려 했습니다. 21:40경 마스터키로 원장실에 잠입했으나, 원장은 책상 위에 쓰러져 의식이 희미한 상태였습니다. 겁에 질린 당신은 금고 옆 횡령 증빙 서류 뭉치만 챙겨 서둘러 도망쳤을 뿐 살해하지 않았습니다.",
       timeline: [
@@ -47,7 +48,8 @@ export default {
       role: "수간호사 / 병동 총괄 관리자",
       isKiller: true, // ★ 진범
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+      // 차분하고 냉철한 표정의 베테랑 여성 수간호사
+      avatarImg: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
       description: "10년 넘게 폐쇄병동을 묵묵히 지켜온 베테랑 수간호사. 원장의 모든 명령을 수행해 옴.",
       secret: "★ 당신이 진범입니다! 원장은 5년 전 당신의 여동생을 병원 지하 격리실에 감금하고 불법 신약 생체실험 대상으로 삼아 결국 뇌사 상태로 사망에 이르게 했습니다. 오늘 밤 원장이 증거를 인멸하고 해외로 도주하려 한다는 사실을 알고, 21:30경 신경안정제라 속여 치사량의 근이완제(석시닐콜린)를 목에 주사했습니다. 그가 마비되어 숨을 헐떡이자 3층 창문 밖으로 밀어 떨어뜨리고 임상실험 일지를 소각로에 태웠습니다.",
       timeline: [
@@ -69,7 +71,8 @@ export default {
       role: "야간 경비원 / 전직 시설관리자",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+      // 깊은 주름과 거친 인상의 고단한 노년 경비원
+      avatarImg: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=400&q=80",
       description: "폐쇄병원의 음산한 복도와 지하실을 20년째 순찰해온 나이 든 야간 경비원.",
       secret: "당신은 원장이 지난 수개월간 체불한 퇴직금과 밀린 월급을 한 푼도 주지 않고 병원을 야반도주하려 한다는 말을 들었습니다. 앙심을 품고 21:20경 원장실 비밀 수납장에서 금괴와 비상용 엔화 뭉치를 훔쳐 지하실 환풍구 뒤에 숨겼습니다. 절도 행각이 발각될까 봐 사건 당시 정위치에서 보초를 서고 있었다고 거짓 진술했습니다.",
       timeline: [
@@ -91,7 +94,8 @@ export default {
       role: "장기 입원 환자 / 화가 지망생",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      // 유약하고 창백한 눈빛의 예술가적 분위기를 풍기는 젊은 여성
+      avatarImg: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
       description: "과거 유산 상속을 노린 가족들에 의해 강제 입원당한 20대 여성 환자.",
       secret: "당신은 정신병자가 아니며, 병원을 탈출하기 위해 환자복 속에 날카로운 메스를 숨겨두고 기회를 엿보고 있었습니다. 21:45경 3층 비상계단을 오르다 원장실 창문에서 누군가가 흰 가운을 입은 사람을 바깥으로 밀어 떨어뜨리는 실루엣을 똑똑히 목격했습니다. 살인자의 얼굴을 보지는 못했으나 공포에 질려 병실로 도망쳤습니다.",
       timeline: [
@@ -113,7 +117,8 @@ export default {
       role: "르포 전문 탐사기자 (5인 전용)",
       isKiller: false,
       isDefault: false,
-      avatarImg: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+      // 날카롭고 집요하게 진실을 파고드는 야전 재킷 차림의 30대 기자
+      avatarImg: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80",
       description: "정신병원 내 환자 인권 유린과 불법 인체실험 폭로 기사를 쓰기 위해 보호자로 위장 잠입한 기자.",
       secret: "당신은 익명의 제보자로부터 '원장이 오늘 밤 증거를 모두 태우고 밀항한다'는 전화를 받고 잠입했습니다. 플래시 카메라로 3층 복도와 병원 비밀 시설을 도촬하느라 여념이 없었으며, 셔터 소리가 새어나갈까 봐 숨어 있었습니다.",
       timeline: [
