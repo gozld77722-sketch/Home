@@ -698,43 +698,46 @@
       switchView('viewThemeSelect');
     });
 
-    window.selectThemeAndGoToLobby = async function(themeId) {
-      currentThemeId = themeId;
-      const loaded = await loadScenarioModule(themeId);
-      if (!loaded) return;
+  // index.html 내 script type="module" 안의 window.selectThemeAndGoToLobby 함수 교체
 
-      const themeTag = document.getElementById('lobbyThemeTag');
-      const coverImg = document.getElementById('lobbyCoverImg');
-      const coverSub = document.getElementById('lobbyCoverSub');
-      const title = document.getElementById('lobbyTitle');
+window.selectThemeAndGoToLobby = async function(themeId) {
+  currentThemeId = themeId;
+  const loaded = await loadScenarioModule(themeId);
+  if (!loaded) return;
 
-      if (themeId === 'winchester') {
-        themeTag.innerText = "폭풍우 치는 윈체스터 별장";
-        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800";
-        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=600&q=80";
-        coverSub.innerText = "Penthouse in the Storm";
-        title.innerText = loaded.title;
-      } else if (themeId === 'express') {
-        themeTag.innerText = "황야의 설원 특급";
-        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
-        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80";
-        coverSub.innerText = "Aurora Express in Blizzard";
-        title.innerText = loaded.title;
-      } else if (themeId === 'hospital') {
-        themeTag.innerText = "안개 낀 폐쇄병원";
-        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800";
-        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80";
-        coverSub.innerText = "Saint Helena Asylum 1987";
-        title.innerText = loaded.title;
-      } else if (themeId === 'glamping') {
-        themeTag.innerText = "비구름 몰려온 글램핑";
-        themeTag.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800";
-        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80";
-        coverSub.innerText = "Glamping Tragedy in Gapyeong";
-        title.innerText = loaded.title;
-      }
-      switchView('viewLobby');
-    };
+  const tagEl = document.getElementById('lobbyThemeTag');
+  const coverImg = document.getElementById('lobbyCoverImg');
+  const coverSub = document.getElementById('lobbyCoverSub');
+  const lobbyTitle = document.getElementById('lobbyTitle');
+
+  if (themeId === 'winchester') {
+    tagEl.innerText = "폭풍우 치는 윈체스터 별장";
+    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800";
+    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=600&q=80";
+    coverSub.innerText = "Penthouse in the Storm";
+    lobbyTitle.innerText = loaded.title;
+  } else if (themeId === 'express') {
+    tagEl.innerText = "황야의 설원 특급";
+    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
+    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80";
+    coverSub.innerText = "Aurora Express in Blizzard";
+    lobbyTitle.innerText = loaded.title;
+  } else if (themeId === 'hospital') {
+    tagEl.innerText = "안개 낀 폐쇄병원";
+    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800";
+    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80";
+    coverSub.innerText = "St. Helena Asylum in Mist";
+    lobbyTitle.innerText = loaded.title;
+  } else if (themeId === 'glamping') {
+    tagEl.innerText = "비구름 몰려온 글램핑";
+    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-orange-950 text-orange-300 border border-orange-800";
+    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80";
+    coverSub.innerText = "Valley Glamping in Heavy Rain";
+    lobbyTitle.innerText = loaded.title;
+  }
+
+  switchView('viewLobby');
+};
 
     signInAnonymously(auth).then(cred => {
       currentUser = cred.user;
