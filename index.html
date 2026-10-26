@@ -162,7 +162,7 @@
           </div>
         </div>
 
-        <!-- 테마 4: 비구름 몰려온 글램핑 (신규 추가) -->
+        <!-- 테마 4: 비구름 몰려온 글램핑 -->
         <div class="noir-card rounded-2xl overflow-hidden border border-rose-800/60 hover:border-rose-400 transition-all duration-300 shadow-xl flex flex-col justify-between group">
           <div>
             <div class="relative w-full h-40 overflow-hidden border-b border-neutral-800">
@@ -599,7 +599,6 @@
     import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-    // 실제 바인딩된 Firebase 설정 객체
     const firebaseConfig = {
       apiKey: "AIzaSyC_t7MbZDPqc1_myKz7li0oZXzYQCeuyIo",
       authDomain: "winchester-game-150ff.firebaseapp.com",
@@ -673,7 +672,7 @@
         return currentScenario;
       } catch (err) {
         console.error("시나리오 로드 실패:", err);
-        alert("시나리오 파일을 불러올 수 없습니다. scenario-" + scenarioId + ".js 파일 위치를 확인하세요.");
+        alert("시나리오 파일을 불러올 수 없습니다. scenario-" + scenarioId + ".js 파일 위치나 파일 내부 문법 오류를 확인하세요.");
         return null;
       }
     }
@@ -698,46 +697,45 @@
       switchView('viewThemeSelect');
     });
 
-  // index.html 내 script type="module" 안의 window.selectThemeAndGoToLobby 함수 교체
+    // 4대 시나리오 테마 로비 연동 함수 (예외 방어 처리 완료)
+    window.selectThemeAndGoToLobby = async function(themeId) {
+      currentThemeId = themeId;
+      const loaded = await loadScenarioModule(themeId);
+      if (!loaded) return;
 
-window.selectThemeAndGoToLobby = async function(themeId) {
-  currentThemeId = themeId;
-  const loaded = await loadScenarioModule(themeId);
-  if (!loaded) return;
+      const tagEl = document.getElementById('lobbyThemeTag');
+      const coverImg = document.getElementById('lobbyCoverImg');
+      const coverSub = document.getElementById('lobbyCoverSub');
+      const lobbyTitle = document.getElementById('lobbyTitle');
 
-  const tagEl = document.getElementById('lobbyThemeTag');
-  const coverImg = document.getElementById('lobbyCoverImg');
-  const coverSub = document.getElementById('lobbyCoverSub');
-  const lobbyTitle = document.getElementById('lobbyTitle');
+      if (themeId === 'winchester') {
+        tagEl.innerText = "폭풍우 치는 윈체스터 별장";
+        tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800";
+        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=600&q=80";
+        coverSub.innerText = "Penthouse in the Storm";
+        lobbyTitle.innerText = loaded.title || "폭풍우 치는 윈체스터 별장";
+      } else if (themeId === 'express') {
+        tagEl.innerText = "황야의 설원 특급";
+        tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
+        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80";
+        coverSub.innerText = "Aurora Express in Blizzard";
+        lobbyTitle.innerText = loaded.title || "황야의 설원 특급";
+      } else if (themeId === 'hospital') {
+        tagEl.innerText = "안개 낀 폐쇄병원";
+        tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800";
+        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80";
+        coverSub.innerText = "St. Helena Asylum in Mist";
+        lobbyTitle.innerText = loaded.title || "안개 낀 폐쇄병원";
+      } else if (themeId === 'glamping') {
+        tagEl.innerText = "비구름 몰려온 글램핑";
+        tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800";
+        coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80";
+        coverSub.innerText = "Valley Glamping in Heavy Rain";
+        lobbyTitle.innerText = loaded.title || "비구름 몰려온 글램핑";
+      }
 
-  if (themeId === 'winchester') {
-    tagEl.innerText = "폭풍우 치는 윈체스터 별장";
-    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800";
-    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=600&q=80";
-    coverSub.innerText = "Penthouse in the Storm";
-    lobbyTitle.innerText = loaded.title;
-  } else if (themeId === 'express') {
-    tagEl.innerText = "황야의 설원 특급";
-    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
-    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80";
-    coverSub.innerText = "Aurora Express in Blizzard";
-    lobbyTitle.innerText = loaded.title;
-  } else if (themeId === 'hospital') {
-    tagEl.innerText = "안개 낀 폐쇄병원";
-    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800";
-    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80";
-    coverSub.innerText = "St. Helena Asylum in Mist";
-    lobbyTitle.innerText = loaded.title;
-  } else if (themeId === 'glamping') {
-    tagEl.innerText = "비구름 몰려온 글램핑";
-    tagEl.className = "text-[11px] font-bold px-2 py-0.5 rounded bg-orange-950 text-orange-300 border border-orange-800";
-    coverImg.src = loaded.prologue?.bannerImg || "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80";
-    coverSub.innerText = "Valley Glamping in Heavy Rain";
-    lobbyTitle.innerText = loaded.title;
-  }
-
-  switchView('viewLobby');
-};
+      switchView('viewLobby');
+    };
 
     signInAnonymously(auth).then(cred => {
       currentUser = cred.user;
@@ -1542,7 +1540,7 @@ window.selectThemeAndGoToLobby = async function(themeId) {
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
-                <img src="${a.img}" onclick="window.openImageDetail('${a.img}', '${a.charName} 알리바이 (#${a.cardNum}/5)')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
+                ${a.img ? `<img src="${a.img}" onclick="window.openImageDetail('${a.img}', '${a.charName} 알리바이 (#${a.cardNum}/5)')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">` : ''}
                 <div class="min-w-0 flex-1">
                   <div class="text-amber-400 font-bold text-[11px] truncate">[알리바이 #${a.cardNum}/5] ${a.charName}</div>
                   <div class="text-neutral-200 text-[10px] truncate font-semibold">${a.title || ''}</div>
@@ -1564,7 +1562,7 @@ window.selectThemeAndGoToLobby = async function(themeId) {
           return `
             <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
               <div class="flex items-center space-x-2">
-                <img src="${clueImg}" onclick="window.openImageDetail('${clueImg}', '[현장 증거] ${c ? c.name : cid}')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">
+                ${clueImg ? `<img src="${clueImg}" onclick="window.openImageDetail('${clueImg}', '[현장 증거] ${c ? c.name : cid}')" class="w-10 h-10 rounded object-cover border border-amber-600/60 cursor-pointer hover:opacity-80 transition flex-shrink-0" title="클릭하여 확대">` : ''}
                 <div class="min-w-0 flex-1">
                   <span class="text-amber-400 font-bold text-[11px] block truncate">[현장 증거] ${c ? c.name : cid}</span>
                 </div>
@@ -1713,7 +1711,7 @@ window.selectThemeAndGoToLobby = async function(themeId) {
         item.className = "flex items-center justify-between p-1.5 bg-black/40 rounded border border-neutral-800 text-[11px]";
         item.innerHTML = `
           <div class="flex items-center space-x-1.5 truncate">
-            <img src="${clueImg}" class="w-6 h-6 rounded object-cover border border-amber-600/40">
+            ${clueImg ? `<img src="${clueImg}" class="w-6 h-6 rounded object-cover border border-amber-600/40">` : ''}
             <span class="text-neutral-300 truncate">[현장 증거] ${c.name}</span>
           </div>
           <button class="px-2 py-0.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded text-[10px] font-bold">실물 공개</button>
