@@ -1,4 +1,4 @@
-import { db, doc, setDoc, getDoc, updateDoc, onSnapshot } from "./firebase.js";
+import { db, doc, setDoc, getDoc, updateDoc, onSnapshot, runTransaction } from "./firebase.js";
 import { state, actions } from "./state.js";
 import {
   switchView,
@@ -8,7 +8,9 @@ import {
   renderCharacterSelection,
   renderPrologue,
   renderInGameDashboard,
-  renderEnding
+  renderEnding,
+  renderTimelineBoard,
+  parseTimelineLine
 } from "./ui.js";
 
 async function loadScenarioModule(scenarioId) {
@@ -24,6 +26,7 @@ async function loadScenarioModule(scenarioId) {
 }
 
 const INGAME_PHASES = ['R1', 'R2', 'R2_WHISPER', 'R3', 'R4', 'R4_WHISPER', 'R5_DEFENSE', 'FINAL_VOTE'];
+const TIMELINE_POST_PHASES = new Set(['PROLOGUE', ...INGAME_PHASES]);
 const FINAL_VOTE_SECONDS = 120;
 const MAX_PLAYERS = 5;
 
@@ -113,11 +116,20 @@ async function onTimerExpired(data) {
   }
 }
 
+function restoreHostNoticeDraft() {
+  const input = document.getElementById("inputHostNotice");
+  if (!input || state.hostNoticeDraft == null) return;
+  if (document.activeElement === input) return;
+  if (input.value !== state.hostNoticeDraft) input.value = state.hostNoticeDraft;
+}
+
 function handleStateUpdate(data, notifyDev = true) {
   latestRoomData = data;
   state.currentPhase = data.phase;
   state.isCurrentHost = (data.hostId === state.myPlayerId);
   document.body.dataset.phase = data.phase || "";
+  if (state.whisperDraft && state.whisperDraft.phase !== data.phase) state.whisperDraft = null;
+  restoreHostNoticeDraft();
 
   const pCount = Object.keys(data.players || {}).length;
   document.getElementById('displayRoomCode').innerText = data.roomCode;
@@ -143,6 +155,7 @@ function handleStateUpdate(data, notifyDev = true) {
   }
 
   updateSystemDiscordGuide(data);
+  renderTimelineBoard(data);
   handleWhisperNotice(data);
   handleSkipVoteModal(data);
   handleCardShareSync(data);
@@ -591,10 +604,94 @@ async function submitVote(targetCharId, data) {
   }
 }
 
+async function postTimeline(selections) {
+  if (!state.currentRoomCode || !latestRoomData || !state.currentScenario) return false;
+  if (!TIMELINE_POST_PHASES.has(latestRoomData.phase)) {
+    alert("지금은 타임라인을 공개할 수 없습니다.");
+    return false;
+  }
+  const me = latestRoomData.players?.[state.myPlayerId];
+  const char = state.currentScenario.characters.find(c => c.id === me?.charId);
+  if (!char || !Array.isArray(selections) || !selections.length) {
+    alert("공개할 줄을 선택하세요.");
+    return false;
+  }
+  const canLie = char.isKiller === true && Array.isArray(char.fakeTimeline);
+  const entries = [];
+  for (const selection of selections) {
+    const index = Number(selection.index);
+    const trueLine = char.timeline?.[index];
+    if (typeof trueLine !== "string") {
+      alert("공개할 수 없는 줄입니다.");
+      return false;
+    }
+    const fakeLine = canLie ? char.fakeTimeline[index] : undefined;
+    const useFake = !!selection.useFake;
+    if (useFake && typeof fakeLine !== "string") {
+      alert("시민은 자신의 타임라인을 그대로만 공개할 수 있습니다.");
+      return false;
+    }
+    const parsed = parseTimelineLine(useFake ? fakeLine : trueLine);
+    entries.push({
+      id: `${state.myPlayerId}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`,
+      pid: state.myPlayerId,
+      charId: char.id,
+      time: parsed.time,
+      text: parsed.text,
+      ts: Date.now() + index,
+      falsified: useFake,
+      sourceIndex: index
+    });
+  }
+
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  const pid = state.myPlayerId;
+  try {
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) return;
+      const fresh = snap.data();
+      if (!TIMELINE_POST_PHASES.has(fresh.phase)) throw new Error("locked");
+      const meFresh = fresh.players?.[pid];
+      if (!meFresh || meFresh.charId !== char.id) throw new Error("character");
+      const board = Array.isArray(fresh.timelineBoard) ? fresh.timelineBoard : [];
+      tx.update(ref, { timelineBoard: board.concat(entries) });
+    });
+  } catch (err) {
+    console.error(err);
+    alert("타임라인을 공개하지 못했습니다.");
+    return false;
+  }
+  return true;
+}
+
+async function removeTimelineEntry(id) {
+  if (!id || !state.currentRoomCode) return;
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  const pid = state.myPlayerId;
+  try {
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) return;
+      const fresh = snap.data();
+      if (fresh.phase === "ENDING" || fresh.phase === "LOBBY") return;
+      const board = Array.isArray(fresh.timelineBoard) ? fresh.timelineBoard : [];
+      const next = board.filter(entry => !(entry.id === id && entry.pid === pid));
+      if (next.length === board.length) return;
+      tx.update(ref, { timelineBoard: next });
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 actions.assignRandomCharacters = assignRandomCharacters;
 actions.investigateAlibi = investigateAlibi;
 actions.shareCardToWhisperRoom = shareCardToWhisperRoom;
 actions.submitVote = submitVote;
+actions.postTimeline = postTimeline;
+actions.removeTimelineEntry = removeTimelineEntry;
+actions.getRoomData = () => latestRoomData;
 
 export function initGame() {
   document.getElementById('btnHeaderHome').addEventListener('click', () => {
@@ -606,8 +703,12 @@ export function initGame() {
     switchView('viewThemeSelect');
   });
 
+  const hostNoticeInput = document.getElementById('inputHostNotice');
+  hostNoticeInput.addEventListener('input', () => {
+    state.hostNoticeDraft = hostNoticeInput.value;
+  });
   document.getElementById('btnSendHostNotice').addEventListener('click', async () => {
-    const val = document.getElementById('inputHostNotice').value.trim();
+    const val = hostNoticeInput.value.trim();
     if (!val || !state.currentRoomCode) return;
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       announcement: val,
@@ -615,7 +716,8 @@ export function initGame() {
     });
   });
   document.getElementById('btnClearHostNotice').addEventListener('click', async () => {
-    document.getElementById('inputHostNotice').value = "";
+    state.hostNoticeDraft = "";
+    hostNoticeInput.value = "";
     if (!state.currentRoomCode) return;
     await updateDoc(doc(db, "rooms", state.currentRoomCode), { announcement: "" });
   });
@@ -670,7 +772,8 @@ export function initGame() {
       sharedCard: null,
       votes: {},
       announcement: "",
-      systemNotice: ""
+      systemNotice: "",
+      timelineBoard: []
     };
     if (new URLSearchParams(location.search).get("test") === "1") roomData.test = true;
 
