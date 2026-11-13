@@ -36,11 +36,11 @@ export default {
         "23:05 - 차장의 호각 소리와 총성을 듣고 특실 문을 부수고 진입"
       ],
       alibiCards: [
-        { id: "jac_1", name: "총열이 식어 있는 콜트 리볼버", desc: "잭의 홀스터에 꽂힌 45구경 권총. 최근 발사된 화약 냄새가 전혀 나지 않음." },
-        { id: "jac_2", name: "녹슨 옛 연방 보안관 배지", desc: "도금은 벗겨졌으나 은퇴 후에도 늘 품에 지니고 다니는 정의의 상징." },
-        { id: "jac_3", name: "10년 전 가족 몰살 신문 스크랩", desc: "밴더빌트 철도 회사의 토지 강탈 방화 사건이 보도된 낡은 신문 기사." },
-        { id: "jac_4", name: "눈 묻은 양모 가죽 코트", desc: "열차 외곽 난간을 순찰하며 기온을 체크하다 눈보라에 젖은 두꺼운 코트." },
-        { id: "jac_5", name: "식당칸 버번 위스키 영수증", desc: "사건 직전까지 식당칸 바에 머물렀음을 증명하는 바텐더의 자필 계산서." }
+        { id: "jac_1", name: "총열이 식어 있는 콜트 리볼버", desc: "잭의 홀스터에 꽂힌 45구경 권총. 최근 발사된 화약 냄새가 전혀 나지 않음.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-jac_1.jpg" },
+        { id: "jac_2", name: "녹슨 옛 연방 보안관 배지", desc: "도금은 벗겨졌으나 은퇴 후에도 늘 품에 지니고 다니는 정의의 상징.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-jac_2.jpg" },
+        { id: "jac_3", name: "10년 전 가족 몰살 신문 스크랩", desc: "밴더빌트 철도 회사의 토지 강탈 방화 사건이 보도된 낡은 신문 기사.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-jac_3.jpg" },
+        { id: "jac_4", name: "눈 묻은 양모 가죽 코트", desc: "열차 외곽 난간을 순찰하며 기온을 체크하다 눈보라에 젖은 두꺼운 코트.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-jac_4.jpg" },
+        { id: "jac_5", name: "식당칸 버번 위스키 영수증", desc: "사건 직전까지 식당칸 바에 머물렀음을 증명하는 바텐더의 자필 계산서.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-jac_5.jpg" }
       ]
     },
     {
@@ -58,11 +58,11 @@ export default {
         "22:50 - 자신의 침실로 돌아와 피 묻은 장갑을 소각하고 금광 증서를 은닉"
       ],
       alibiCards: [
-        { id: "viv_1", name: "탄약이 1발 비어 있는 2연발 데린저", desc: "비비안의 핸드백 비밀 칸에 숨겨져 있던 소형 호신용 은장 권총." },
-        { id: "viv_2", name: "코르셋 속에 숨긴 순금 양도 증서", desc: "패트릭의 서명이 날인된 500온스 금광 독점 채굴권 원본 문서." },
-        { id: "viv_3", name: "깃털이 묻은 비단 이브닝 드레스", desc: "소음용 베개가 터지며 드레스 안감 틈새에 달라붙은 거위 털 조각." },
-        { id: "viv_4", name: "화약 그을음이 남은 레이스 장갑", desc: "초근접 사격 시 발생하는 미세한 흑색 화약 잔류물이 묻은 레이스 장갑." },
-        { id: "viv_5", name: "아버지의 클론다이크 광산 계약서", desc: "밴더빌트에게 사기당해 빼앗겼던 집안의 옛 금광 소유권 문서." }
+        { id: "viv_1", name: "탄약이 1발 비어 있는 2연발 데린저", desc: "비비안의 핸드백 비밀 칸에 숨겨져 있던 소형 호신용 은장 권총.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-viv_1.jpg" },
+        { id: "viv_2", name: "코르셋 속에 숨긴 순금 양도 증서", desc: "패트릭의 서명이 날인된 500온스 금광 독점 채굴권 원본 문서.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-viv_2.jpg" },
+        { id: "viv_3", name: "깃털이 묻은 비단 이브닝 드레스", desc: "소음용 베개가 터지며 드레스 안감 틈새에 달라붙은 거위 털 조각.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-viv_3.jpg" },
+        { id: "viv_4", name: "화약 그을음이 남은 레이스 장갑", desc: "초근접 사격 시 발생하는 미세한 흑색 화약 잔류물이 묻은 레이스 장갑.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-viv_4.jpg" },
+        { id: "viv_5", name: "아버지의 클론다이크 광산 계약서", desc: "밴더빌트에게 사기당해 빼앗겼던 집안의 옛 금광 소유권 문서.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-viv_5.jpg" }
       ]
     },
     {
@@ -80,11 +80,11 @@ export default {
         "23:05 - 비상벨이 울리자 검시관 자격으로 현장에 달려와 사망 판정"
       ],
       alibiCards: [
-        { id: "sam_1", name: "의료 가방 속 만돌린 약병", desc: "신경 안정과 수면 유도를 위해 조제해 둔 진통 마취제 병." },
-        { id: "sam_2", name: "거액의 도박 빚 차용 각서", desc: "패트릭 밴더빌트의 이름으로 서명된 3만 달러의 사채 빚 독촉장." },
-        { id: "sam_3", name: "의사 가운에 튄 적색 소독약", desc: "피처럼 붉게 보이지만 실제로는 요오드 성분의 외용 소독약 얼룩." },
-        { id: "sam_4", name: "위조된 볼티모어 의대 졸업장", desc: "사무엘의 비밀 가방 깊숙한 곳에서 발견된 조작된 의사 면허증." },
-        { id: "sam_5", name: "철도 회사 촉탁 계약서", desc: "열차 운행 중 발생하는 의료 사고에 대한 면책 보장 조항이 담긴 계약서." }
+        { id: "sam_1", name: "의료 가방 속 만돌린 약병", desc: "신경 안정과 수면 유도를 위해 조제해 둔 진통 마취제 병.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-sam_1.jpg" },
+        { id: "sam_2", name: "거액의 도박 빚 차용 각서", desc: "패트릭 밴더빌트의 이름으로 서명된 3만 달러의 사채 빚 독촉장.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-sam_2.jpg" },
+        { id: "sam_3", name: "의사 가운에 튄 적색 소독약", desc: "피처럼 붉게 보이지만 실제로는 요오드 성분의 외용 소독약 얼룩.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-sam_3.jpg" },
+        { id: "sam_4", name: "위조된 볼티모어 의대 졸업장", desc: "사무엘의 비밀 가방 깊숙한 곳에서 발견된 조작된 의사 면허증.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-sam_4.jpg" },
+        { id: "sam_5", name: "철도 회사 촉탁 계약서", desc: "열차 운행 중 발생하는 의료 사고에 대한 면책 보장 조항이 담긴 계약서.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-sam_5.jpg" }
       ]
     },
     {
@@ -102,11 +102,11 @@ export default {
         "23:05 - 총성 보고를 듣고 1등실 복도로 뛰쳐나옴"
       ],
       alibiCards: [
-        { id: "cla_1", name: "찢어진 정략결혼 서약서", desc: "패트릭 삼촌이 클라라를 억지로 시집보내려 했던 늙은 부호와의 혼인 계약서 조각." },
-        { id: "cla_2", name: "복제된 특실 황동 열쇠", desc: "차장에게 뇌물을 주고 몰래 복사해 둔 삼촌 방의 스페어 키." },
-        { id: "cla_3", name: "향수 묻은 손수건", desc: "클라라가 평소 사용하는 뉴욕 상류층의 고급 바이올렛 향수 냄새가 밴 천." },
-        { id: "cla_4", name: "가문의 법정 대리인 전보", desc: "삼촌의 횡령을 폭로하면 상속권을 전액 되찾을 수 있다는 변호사의 전보문." },
-        { id: "cla_5", name: "진주 박힌 휴대용 망원경", desc: "설원의 풍경을 감상하기 위해 소지하고 있던 은제 오페라 글래스." }
+        { id: "cla_1", name: "찢어진 정략결혼 서약서", desc: "패트릭 삼촌이 클라라를 억지로 시집보내려 했던 늙은 부호와의 혼인 계약서 조각.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-cla_1.jpg" },
+        { id: "cla_2", name: "복제된 특실 황동 열쇠", desc: "차장에게 뇌물을 주고 몰래 복사해 둔 삼촌 방의 스페어 키.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-cla_2.jpg" },
+        { id: "cla_3", name: "향수 묻은 손수건", desc: "클라라가 평소 사용하는 뉴욕 상류층의 고급 바이올렛 향수 냄새가 밴 천.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-cla_3.jpg" },
+        { id: "cla_4", name: "가문의 법정 대리인 전보", desc: "삼촌의 횡령을 폭로하면 상속권을 전액 되찾을 수 있다는 변호사의 전보문.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-cla_4.jpg" },
+        { id: "cla_5", name: "진주 박힌 휴대용 망원경", desc: "설원의 풍경을 감상하기 위해 소지하고 있던 은제 오페라 글래스.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-cla_5.jpg" }
       ]
     },
     {
@@ -124,41 +124,41 @@ export default {
         "23:05 - 소란을 듣고 문을 부수는 잭 보안관과 함께 특실로 난입"
       ],
       alibiCards: [
-        { id: "ale_1", name: "러시아 제국 이중 바브카 암호문", desc: "상트페테르부르크 본국으로 송신하려던 비밀 보고서 전보 초안." },
-        { id: "ale_2", name: "무거운 놋쇠 너클과 나이프", desc: "백병전에 능한 알렉산더의 군용 코사크 단검과 황동 너클." },
-        { id: "ale_3", name: "패트릭의 고용 계약서", desc: "월 500달러에 특급 경호를 수행한다는 내용의 공식 계약서." },
-        { id: "ale_4", name: "보드카 플라스크", desc: "혹한의 추위를 견디기 위해 항상 품에 넣고 마시는 강한 러시아산 보드카." },
-        { id: "ale_5", name: "군용 모피 털모자와 장화", desc: "설원 환경에 특화된 두꺼운 러시아군 제식 방한구." }
+        { id: "ale_1", name: "러시아 제국 이중 바브카 암호문", desc: "상트페테르부르크 본국으로 송신하려던 비밀 보고서 전보 초안.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-ale_1.jpg" },
+        { id: "ale_2", name: "무거운 놋쇠 너클과 나이프", desc: "백병전에 능한 알렉산더의 군용 코사크 단검과 황동 너클.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-ale_2.jpg" },
+        { id: "ale_3", name: "패트릭의 고용 계약서", desc: "월 500달러에 특급 경호를 수행한다는 내용의 공식 계약서.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-ale_3.jpg" },
+        { id: "ale_4", name: "보드카 플라스크", desc: "혹한의 추위를 견디기 위해 항상 품에 넣고 마시는 강한 러시아산 보드카.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-ale_4.jpg" },
+        { id: "ale_5", name: "군용 모피 털모자와 장화", desc: "설원 환경에 특화된 두꺼운 러시아군 제식 방한구.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/alibi-ale_5.jpg" }
       ]
     }
   ],
 
   // 3. 현장 증거 24종 덱
   clues: [
-    { id: "e_c01", name: "이마에 총상을 입은 패트릭 시신", desc: "침대 위에 반듯하게 누운 채 미간에 정확히 한 발의 탄환을 맞고 즉사한 시신." },
-    { id: "e_c02", name: "구멍 뚫린 거위털 베개", desc: "총소리를 줄이기 위해 소음기로 사용되어 타버린 화약 구멍과 흩어진 깃털들." },
-    { id: "e_c03", name: "벽난로 속 타버린 순금 탄피", desc: "난로 속 붉은 숯 사이에 녹아내린 41구경 순금 데린저 탄환의 껍데기." },
-    { id: "e_c04", name: "특실 탁자 위의 빈 샴페인 잔 2개", desc: "패트릭과 여성이 단둘이 마신 흔적. 잔 가장자리에 붉은 루즈 자국이 선명함." },
-    { id: "e_c05", name: "안쪽에서 걸려 있던 철제 빗장", desc: "문틈으로 얇은 철사를 밀어 넣어 안쪽 빗장을 걸고 빠져나갈 수 있는 특수 구조." },
-    { id: "e_c06", name: "창틀의 얼어붙은 성에", desc: "창문은 영하의 기온으로 꽁꽁 얼어붙어 있어 외부 침입이나 탈출이 불가능함." },
-    { id: "e_c07", name: "바닥에 떨어진 보라색 실크 리본", desc: "클라라의 드레스 장식에서 뜯겨나간 것으로 추정되는 고급 실크 천 조각." },
-    { id: "e_c08", name: "복도 카펫의 거위털 한 올", desc: "범인이 방을 빠져나오며 옷에 묻어 있던 베개 깃털이 복도 바닥에 떨어진 것." },
-    { id: "e_c09", name: "사무엘의 흘려진 수면제 앰플", desc: "특실 문턱 밑에서 발견된 사무엘의 이니셜이 각인된 진통 수면제 유리병." },
-    { id: "e_c10", name: "잭의 홀스터 속 45구경 탄환 6발", desc: "잭의 권총 탄창은 한 발도 비어 있지 않고 가득 채워져 있음." },
-    { id: "e_c11", name: "도난당한 금광 채굴권 보관함", desc: "패트릭의 옷장 속 삼중 금고가 열려 있고 금광 증서만 사라짐." },
-    { id: "e_c12", name: "식당칸 바텐더의 진술서", desc: "'잭은 22시 35분까지 바에 앉아 버번을 마시고 있었다'는 내용의 증언." },
-    { id: "e_c13", name: "비비안의 핸드백 속 빈 탄약 상자", desc: "순금 탄환이 들어 있던 작은 보석함 모양의 탄약 상자가 비어 있음." },
-    { id: "e_c14", name: "화약 냄새가 배어 있는 레이스 손수건", desc: "총기를 발사한 직후 손을 닦은 흔적이 뚜렷한 고급 프랑스산 손수건." },
-    { id: "e_c15", name: "패트릭의 유언장 초안", desc: "'모든 금광 지분을 조카 클라라에게 상속한다'는 미완성 공증 문서." },
-    { id: "e_c16", name: "알렉산더의 부러진 마스터키 핀", desc: "환풍구를 조사하다 모서리에 부딪혀 휘어진 알렉산더의 특수 공구." },
-    { id: "e_c17", name: "침대 머리맡의 깨진 회중시계", desc: "몸싸움 충격으로 22시 30분에 바늘이 멈춰 선 패트릭의 황금 시계." },
-    { id: "e_c18", name: "화물칸의 황실 밀반출 골드바", desc: "패트릭이 러시아 황실로부터 불법 밀수하려던 제정 러시아 문장의 금괴 상자." },
-    { id: "e_c19", name: "사무엘의 가짜 의사 신분증", desc: "볼티모어 의대 학적부에 등록되지 않은 가짜 면허임을 알리는 전보." },
-    { id: "e_c20", name: "특실 카펫 위의 붉은 립스틱 자국", desc: "샴페인 잔에 묻은 것과 정확히 성분이 일치하는 비비안의 체리 레드 루즈." },
-    { id: "e_c21", name: "난로 속 타버린 깃털 베개 모서리", desc: "범행 후 증거를 인멸하기 위해 난로에 쑤셔 넣었으나 덜 탄 베개 커버." },
-    { id: "e_c22", name: "외부 난간의 눈 덮인 발자국", desc: "영하 30도의 눈보라 속에서 난간을 건너뛴 사람은 아무도 없음을 증명하는 눈 상태." },
-    { id: "e_c23", name: "열차 차장의 마스터키 반납 대장", desc: "클라라가 차장에게 돈을 주고 예비 열쇠를 빌려 갔던 기록." },
-    { id: "e_c24", name: "클론다이크 광산 참사 보고서", desc: "비비안의 아버지가 매몰되어 사망했던 밴더빌트 광산의 부실 공사 일지." }
+    { id: "e_c01", name: "이마에 총상을 입은 패트릭 시신", desc: "침대 위에 반듯하게 누운 채 미간에 정확히 한 발의 탄환을 맞고 즉사한 시신.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c01.jpg" },
+    { id: "e_c02", name: "구멍 뚫린 거위털 베개", desc: "총소리를 줄이기 위해 소음기로 사용되어 타버린 화약 구멍과 흩어진 깃털들.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c02.jpg" },
+    { id: "e_c03", name: "벽난로 속 타버린 순금 탄피", desc: "난로 속 붉은 숯 사이에 녹아내린 41구경 순금 데린저 탄환의 껍데기.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c03.jpg" },
+    { id: "e_c04", name: "특실 탁자 위의 빈 샴페인 잔 2개", desc: "패트릭과 여성이 단둘이 마신 흔적. 잔 가장자리에 붉은 루즈 자국이 선명함.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c04.jpg" },
+    { id: "e_c05", name: "안쪽에서 걸려 있던 철제 빗장", desc: "문틈으로 얇은 철사를 밀어 넣어 안쪽 빗장을 걸고 빠져나갈 수 있는 특수 구조.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c05.jpg" },
+    { id: "e_c06", name: "창틀의 얼어붙은 성에", desc: "창문은 영하의 기온으로 꽁꽁 얼어붙어 있어 외부 침입이나 탈출이 불가능함.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c06.jpg" },
+    { id: "e_c07", name: "바닥에 떨어진 보라색 실크 리본", desc: "클라라의 드레스 장식에서 뜯겨나간 것으로 추정되는 고급 실크 천 조각.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c07.jpg" },
+    { id: "e_c08", name: "복도 카펫의 거위털 한 올", desc: "범인이 방을 빠져나오며 옷에 묻어 있던 베개 깃털이 복도 바닥에 떨어진 것.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c08.jpg" },
+    { id: "e_c09", name: "사무엘의 흘려진 수면제 앰플", desc: "특실 문턱 밑에서 발견된 사무엘의 이니셜이 각인된 진통 수면제 유리병.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c09.jpg" },
+    { id: "e_c10", name: "잭의 홀스터 속 45구경 탄환 6발", desc: "잭의 권총 탄창은 한 발도 비어 있지 않고 가득 채워져 있음.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c10.jpg" },
+    { id: "e_c11", name: "도난당한 금광 채굴권 보관함", desc: "패트릭의 옷장 속 삼중 금고가 열려 있고 금광 증서만 사라짐.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c11.jpg" },
+    { id: "e_c12", name: "식당칸 바텐더의 진술서", desc: "'잭은 22시 35분까지 바에 앉아 버번을 마시고 있었다'는 내용의 증언.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c12.jpg" },
+    { id: "e_c13", name: "비비안의 핸드백 속 빈 탄약 상자", desc: "순금 탄환이 들어 있던 작은 보석함 모양의 탄약 상자가 비어 있음.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c13.jpg" },
+    { id: "e_c14", name: "화약 냄새가 배어 있는 레이스 손수건", desc: "총기를 발사한 직후 손을 닦은 흔적이 뚜렷한 고급 프랑스산 손수건.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c14.jpg" },
+    { id: "e_c15", name: "패트릭의 유언장 초안", desc: "'모든 금광 지분을 조카 클라라에게 상속한다'는 미완성 공증 문서.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c15.jpg" },
+    { id: "e_c16", name: "알렉산더의 부러진 마스터키 핀", desc: "환풍구를 조사하다 모서리에 부딪혀 휘어진 알렉산더의 특수 공구.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c16.jpg" },
+    { id: "e_c17", name: "침대 머리맡의 깨진 회중시계", desc: "몸싸움 충격으로 22시 30분에 바늘이 멈춰 선 패트릭의 황금 시계.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c17.jpg" },
+    { id: "e_c18", name: "화물칸의 황실 밀반출 골드바", desc: "패트릭이 러시아 황실로부터 불법 밀수하려던 제정 러시아 문장의 금괴 상자.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c18.jpg" },
+    { id: "e_c19", name: "사무엘의 가짜 의사 신분증", desc: "볼티모어 의대 학적부에 등록되지 않은 가짜 면허임을 알리는 전보.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c19.jpg" },
+    { id: "e_c20", name: "특실 카펫 위의 붉은 립스틱 자국", desc: "샴페인 잔에 묻은 것과 정확히 성분이 일치하는 비비안의 체리 레드 루즈.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c20.jpg" },
+    { id: "e_c21", name: "난로 속 타버린 깃털 베개 모서리", desc: "범행 후 증거를 인멸하기 위해 난로에 쑤셔 넣었으나 덜 탄 베개 커버.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c21.jpg" },
+    { id: "e_c22", name: "외부 난간의 눈 덮인 발자국", desc: "영하 30도의 눈보라 속에서 난간을 건너뛴 사람은 아무도 없음을 증명하는 눈 상태.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c22.jpg" },
+    { id: "e_c23", name: "열차 차장의 마스터키 반납 대장", desc: "클라라가 차장에게 돈을 주고 예비 열쇠를 빌려 갔던 기록.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c23.jpg" },
+    { id: "e_c24", name: "클론다이크 광산 참사 보고서", desc: "비비안의 아버지가 매몰되어 사망했던 밴더빌트 광산의 부실 공사 일지.", img: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/clue-e_c24.jpg" }
   ],
 
   // 4. 최종 엔딩 및 에필로그
