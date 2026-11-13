@@ -64,7 +64,17 @@ window.openImageDetail = function(imgSrc, title) {
   document.getElementById('imageDetailModal').classList.remove('hidden');
 };
 
-window.showEvidenceModal = function(header, title, desc, img) {
+let evidencePinPayload = null;
+
+function syncEvidencePinButton() {
+  const btn = document.getElementById('btnPinFromEvidence');
+  if (!btn) return;
+  const data = actions.getRoomData?.();
+  const open = TIMELINE_VISIBLE.has(data?.phase) && data.phase !== 'ENDING';
+  btn.classList.toggle('hidden', !evidencePinPayload || !open);
+}
+
+window.showEvidenceModal = function(header, title, desc, img, pin) {
   document.getElementById('evidenceModalHeader').innerText = header || "";
   document.getElementById('evidenceModalTitle').innerText = title || "";
   document.getElementById('evidenceModalDesc').innerText = desc || "";
@@ -78,6 +88,8 @@ window.showEvidenceModal = function(header, title, desc, img) {
     imgEl.classList.add('hidden');
     imgEl.onclick = null;
   }
+  evidencePinPayload = pin && pin.cardType ? pin : null;
+  syncEvidencePinButton();
   document.getElementById('evidenceModal').classList.remove('hidden');
 };
 
@@ -286,6 +298,7 @@ export function renderPrologue(data) {
 
   const storyContainer = document.getElementById('prologueStoryText');
   storyContainer.innerHTML = state.currentScenario.prologue.story.map(st => `<p>• ${st}</p>`).join('');
+  renderPrologueCaseLog();
 
   const myInfo = data.players[state.myPlayerId];
   const proceedBtn = document.getElementById('btnProceedToRound1');
@@ -298,6 +311,36 @@ export function renderPrologue(data) {
     proceedBtn.classList.add('hidden');
     hostNotice.classList.remove('hidden');
   }
+}
+
+function renderPrologueCaseLog() {
+  const log = document.getElementById('prologueCaseLog');
+  const list = document.getElementById('prologueCaseLogList');
+  if (!log || !list) return;
+  const anchors = Array.isArray(state.currentScenario?.caseTimeline) ? state.currentScenario.caseTimeline : [];
+  log.classList.toggle('hidden', anchors.length === 0);
+  list.replaceChildren();
+  anchors.forEach(item => {
+    const li = document.createElement('li');
+    li.className = 'tl-prologue-row';
+    const meta = document.createElement('div');
+    meta.className = 'flex flex-wrap items-center gap-1 mb-0.5';
+    const time = document.createElement('span');
+    time.className = 'tl-time';
+    time.textContent = item.time || '';
+    meta.appendChild(time);
+    if (item.place) {
+      const place = document.createElement('span');
+      place.className = 'tl-place';
+      place.textContent = item.place;
+      meta.appendChild(place);
+    }
+    const text = document.createElement('p');
+    text.className = 'tl-text text-[11px] sm:text-xs text-slate-100';
+    text.textContent = item.text || '';
+    li.append(meta, text);
+    list.appendChild(li);
+  });
 }
 
 export function renderInGameDashboard(data) {
@@ -448,8 +491,13 @@ function renderInventory(data) {
 
   document.getElementById('totalInventoryCount').innerText = `총 ${totalCount}건`;
 
+  const canPin = data.phase !== 'ENDING' && data.phase !== 'LOBBY';
+  const pinBtn = (card, key) => canPin
+    ? `<button type="button" class="js-pin-card px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 rounded text-[10px] font-bold" data-card="${card}" data-key="${key}">타임라인에 고정</button>`
+    : '';
+
   if (myInv.alibis && myInv.alibis.length > 0) {
-    alibiList.innerHTML = myInv.alibis.map(a => {
+    alibiList.innerHTML = myInv.alibis.map((a, index) => {
       return `
         <div class="p-2 bg-neutral-900/80 border border-neutral-700/80 rounded text-xs space-y-1.5 shadow">
           <div class="flex items-center space-x-2">
@@ -460,6 +508,10 @@ function renderInventory(data) {
             </div>
           </div>
           <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${a.text}</p>
+          <div class="flex flex-wrap gap-1">
+            <button type="button" class="js-open-card px-2 py-1 bg-neutral-800 text-neutral-200 rounded text-[10px] font-bold" data-card="alibi" data-key="${index}">자세히</button>
+            ${pinBtn('alibi', index)}
+          </div>
         </div>
       `;
     }).join('');
@@ -481,6 +533,10 @@ function renderInventory(data) {
             </div>
           </div>
           <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${c ? c.desc : ''}</p>
+          <div class="flex flex-wrap gap-1">
+            <button type="button" class="js-open-card px-2 py-1 bg-neutral-800 text-neutral-200 rounded text-[10px] font-bold" data-card="clue" data-key="${cid}">자세히</button>
+            ${pinBtn('clue', cid)}
+          </div>
         </div>
       `;
     }).join('');
@@ -642,15 +698,18 @@ function renderWhisperCards(data, myRoomType) {
     const clueImg = c.img || "";
 
     const item = document.createElement('div');
-    item.className = "flex items-center justify-between p-1.5 bg-black/40 rounded border border-neutral-800 text-[11px]";
+    item.className = "flex items-center justify-between gap-1 p-1.5 bg-black/40 rounded border border-neutral-800 text-[11px]";
     item.innerHTML = `
-      <div class="flex items-center space-x-1.5 truncate">
-        ${clueImg ? `<img src="${clueImg}" loading="lazy" class="w-6 h-6 rounded object-cover border border-amber-600/40">` : ''}
+      <div class="flex items-center space-x-1.5 min-w-0">
+        ${clueImg ? `<img src="${clueImg}" loading="lazy" class="w-6 h-6 rounded object-cover border border-amber-600/40 shrink-0">` : ''}
         <span class="text-neutral-300 truncate">[현장 증거] ${c.name}</span>
       </div>
-      <button class="px-2 py-0.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded text-[10px] font-bold">실물 공개</button>
+      <div class="flex shrink-0 gap-1">
+        <button type="button" class="js-pin-card px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 rounded text-[10px] font-bold" data-card="clue" data-key="${cid}">고정</button>
+        <button type="button" class="js-share-card px-2 py-0.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded text-[10px] font-bold">실물 공개</button>
+      </div>
     `;
-    item.querySelector('button').addEventListener('click', () => {
+    item.querySelector('.js-share-card').addEventListener('click', () => {
       actions.shareCardToWhisperRoom(myRoomType, `[현장 증거] ${c.name}`, c.desc, clueImg, data);
     });
     list.appendChild(item);
@@ -791,6 +850,11 @@ const TIMELINE_VISIBLE = new Set([
   "PROLOGUE", "R1", "R2", "R2_WHISPER", "R3", "R4", "R4_WHISPER", "R5_DEFENSE", "FINAL_VOTE", "ENDING"
 ]);
 
+const TIMELINE_KIND_LABEL = { record: "기록", statement: "진술", evidence: "증거" };
+
+let pinTarget = null;
+let evidenceById = new Map();
+
 export function parseTimelineLine(line) {
   const raw = String(line ?? "").trim();
   const match = raw.match(/^(\d{1,2}):(\d{2})\s*[-–—]\s*(.*)$/);
@@ -801,18 +865,61 @@ export function parseTimelineLine(line) {
   };
 }
 
-function timelineTimeKey(time) {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(String(time || "").trim());
+function timelineStartKey(time) {
+  const match = /^(\d{1,2}):(\d{2})/.exec(String(time || "").trim());
   if (!match) return Number.POSITIVE_INFINITY;
-  return Number(match[1]) * 60 + Number(match[2]);
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) return Number.POSITIVE_INFINITY;
+  return hour * 60 + minute;
 }
 
 function sortTimelineEntries(entries) {
-  return entries.slice().sort((a, b) => {
-    const diff = timelineTimeKey(a.time) - timelineTimeKey(b.time);
-    if (diff !== 0) return diff;
-    return (a.ts || 0) - (b.ts || 0);
-  });
+  return entries
+    .map((entry, index) => ({ entry, index }))
+    .sort((a, b) => {
+      const diff = timelineStartKey(a.entry.time) - timelineStartKey(b.entry.time);
+      if (diff !== 0) return diff;
+      const ao = Number.isFinite(a.entry.order) ? a.entry.order : (a.entry.ts || 0);
+      const bo = Number.isFinite(b.entry.order) ? b.entry.order : (b.entry.ts || 0);
+      if (ao !== bo) return ao - bo;
+      return a.index - b.index;
+    })
+    .map(item => item.entry);
+}
+
+function caseAnchorEntries() {
+  const list = state.currentScenario?.caseTimeline;
+  if (!Array.isArray(list)) return [];
+  return list.filter(item => item && (item.time || item.text || item.place)).map((item, index) => ({
+    kind: "record",
+    id: `case-${index}`,
+    time: String(item.time || ""),
+    place: String(item.place || ""),
+    text: String(item.text || ""),
+    order: index
+  }));
+}
+
+function boardEntries(data) {
+  const board = Array.isArray(data?.timelineBoard) ? data.timelineBoard : [];
+  return board.map(entry => ({
+    ...entry,
+    kind: entry.kind === "evidence" ? "evidence" : "statement"
+  }));
+}
+
+function mergedTimeline(data) {
+  return sortTimelineEntries(caseAnchorEntries().concat(boardEntries(data)));
+}
+
+function entryVisible(entry) {
+  const type = state.timelineTypeFilter || "all";
+  if (type !== "all" && entry.kind !== type) return false;
+  const who = state.timelineFilter || "all";
+  if (who === "all") return true;
+  if (entry.kind === "record") return false;
+  return entry.charId === who;
 }
 
 function formatTimelineEntry(entry) {
@@ -830,18 +937,36 @@ function killerCanChooseLie(char) {
   return !!(char && char.isKiller === true && Array.isArray(char.fakeTimeline) && char.fakeTimeline.length);
 }
 
+function timelinePhaseLocked(data) {
+  return !data || data.phase === "ENDING" || data.phase === "LOBBY";
+}
+
 export function renderTimelineBoard(data) {
   const panel = document.getElementById("timelineBoard");
   if (!panel) return;
   const postModal = document.getElementById("timelinePostModal");
   if (postModal && !postModal.classList.contains("hidden")) {
     const ownerGone = postModal.dataset.owner !== state.myPlayerId;
-    const phaseLocked = !data || data.phase === "ENDING" || data.phase === "LOBBY";
-    if (ownerGone || phaseLocked) postModal.classList.add("hidden");
+    if (ownerGone || timelinePhaseLocked(data)) postModal.classList.add("hidden");
   }
+  const pinModal = document.getElementById("timelinePinModal");
+  if (pinModal && !pinModal.classList.contains("hidden")) {
+    const ownerGone = pinModal.dataset.owner !== state.myPlayerId;
+    if (ownerGone || timelinePhaseLocked(data)) pinModal.classList.add("hidden");
+  }
+  syncEvidencePinButton();
+
   const visible = !!(data && state.currentScenario && TIMELINE_VISIBLE.has(data.phase));
   panel.classList.toggle("hidden", !visible);
   if (!visible) return;
+
+  if (state.timelineScenarioId !== state.currentScenario.id) {
+    state.timelineScenarioId = state.currentScenario.id;
+    state.timelineFilter = "all";
+    state.timelineTypeFilter = "all";
+    const host = document.getElementById("timelineFilters");
+    if (host) delete host.dataset.signature;
+  }
 
   if (state.timelineCollapsed == null) {
     state.timelineCollapsed = window.matchMedia("(max-width: 639px)").matches;
@@ -854,7 +979,7 @@ export function renderTimelineBoard(data) {
   const toggle = document.getElementById("btnToggleTimeline");
   if (toggle) toggle.setAttribute("aria-expanded", state.timelineCollapsed ? "false" : "true");
 
-  const entries = sortTimelineEntries(Array.isArray(data.timelineBoard) ? data.timelineBoard : []);
+  const entries = mergedTimeline(data);
   const count = document.getElementById("timelineCount");
   if (count) count.textContent = entries.length ? `(${entries.length})` : "";
 
@@ -876,14 +1001,28 @@ export function renderTimelineBoard(data) {
   const lockNote = document.getElementById("timelineLockNote");
   if (lockNote) {
     lockNote.classList.toggle("hidden", !locked);
-    if (locked) lockNote.textContent = "엔딩: 더 이상 올리거나 내릴 수 없습니다. 거짓으로 공개된 줄이 표시됩니다.";
+    if (locked) lockNote.textContent = "엔딩: 더 이상 올리거나 고정하거나 내릴 수 없습니다. 거짓으로 공개된 진술이 표시됩니다.";
   }
 
-  if (state.timelineFilter !== "all" && !entries.some(entry => entry.charId === state.timelineFilter)) {
+  if (state.timelineFilter !== "all" && !entries.some(entry => entry.kind !== "record" && entry.charId === state.timelineFilter)) {
     state.timelineFilter = "all";
   }
   renderTimelineFilters(entries);
-  renderTimelineEntries(entries.filter(entry => state.timelineFilter === "all" || entry.charId === state.timelineFilter), data, locked);
+  renderTimelineEntries(entries.filter(entryVisible), data, locked);
+}
+
+function chipButton(kind, id, name, active) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.dataset.filterKind = kind;
+  btn.dataset.filter = id;
+  btn.className = `timeline-filter px-2 py-0.5 rounded border text-[10px] font-bold ${
+    active
+      ? "bg-amber-900 border-amber-600 text-amber-100"
+      : "bg-neutral-900 border-neutral-700 text-neutral-300"
+  }`;
+  btn.textContent = name;
+  return btn;
 }
 
 function renderTimelineFilters(entries) {
@@ -891,28 +1030,39 @@ function renderTimelineFilters(entries) {
   if (!host) return;
   const seen = [];
   entries.forEach(entry => {
-    if (entry.charId && !seen.includes(entry.charId)) seen.push(entry.charId);
+    if (entry.kind !== "record" && entry.charId && !seen.includes(entry.charId)) seen.push(entry.charId);
   });
-  const chips = [{ id: "all", name: "전체" }];
+  const chars = [{ id: "all", name: "전체" }];
   state.currentScenario.characters.forEach(char => {
-    if (seen.includes(char.id)) chips.push({ id: char.id, name: char.name });
+    if (seen.includes(char.id)) chars.push({ id: char.id, name: char.name });
   });
-  const signature = `${state.timelineFilter}|${chips.map(chip => chip.id).join(",")}`;
+  const types = [
+    { id: "all", name: "전체" },
+    { id: "record", name: "기록" },
+    { id: "statement", name: "진술" },
+    { id: "evidence", name: "증거" }
+  ];
+  const signature = `${state.timelineTypeFilter}|${state.timelineFilter}|${chars.map(chip => chip.id).join(",")}`;
   if (host.dataset.signature === signature) return;
   host.dataset.signature = signature;
   host.replaceChildren();
-  chips.forEach(chip => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.dataset.filter = chip.id;
-    btn.className = `timeline-filter px-2 py-0.5 rounded border text-[10px] font-bold ${
-      state.timelineFilter === chip.id
-        ? "bg-amber-900 border-amber-600 text-amber-100"
-        : "bg-neutral-900 border-neutral-700 text-neutral-300"
-    }`;
-    btn.textContent = chip.name;
-    host.appendChild(btn);
-  });
+
+  const typeRow = document.createElement("div");
+  typeRow.className = "flex flex-wrap items-center gap-1";
+  const typeLabel = document.createElement("span");
+  typeLabel.className = "text-[10px] text-neutral-500 mr-0.5";
+  typeLabel.textContent = "종류";
+  typeRow.appendChild(typeLabel);
+  types.forEach(chip => typeRow.appendChild(chipButton("type", chip.id, chip.name, state.timelineTypeFilter === chip.id)));
+
+  const charRow = document.createElement("div");
+  charRow.className = "flex flex-wrap items-center gap-1";
+  const charLabel = document.createElement("span");
+  charLabel.className = "text-[10px] text-neutral-500 mr-0.5";
+  charLabel.textContent = "인물";
+  charRow.appendChild(charLabel);
+  chars.forEach(chip => charRow.appendChild(chipButton("char", chip.id, chip.name, state.timelineFilter === chip.id)));
+  host.append(typeRow, charRow);
 }
 
 function renderTimelineEntries(entries, data, locked) {
@@ -920,70 +1070,185 @@ function renderTimelineEntries(entries, data, locked) {
   if (!list) return;
   const signature = [
     state.timelineFilter,
+    state.timelineTypeFilter,
     locked ? "1" : "0",
     state.myPlayerId || "",
-    entries.map(entry => `${entry.id || ""}:${entry.falsified ? "1" : "0"}:${entry.time}:${entry.text}`).join("||")
+    entries.map(entry => [
+      entry.id || "",
+      entry.kind,
+      entry.falsified ? "1" : "0",
+      entry.time || "",
+      entry.place || "",
+      entry.text || "",
+      entry.cardName || "",
+      entry.cardId || ""
+    ].join(":")).join("||")
   ].join("|");
   if (list.dataset.signature === signature) return;
   list.dataset.signature = signature;
   list.replaceChildren();
+  evidenceById = new Map();
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "text-[11px] text-neutral-500 italic py-1";
-    empty.textContent = state.timelineFilter === "all"
-      ? "아직 공개된 타임라인이 없습니다."
-      : "이 인물로 공개된 줄이 없습니다.";
+    const filtered = state.timelineFilter !== "all" || state.timelineTypeFilter !== "all";
+    empty.textContent = filtered
+      ? "이 조건에 맞는 항목이 없습니다."
+      : "아직 공개된 타임라인이 없습니다.";
     list.appendChild(empty);
     return;
   }
 
   entries.forEach(entry => {
-    const char = state.currentScenario.characters.find(c => c.id === entry.charId);
-    const row = document.createElement("article");
-    row.className = "timeline-entry flex items-start gap-2 p-2 rounded border border-neutral-800 bg-black/40";
-    row.dataset.id = entry.id || "";
-    row.dataset.charId = entry.charId || "";
-
-    const img = document.createElement("img");
-    img.className = "w-7 h-7 rounded-full object-cover border border-amber-700/60 shrink-0";
-    img.alt = char ? char.name : "인물";
-    if (char?.avatarImg) img.src = char.avatarImg;
-
-    const body = document.createElement("div");
-    body.className = "min-w-0 flex-1";
-    const name = document.createElement("div");
-    name.className = "text-[11px] font-bold text-amber-300";
-    name.textContent = char ? char.name : (entry.charId || "인물");
-    const line = document.createElement("p");
-    line.className = "timeline-line text-[11px] text-neutral-200 leading-relaxed break-keep";
-    line.textContent = formatTimelineEntry(entry);
-    body.append(name, line);
-
-    if (locked && entry.falsified) {
-      const badge = document.createElement("p");
-      badge.className = "timeline-false text-[10px] font-bold text-red-400 mt-0.5";
-      const trueLine = char?.timeline?.[entry.sourceIndex];
-      badge.textContent = trueLine
-        ? `거짓으로 밝혀짐 · 실제: ${trueLine}`
-        : "거짓으로 밝혀짐";
-      body.appendChild(badge);
-    }
-
-    row.append(img, body);
-    if (!locked && entry.pid === state.myPlayerId && entry.id) {
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.dataset.remove = entry.id;
-      remove.className = "shrink-0 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:text-red-300 border border-neutral-700 rounded";
-      remove.textContent = "내리기";
-      row.appendChild(remove);
-    }
-    list.appendChild(row);
+    if (entry.kind === "record") list.appendChild(renderRecordRow(entry));
+    else if (entry.kind === "evidence") list.appendChild(renderEvidenceRow(entry, locked));
+    else list.appendChild(renderStatementRow(entry, locked));
   });
+}
+
+function renderRecordRow(entry) {
+  const row = document.createElement("article");
+  row.className = "tl-row tl-record";
+  row.dataset.kind = "record";
+  row.dataset.time = entry.time || "";
+  const body = document.createElement("div");
+  body.className = "min-w-0 flex-1";
+  body.appendChild(metaLine(entry, "기록"));
+  const text = document.createElement("p");
+  text.className = "tl-text text-[11px] text-slate-100 leading-relaxed";
+  text.textContent = entry.text || "";
+  body.appendChild(text);
+  row.appendChild(body);
+  return row;
+}
+
+function renderStatementRow(entry, locked) {
+  const char = state.currentScenario.characters.find(c => c.id === entry.charId);
+  const row = document.createElement("article");
+  row.className = "tl-row tl-statement";
+  row.dataset.kind = "statement";
+  row.dataset.id = entry.id || "";
+  row.dataset.charId = entry.charId || "";
+  row.dataset.time = entry.time || "";
+
+  if (char?.avatarImg) {
+    const img = document.createElement("img");
+    img.className = "tl-avatar";
+    img.alt = char.name;
+    img.src = char.avatarImg;
+    row.appendChild(img);
+  }
+
+  const body = document.createElement("div");
+  body.className = "min-w-0 flex-1";
+  body.appendChild(metaLine(entry, "진술"));
+  const name = document.createElement("div");
+  name.className = "text-[11px] font-bold text-amber-300";
+  name.textContent = char ? char.name : (entry.charId || "인물");
+  const line = document.createElement("p");
+  line.className = "timeline-line tl-text text-[11px] text-neutral-200 leading-relaxed";
+  line.textContent = formatTimelineEntry(entry);
+  body.append(name, line);
+
+  if (locked && entry.falsified) {
+    const badge = document.createElement("p");
+    badge.className = "timeline-false text-[10px] font-bold text-red-400 mt-0.5";
+    const trueLine = char?.timeline?.[entry.sourceIndex];
+    badge.textContent = trueLine
+      ? `거짓으로 밝혀짐 · 실제: ${trueLine}`
+      : "거짓으로 밝혀짐";
+    body.appendChild(badge);
+  }
+  row.appendChild(body);
+  if (!locked && entry.pid === state.myPlayerId && entry.id) row.appendChild(removeButton(entry.id, "내리기"));
+  return row;
+}
+
+function renderEvidenceRow(entry, locked) {
+  const poster = state.currentScenario.characters.find(c => c.id === entry.posterCharId);
+  const row = document.createElement("article");
+  row.className = "tl-row tl-evidence";
+  row.dataset.kind = "evidence";
+  row.dataset.id = entry.id || "";
+  row.dataset.charId = entry.charId || "";
+  row.dataset.time = entry.time || "";
+  row.dataset.evidenceId = entry.id || "";
+
+  if (entry.cardImg) {
+    const img = document.createElement("img");
+    img.className = "tl-thumb";
+    img.alt = entry.cardName || "증거";
+    img.src = entry.cardImg;
+    row.appendChild(img);
+  }
+
+  const body = document.createElement("div");
+  body.className = "min-w-0 flex-1";
+  body.appendChild(metaLine(entry, "증거"));
+  const name = document.createElement("div");
+  name.className = "text-[11px] font-bold text-cyan-200";
+  const kindLabel = entry.cardType === "alibi" ? "알리바이" : "현장 증거";
+  name.textContent = entry.cardName || kindLabel;
+  const sub = document.createElement("p");
+  sub.className = "text-[10px] text-cyan-100/80";
+  const who = poster ? poster.name : "플레이어";
+  const subject = entry.cardType === "alibi" && entry.charName ? `${entry.charName} · ` : "";
+  sub.textContent = `${subject}${kindLabel} · ${who}가 고정`;
+  body.append(name, sub);
+  if (entry.text) {
+    const note = document.createElement("p");
+    note.className = "tl-text text-[11px] text-neutral-200 leading-relaxed";
+    note.textContent = entry.text;
+    body.appendChild(note);
+  }
+  row.appendChild(body);
+  if (!locked && entry.pid === state.myPlayerId && entry.id) row.appendChild(removeButton(entry.id, "해제"));
+
+  evidenceById.set(entry.id, {
+    header: `타임라인에 고정된 ${kindLabel}`,
+    title: entry.cardName || kindLabel,
+    desc: entry.cardDesc || "",
+    img: entry.cardImg || ""
+  });
+  return row;
+}
+
+function metaLine(entry, label) {
+  const meta = document.createElement("div");
+  meta.className = "flex flex-wrap items-center gap-1 mb-0.5";
+  const kind = document.createElement("span");
+  kind.className = "tl-kind";
+  kind.textContent = TIMELINE_KIND_LABEL[entry.kind] || label;
+  const time = document.createElement("time");
+  time.className = "tl-time";
+  time.dateTime = entry.time || "";
+  time.textContent = entry.time || "시각 미상";
+  meta.append(kind, time);
+  if (entry.place) {
+    const place = document.createElement("span");
+    place.className = "tl-place";
+    place.textContent = entry.place;
+    meta.appendChild(place);
+  }
+  return meta;
+}
+
+function removeButton(id, label) {
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.dataset.remove = id;
+  remove.className = "shrink-0 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:text-red-300 border border-neutral-700 rounded";
+  remove.textContent = label;
+  return remove;
 }
 
 function closeTimelineModal() {
   document.getElementById("timelinePostModal")?.classList.add("hidden");
+}
+
+function closePinModal() {
+  pinTarget = null;
+  document.getElementById("timelinePinModal")?.classList.add("hidden");
 }
 
 function choiceBlock(label, line, fake) {
@@ -1005,7 +1270,7 @@ export function openTimelinePostModal(data) {
   const hint = document.getElementById("timelinePostHint");
   if (!modal || !lines || !data) return;
   const mine = myCharacter(data);
-  if (!mine || data.phase === "ENDING" || data.phase === "LOBBY") return;
+  if (!mine || timelinePhaseLocked(data)) return;
   modal.dataset.owner = state.myPlayerId || "";
 
   const canLie = killerCanChooseLie(mine);
@@ -1062,6 +1327,107 @@ export function openTimelinePostModal(data) {
   modal.classList.remove("hidden");
 }
 
+function cardPayloadFromKey(card, key) {
+  const data = actions.getRoomData?.();
+  if (!data || !state.currentScenario) return null;
+  const inv = (data.playerInventories && data.playerInventories[state.myPlayerId]) || { alibis: [], clues: [] };
+  if (card === "alibi") {
+    const owned = (inv.alibis || [])[Number(key)];
+    if (!owned) return null;
+    return {
+      cardType: "alibi",
+      charId: owned.charId,
+      cardNum: owned.cardNum,
+      preview: { title: owned.title || "알리바이", name: owned.title || "알리바이" }
+    };
+  }
+  if (!(inv.clues || []).includes(key)) return null;
+  const clue = state.currentScenario.clues.find(item => item.id === key);
+  if (!clue) return null;
+  return { cardType: "clue", cardId: clue.id, preview: { name: clue.name, title: clue.name, desc: clue.desc, img: clue.img || "" } };
+}
+
+function openOwnedCard(payload) {
+  if (!payload) return;
+  if (payload.cardType === "alibi") {
+    const data = actions.getRoomData?.();
+    const inv = (data?.playerInventories && data.playerInventories[state.myPlayerId]) || { alibis: [] };
+    const owned = (inv.alibis || []).find(card => card.charId === payload.charId && Number(card.cardNum) === Number(payload.cardNum));
+    window.showEvidenceModal(
+      `[알리바이] ${owned?.charName || ""}`,
+      owned?.title || "알리바이",
+      owned?.text || "",
+      owned?.img || "",
+      { cardType: "alibi", charId: payload.charId, cardNum: payload.cardNum }
+    );
+    return;
+  }
+  const clue = payload.preview;
+  window.showEvidenceModal(
+    "[현장 증거]",
+    clue?.name || "현장 증거",
+    clue?.desc || "",
+    clue?.img || "",
+    { cardType: "clue", cardId: payload.cardId }
+  );
+}
+
+function syncPinCustomField() {
+  const select = document.getElementById("timelinePinTimeSelect");
+  const wrap = document.getElementById("timelinePinCustomWrap");
+  if (!select || !wrap) return;
+  wrap.classList.toggle("hidden", select.value !== "__custom__");
+}
+
+function openTimelinePinModal(payload) {
+  const data = actions.getRoomData?.();
+  if (!payload || timelinePhaseLocked(data)) return;
+  const modal = document.getElementById("timelinePinModal");
+  const select = document.getElementById("timelinePinTimeSelect");
+  const custom = document.getElementById("timelinePinTimeCustom");
+  const note = document.getElementById("timelinePinNote");
+  const name = document.getElementById("timelinePinCardName");
+  if (!modal || !select) return;
+  pinTarget = {
+    cardType: payload.cardType,
+    charId: payload.charId || "",
+    cardNum: payload.cardNum,
+    cardId: payload.cardId || ""
+  };
+  modal.dataset.owner = state.myPlayerId || "";
+  if (name) name.textContent = payload.preview?.title || payload.preview?.name || "증거 카드";
+  select.replaceChildren();
+  const anchors = Array.isArray(state.currentScenario?.caseTimeline) ? state.currentScenario.caseTimeline : [];
+  anchors.forEach(item => {
+    if (!item?.time) return;
+    const opt = document.createElement("option");
+    opt.value = item.time;
+    opt.textContent = item.place ? `${item.time} · ${item.place}` : item.time;
+    select.appendChild(opt);
+  });
+  const customOpt = document.createElement("option");
+  customOpt.value = "__custom__";
+  customOpt.textContent = "직접 입력 (HH:MM)";
+  select.appendChild(customOpt);
+  if (!anchors.length) select.value = "__custom__";
+  if (custom) custom.value = "";
+  if (note) note.value = "";
+  syncPinCustomField();
+  closeEvidenceModal();
+  modal.classList.remove("hidden");
+}
+
+function onOwnedCardClick(event) {
+  const pin = event.target.closest(".js-pin-card");
+  const open = event.target.closest(".js-open-card");
+  const btn = pin || open;
+  if (!btn) return;
+  const payload = cardPayloadFromKey(btn.dataset.card, btn.dataset.key);
+  if (!payload) return;
+  if (pin) openTimelinePinModal(payload);
+  else openOwnedCard(payload);
+}
+
 function initTimelineBoard() {
   document.getElementById("btnToggleTimeline")?.addEventListener("click", () => {
     const panel = document.getElementById("timelineBoard");
@@ -1071,9 +1437,10 @@ function initTimelineBoard() {
     else panel.classList.toggle("tl-collapsed", !!state.timelineCollapsed);
   });
   document.getElementById("timelineFilters")?.addEventListener("click", (event) => {
-    const btn = event.target.closest("[data-filter]");
+    const btn = event.target.closest("[data-filter-kind]");
     if (!btn) return;
-    state.timelineFilter = btn.dataset.filter || "all";
+    if (btn.dataset.filterKind === "type") state.timelineTypeFilter = btn.dataset.filter || "all";
+    else state.timelineFilter = btn.dataset.filter || "all";
     const host = document.getElementById("timelineFilters");
     if (host) delete host.dataset.signature;
     const data = actions.getRoomData?.();
@@ -1081,8 +1448,14 @@ function initTimelineBoard() {
   });
   document.getElementById("timelineEntries")?.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-remove]");
-    if (!btn) return;
-    actions.removeTimelineEntry?.(btn.dataset.remove);
+    if (btn) {
+      actions.removeTimelineEntry?.(btn.dataset.remove);
+      return;
+    }
+    const row = event.target.closest("[data-evidence-id]");
+    if (!row) return;
+    const card = evidenceById.get(row.dataset.evidenceId);
+    if (card) window.showEvidenceModal(card.header, card.title, card.desc, card.img);
   });
   document.getElementById("btnOpenTimelinePost")?.addEventListener("click", () => {
     const data = actions.getRoomData?.();
@@ -1103,6 +1476,28 @@ function initTimelineBoard() {
     const posted = await actions.postTimeline?.(selections);
     if (posted) closeTimelineModal();
   });
+
+  document.getElementById("btnPinFromEvidence")?.addEventListener("click", () => {
+    if (!evidencePinPayload) return;
+    const title = document.getElementById("evidenceModalTitle")?.textContent || "증거 카드";
+    openTimelinePinModal({ ...evidencePinPayload, preview: { title, name: title } });
+  });
+  document.getElementById("timelinePinTimeSelect")?.addEventListener("change", syncPinCustomField);
+  const closePin = () => closePinModal();
+  document.getElementById("btnCloseTimelinePin")?.addEventListener("click", closePin);
+  document.getElementById("btnCancelTimelinePin")?.addEventListener("click", closePin);
+  document.getElementById("btnConfirmTimelinePin")?.addEventListener("click", async () => {
+    if (!pinTarget) return;
+    const select = document.getElementById("timelinePinTimeSelect");
+    const custom = document.getElementById("timelinePinTimeCustom");
+    const note = document.getElementById("timelinePinNote");
+    const time = select?.value === "__custom__" ? (custom?.value || "") : (select?.value || "");
+    const posted = await actions.pinEvidence?.({ ...pinTarget, time, note: note?.value || "" });
+    if (posted) closePinModal();
+  });
+  document.getElementById("myAlibiCardsList")?.addEventListener("click", onOwnedCardClick);
+  document.getElementById("myClueCardsList")?.addEventListener("click", onOwnedCardClick);
+  document.getElementById("whisperCardsList")?.addEventListener("click", onOwnedCardClick);
 }
 
 function initTestModeButton() {

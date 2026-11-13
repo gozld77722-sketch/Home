@@ -510,7 +510,8 @@ async function investigateAlibi(targetCharId, data, isNPC) {
     `[${targetChar.name}${isNPC ? ' (NPC 용의자)' : ''} 알리바이 카드 확보 (5장 중 #${cardNum + 1})]`,
     `제목: ${cardTitle}`,
     `내용: "${cardText}"\n\n내 단서 보관함에 저장되었습니다.`,
-    cardImg
+    cardImg,
+    { cardType: "alibi", charId: targetCharId, cardNum: cardNum + 1 }
   );
 }
 
@@ -634,6 +635,7 @@ async function postTimeline(selections) {
     const parsed = parseTimelineLine(useFake ? fakeLine : trueLine);
     entries.push({
       id: `${state.myPlayerId}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`,
+      kind: "statement",
       pid: state.myPlayerId,
       charId: char.id,
       time: parsed.time,
@@ -685,11 +687,130 @@ async function removeTimelineEntry(id) {
   }
 }
 
+function normalizePinTime(raw) {
+  const value = String(raw || "").trim();
+  const anchors = Array.isArray(state.currentScenario?.caseTimeline) ? state.currentScenario.caseTimeline : [];
+  if (anchors.some(item => item && item.time === value)) return value;
+  const match = /^(\d{1,2}):(\d{2})$/.exec(value);
+  if (!match) return "";
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) return "";
+  return `${String(hour).padStart(2, "0")}:${match[2]}`;
+}
+
+function resolveOwnedCard(inv, payload) {
+  if (!payload || !state.currentScenario) return null;
+  if (payload.cardType === "clue") {
+    const clues = Array.isArray(inv?.clues) ? inv.clues : [];
+    if (!clues.includes(payload.cardId)) return null;
+    const clue = state.currentScenario.clues.find(c => c.id === payload.cardId);
+    if (!clue) return null;
+    return {
+      cardType: "clue",
+      cardId: clue.id,
+      charId: "",
+      charName: "",
+      name: clue.name,
+      desc: clue.desc,
+      img: clue.img || ""
+    };
+  }
+  if (payload.cardType === "alibi") {
+    const cardNum = Number(payload.cardNum);
+    const alibis = Array.isArray(inv?.alibis) ? inv.alibis : [];
+    const owned = alibis.find(card => card.charId === payload.charId && Number(card.cardNum) === cardNum);
+    if (!owned) return null;
+    const char = state.currentScenario.characters.find(c => c.id === payload.charId);
+    const def = char?.alibiCards?.[cardNum - 1];
+    if (!def) return null;
+    return {
+      cardType: "alibi",
+      cardId: def.id || "",
+      charId: payload.charId,
+      charName: owned.charName || char.name,
+      cardNum,
+      name: def.name,
+      desc: def.desc,
+      img: def.img || owned.img || ""
+    };
+  }
+  return null;
+}
+
+async function pinEvidence(payload) {
+  if (!state.currentRoomCode || !latestRoomData || !state.currentScenario) return false;
+  if (!TIMELINE_POST_PHASES.has(latestRoomData.phase)) {
+    alert("지금은 타임라인에 고정할 수 없습니다.");
+    return false;
+  }
+  const time = normalizePinTime(payload?.time);
+  if (!time) {
+    alert("시각은 사건 기록의 칸이거나 HH:MM 이어야 합니다.");
+    return false;
+  }
+  const note = String(payload?.note || "").trim().slice(0, 80);
+  const me = latestRoomData.players?.[state.myPlayerId];
+  if (!me) {
+    alert("이 방의 플레이어만 고정할 수 있습니다.");
+    return false;
+  }
+  if (!resolveOwnedCard(latestRoomData.playerInventories?.[state.myPlayerId], payload)) {
+    alert("조사해 손에 넣은 카드만 고정할 수 있습니다.");
+    return false;
+  }
+
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  const pid = state.myPlayerId;
+  const entryId = `${pid}_pin_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  try {
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) throw new Error("missing");
+      const fresh = snap.data();
+      if (!TIMELINE_POST_PHASES.has(fresh.phase)) throw new Error("locked");
+      const meFresh = fresh.players?.[pid];
+      if (!meFresh) throw new Error("character");
+      const owned = resolveOwnedCard(fresh.playerInventories?.[pid], payload);
+      if (!owned) throw new Error("owned");
+      const board = Array.isArray(fresh.timelineBoard) ? fresh.timelineBoard : [];
+      const entry = {
+        id: entryId,
+        kind: "evidence",
+        pid,
+        charId: owned.charId,
+        posterCharId: meFresh.charId || "",
+        time,
+        text: note,
+        ts: Date.now(),
+        falsified: false,
+        cardType: owned.cardType,
+        cardId: owned.cardId,
+        cardName: owned.name,
+        cardDesc: owned.desc,
+        cardImg: owned.img,
+        charName: owned.charName
+      };
+      if (owned.cardNum != null) entry.cardNum = owned.cardNum;
+      tx.update(ref, { timelineBoard: board.concat(entry) });
+    });
+  } catch (err) {
+    console.error(err);
+    const message = String(err?.message || "");
+    if (message.includes("locked")) alert("지금은 타임라인에 고정할 수 없습니다.");
+    else if (message.includes("owned")) alert("조사해 손에 넣은 카드만 고정할 수 있습니다.");
+    else alert("타임라인에 고정하지 못했습니다.");
+    return false;
+  }
+  return true;
+}
+
 actions.assignRandomCharacters = assignRandomCharacters;
 actions.investigateAlibi = investigateAlibi;
 actions.shareCardToWhisperRoom = shareCardToWhisperRoom;
 actions.submitVote = submitVote;
 actions.postTimeline = postTimeline;
+actions.pinEvidence = pinEvidence;
 actions.removeTimelineEntry = removeTimelineEntry;
 actions.getRoomData = () => latestRoomData;
 
@@ -884,7 +1005,8 @@ export function initGame() {
       `[현장 증거 발견: ${clueName}]`,
       clueName,
       `"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`,
-      clueObj && clueObj.img ? clueObj.img : ""
+      clueObj && clueObj.img ? clueObj.img : "",
+      { cardType: "clue", cardId: clueId }
     );
   });
 
