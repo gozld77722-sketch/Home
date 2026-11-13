@@ -48,6 +48,13 @@ export function switchView(viewId) {
       else el.classList.add('hidden');
     }
   });
+  const landing = viewId === 'viewThemeSelect';
+  document.body.classList.toggle('show-noir-landing', landing);
+  const main = document.querySelector('main');
+  if (main) {
+    main.classList.toggle('justify-center', !landing);
+    main.classList.toggle('justify-start', landing);
+  }
 }
 
 window.openImageDetail = function(imgSrc, title) {
@@ -80,21 +87,24 @@ function closeEvidenceModal() {
 
 export const SCENARIOS = ['winchester', 'express', 'hospital', 'glamping', 'cruise'];
 
-function renderThemeCard(scenario) {
+function renderThemeCard(scenario, index) {
   const t = scenario.theme.card;
+  const num = String(index + 1).padStart(2, '0');
   return `
-    <div class="noir-card rounded-2xl overflow-hidden ${t.borderClass} transition-all duration-300 shadow-xl flex flex-col justify-between group">
+    <article class="case-file noir-card rounded-2xl ${t.borderClass} shadow-xl flex flex-col justify-between">
       <div>
-        <div class="relative w-full h-40 overflow-hidden border-b border-neutral-800">
-          <img src="${t.banner}" alt="${t.bannerAlt}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 filter brightness-75">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex items-end p-2.5">
+        <div class="case-tab">CASE No.${num}</div>
+        <div class="case-photo">
+          <img src="${t.banner}" alt="${t.bannerAlt}" loading="lazy" decoding="async" class="case-photo-img">
+          <span class="case-classified" aria-hidden="true">기밀</span>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2 pointer-events-none">
             <span class="${t.eraClass}">${t.era}</span>
           </div>
         </div>
         <div class="p-3.5 space-y-1.5">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-2">
             <h3 class="${t.titleClass}">${t.title}</h3>
-            <span class="${t.playersClass}">${t.players}</span>
+            <span class="${t.playersClass} whitespace-nowrap">${t.players}</span>
           </div>
           <p class="text-[11px] text-neutral-400 leading-relaxed break-keep">${t.blurb}</p>
         </div>
@@ -104,7 +114,7 @@ function renderThemeCard(scenario) {
           <i class="${t.buttonIconClass}"></i> 시작하기
         </button>
       </div>
-    </div>
+    </article>
   `;
 }
 
@@ -114,7 +124,7 @@ export async function renderThemeCards() {
   const loaded = await Promise.all(
     SCENARIOS.map(id => import(`../scenarios/scenario-${id}.js`))
   );
-  grid.innerHTML = loaded.map(({ default: scenario }) => renderThemeCard(scenario)).join('');
+  grid.innerHTML = loaded.map(({ default: scenario }, index) => renderThemeCard(scenario, index)).join('');
 }
 
 export function applyLobbyHeader(loaded) {
@@ -183,13 +193,21 @@ export function updateSystemDiscordGuide(data) {
       timeTag.innerText = "10분 변론";
       break;
     case 'FINAL_VOTE':
-      guideText.innerHTML = `🚨 <strong>[최후의 지목 투표]</strong> 변론 종료! 진범을 화면에서 지목하세요 (NPC 용의자도 지목 가능!).`;
-      timeTag.innerText = "최종 투표";
+      guideText.innerHTML = `🚨 <strong>[최후의 지목 투표 · 2분]</strong> 시간이 끝나면 지금까지 제출된 표로 집계합니다. 진범 플레이어의 표는 빠지고, 진범이 최다(동률 포함)면 시민이 이깁니다.`;
+      timeTag.innerText = "2분 투표";
       break;
     default:
       guideText.innerText = `사건 조사를 진행하세요.`;
       timeTag.innerText = "";
   }
+}
+
+function playerModeLabel(pCount) {
+  if (pCount === 2) return "2인 모드 (NPC 2명 / 밀담 없음)";
+  if (pCount === 3) return "3인 모드 (NPC 1명 / 밀담 있음)";
+  if (pCount === 4) return "4인 모드 (NPC 없음 / 밀담 있음)";
+  if (pCount >= 5) return "5인 모드 (5번째 인물 해금 / NPC 없음)";
+  return `${pCount}인 대기`;
 }
 
 export function renderCharacterSelection(data) {
@@ -198,9 +216,7 @@ export function renderCharacterSelection(data) {
   const pCount = Object.keys(data.players || {}).length;
   const is5P = pCount >= 5;
 
-  document.getElementById('scenarioModeBadge').innerText = (pCount === 2) 
-    ? "2인 전용 모드 (밀담 생략 / NPC 조사)" 
-    : ((pCount === 3) ? "3인 NPC 추리 모드" : (is5P ? "5인 완전 범죄 모드" : `${pCount}인 일반 모드`));
+  document.getElementById('scenarioModeBadge').innerText = playerModeLabel(pCount);
 
   const myInfo = data.players[state.myPlayerId];
   const randomBtn = document.getElementById('btnRandomAssign');

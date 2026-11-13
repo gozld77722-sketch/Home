@@ -10,7 +10,11 @@ export const state = {
   currentPhase: null,
   isCurrentHost: false,
   lastHandledShareTimestamp: 0,
-  lastNotifiedWhisperPhase: null
+  lastNotifiedWhisperPhase: null,
+  lastSeenAnnouncementAt: 0,
+  hostNoticeDismissed: false,
+  devTimerScale: 1,
+  devRealPlayerId: null
 };
 
 // Late-bound game actions so view code can call them without an import cycle.
