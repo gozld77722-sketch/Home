@@ -19,6 +19,7 @@ export const state = {
   hostNoticeDraft: null,
   timelineFilter: "all",
   timelineTypeFilter: "all",
+  timelineTimeFocus: null,
   timelineCollapsed: null,
   timelineScenarioId: null
 };

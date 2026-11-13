@@ -64,17 +64,7 @@ window.openImageDetail = function(imgSrc, title) {
   document.getElementById('imageDetailModal').classList.remove('hidden');
 };
 
-let evidencePinPayload = null;
-
-function syncEvidencePinButton() {
-  const btn = document.getElementById('btnPinFromEvidence');
-  if (!btn) return;
-  const data = actions.getRoomData?.();
-  const open = TIMELINE_VISIBLE.has(data?.phase) && data.phase !== 'ENDING';
-  btn.classList.toggle('hidden', !evidencePinPayload || !open);
-}
-
-window.showEvidenceModal = function(header, title, desc, img, pin) {
+window.showEvidenceModal = function(header, title, desc, img) {
   document.getElementById('evidenceModalHeader').innerText = header || "";
   document.getElementById('evidenceModalTitle').innerText = title || "";
   document.getElementById('evidenceModalDesc').innerText = desc || "";
@@ -88,8 +78,6 @@ window.showEvidenceModal = function(header, title, desc, img, pin) {
     imgEl.classList.add('hidden');
     imgEl.onclick = null;
   }
-  evidencePinPayload = pin && pin.cardType ? pin : null;
-  syncEvidencePinButton();
   document.getElementById('evidenceModal').classList.remove('hidden');
 };
 
@@ -491,11 +479,6 @@ function renderInventory(data) {
 
   document.getElementById('totalInventoryCount').innerText = `총 ${totalCount}건`;
 
-  const canPin = data.phase !== 'ENDING' && data.phase !== 'LOBBY';
-  const pinBtn = (card, key) => canPin
-    ? `<button type="button" class="js-pin-card px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 rounded text-[10px] font-bold" data-card="${card}" data-key="${key}">타임라인에 고정</button>`
-    : '';
-
   if (myInv.alibis && myInv.alibis.length > 0) {
     alibiList.innerHTML = myInv.alibis.map((a, index) => {
       return `
@@ -510,7 +493,6 @@ function renderInventory(data) {
           <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${a.text}</p>
           <div class="flex flex-wrap gap-1">
             <button type="button" class="js-open-card px-2 py-1 bg-neutral-800 text-neutral-200 rounded text-[10px] font-bold" data-card="alibi" data-key="${index}">자세히</button>
-            ${pinBtn('alibi', index)}
           </div>
         </div>
       `;
@@ -535,7 +517,6 @@ function renderInventory(data) {
           <p class="text-neutral-300 text-[11px] leading-relaxed break-keep bg-black/40 p-1.5 rounded">${c ? c.desc : ''}</p>
           <div class="flex flex-wrap gap-1">
             <button type="button" class="js-open-card px-2 py-1 bg-neutral-800 text-neutral-200 rounded text-[10px] font-bold" data-card="clue" data-key="${cid}">자세히</button>
-            ${pinBtn('clue', cid)}
           </div>
         </div>
       `;
@@ -705,7 +686,6 @@ function renderWhisperCards(data, myRoomType) {
         <span class="text-neutral-300 truncate">[현장 증거] ${c.name}</span>
       </div>
       <div class="flex shrink-0 gap-1">
-        <button type="button" class="js-pin-card px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600 rounded text-[10px] font-bold" data-card="clue" data-key="${cid}">고정</button>
         <button type="button" class="js-share-card px-2 py-0.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded text-[10px] font-bold">실물 공개</button>
       </div>
     `;
@@ -847,13 +827,10 @@ export function renderEnding(data) {
 }
 
 const TIMELINE_VISIBLE = new Set([
-  "PROLOGUE", "R1", "R2", "R2_WHISPER", "R3", "R4", "R4_WHISPER", "R5_DEFENSE", "FINAL_VOTE", "ENDING"
+  "R1", "R2", "R2_WHISPER", "R3", "R4", "R4_WHISPER", "R5_DEFENSE", "FINAL_VOTE", "ENDING"
 ]);
 
-const TIMELINE_KIND_LABEL = { record: "기록", statement: "진술", evidence: "증거" };
-
-let pinTarget = null;
-let evidenceById = new Map();
+const TIMELINE_KIND_LABEL = { record: "기록", statement: "진술" };
 
 export function parseTimelineLine(line) {
   const raw = String(line ?? "").trim();
@@ -865,13 +842,37 @@ export function parseTimelineLine(line) {
   };
 }
 
+function clockMinutes(hour, minute) {
+  const h = Number(hour);
+  const m = Number(minute);
+  if (h > 23 || m > 59 || h < 0 || m < 0) return null;
+  return h * 60 + m;
+}
+
+function parseTimeRange(raw) {
+  const text = String(raw || "").trim();
+  const range = text.match(/^(\d{1,2}):(\d{2})\s*[~～\-–—]\s*(\d{1,2}):(\d{2})/);
+  if (range) {
+    const start = clockMinutes(range[1], range[2]);
+    const end = clockMinutes(range[3], range[4]);
+    if (start == null || end == null) return null;
+    return start <= end ? { start, end } : { start: end, end: start };
+  }
+  const point = text.match(/^(\d{1,2}):(\d{2})/);
+  if (!point) return null;
+  const at = clockMinutes(point[1], point[2]);
+  if (at == null) return null;
+  return { start: at, end: at };
+}
+
+function rangesOverlap(a, b) {
+  return a.start <= b.end && b.start <= a.end;
+}
+
 function timelineStartKey(time) {
-  const match = /^(\d{1,2}):(\d{2})/.exec(String(time || "").trim());
-  if (!match) return Number.POSITIVE_INFINITY;
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) return Number.POSITIVE_INFINITY;
-  return hour * 60 + minute;
+  const range = parseTimeRange(time);
+  if (!range) return Number.POSITIVE_INFINITY;
+  return range.start;
 }
 
 function sortTimelineEntries(entries) {
@@ -903,9 +904,9 @@ function caseAnchorEntries() {
 
 function boardEntries(data) {
   const board = Array.isArray(data?.timelineBoard) ? data.timelineBoard : [];
-  return board.map(entry => ({
+  return board.filter(entry => entry && typeof entry === "object" && entry.kind !== "evidence").map(entry => ({
     ...entry,
-    kind: entry.kind === "evidence" ? "evidence" : "statement"
+    kind: "statement"
   }));
 }
 
@@ -913,8 +914,26 @@ function mergedTimeline(data) {
   return sortTimelineEntries(caseAnchorEntries().concat(boardEntries(data)));
 }
 
+function focusedRecord() {
+  if (!state.timelineTimeFocus) return null;
+  return caseAnchorEntries().find(entry => entry.id === state.timelineTimeFocus) || null;
+}
+
+function statementInFocusedRange(entry) {
+  const record = focusedRecord();
+  if (!record) return false;
+  const recordRange = parseTimeRange(record.time);
+  const statementRange = parseTimeRange(entry.time);
+  if (!recordRange || !statementRange) return false;
+  return rangesOverlap(recordRange, statementRange);
+}
+
 function entryVisible(entry) {
+  if (state.timelineTimeFocus) {
+    if (entry.kind !== "statement" || !statementInFocusedRange(entry)) return false;
+  }
   const type = state.timelineTypeFilter || "all";
+  if (type === "evidence") return false;
   if (type !== "all" && entry.kind !== type) return false;
   const who = state.timelineFilter || "all";
   if (who === "all") return true;
@@ -938,7 +957,7 @@ function killerCanChooseLie(char) {
 }
 
 function timelinePhaseLocked(data) {
-  return !data || data.phase === "ENDING" || data.phase === "LOBBY";
+  return !data || data.phase === "ENDING" || data.phase === "LOBBY" || data.phase === "PROLOGUE";
 }
 
 export function renderTimelineBoard(data) {
@@ -949,21 +968,21 @@ export function renderTimelineBoard(data) {
     const ownerGone = postModal.dataset.owner !== state.myPlayerId;
     if (ownerGone || timelinePhaseLocked(data)) postModal.classList.add("hidden");
   }
-  const pinModal = document.getElementById("timelinePinModal");
-  if (pinModal && !pinModal.classList.contains("hidden")) {
-    const ownerGone = pinModal.dataset.owner !== state.myPlayerId;
-    if (ownerGone || timelinePhaseLocked(data)) pinModal.classList.add("hidden");
-  }
-  syncEvidencePinButton();
 
   const visible = !!(data && state.currentScenario && TIMELINE_VISIBLE.has(data.phase));
   panel.classList.toggle("hidden", !visible);
   if (!visible) return;
 
+  if (state.timelineTypeFilter === "evidence") state.timelineTypeFilter = "all";
+  if (state.timelineTimeFocus && !caseAnchorEntries().some(entry => entry.id === state.timelineTimeFocus)) {
+    state.timelineTimeFocus = null;
+  }
+
   if (state.timelineScenarioId !== state.currentScenario.id) {
     state.timelineScenarioId = state.currentScenario.id;
     state.timelineFilter = "all";
     state.timelineTypeFilter = "all";
+    state.timelineTimeFocus = null;
     const host = document.getElementById("timelineFilters");
     if (host) delete host.dataset.signature;
   }
@@ -1001,7 +1020,7 @@ export function renderTimelineBoard(data) {
   const lockNote = document.getElementById("timelineLockNote");
   if (lockNote) {
     lockNote.classList.toggle("hidden", !locked);
-    if (locked) lockNote.textContent = "엔딩: 더 이상 올리거나 고정하거나 내릴 수 없습니다. 거짓으로 공개된 진술이 표시됩니다.";
+    if (locked) lockNote.textContent = "엔딩: 더 이상 올리거나 내릴 수 없습니다. 거짓으로 공개된 진술이 표시됩니다.";
   }
 
   if (state.timelineFilter !== "all" && !entries.some(entry => entry.kind !== "record" && entry.charId === state.timelineFilter)) {
@@ -1039,10 +1058,9 @@ function renderTimelineFilters(entries) {
   const types = [
     { id: "all", name: "전체" },
     { id: "record", name: "기록" },
-    { id: "statement", name: "진술" },
-    { id: "evidence", name: "증거" }
+    { id: "statement", name: "진술" }
   ];
-  const signature = `${state.timelineTypeFilter}|${state.timelineFilter}|${chars.map(chip => chip.id).join(",")}`;
+  const signature = `${state.timelineTypeFilter}|${state.timelineFilter}|${state.timelineTimeFocus || ""}|${chars.map(chip => chip.id).join(",")}`;
   if (host.dataset.signature === signature) return;
   host.dataset.signature = signature;
   host.replaceChildren();
@@ -1063,6 +1081,27 @@ function renderTimelineFilters(entries) {
   charRow.appendChild(charLabel);
   chars.forEach(chip => charRow.appendChild(chipButton("char", chip.id, chip.name, state.timelineFilter === chip.id)));
   host.append(typeRow, charRow);
+
+  const focus = focusedRecord();
+  if (!focus) return;
+  const bar = document.createElement("div");
+  bar.className = "flex flex-wrap items-center gap-1";
+  const note = document.createElement("span");
+  note.className = "text-[10px] text-slate-300 break-keep";
+  note.textContent = `${focus.time || "이 시각"} 진술만 표시 중`;
+  const again = document.createElement("button");
+  again.type = "button";
+  again.dataset.timeFocus = focus.id;
+  again.className = "tl-time-focus";
+  again.setAttribute("aria-pressed", "true");
+  again.textContent = "그 시각 진술 보기";
+  const clear = document.createElement("button");
+  clear.type = "button";
+  clear.dataset.clearTimeFocus = "1";
+  clear.className = "tl-time-focus";
+  clear.textContent = "전체 보기";
+  bar.append(note, again, clear);
+  host.appendChild(bar);
 }
 
 function renderTimelineEntries(entries, data, locked) {
@@ -1071,6 +1110,7 @@ function renderTimelineEntries(entries, data, locked) {
   const signature = [
     state.timelineFilter,
     state.timelineTypeFilter,
+    state.timelineTimeFocus || "",
     locked ? "1" : "0",
     state.myPlayerId || "",
     entries.map(entry => [
@@ -1079,29 +1119,29 @@ function renderTimelineEntries(entries, data, locked) {
       entry.falsified ? "1" : "0",
       entry.time || "",
       entry.place || "",
-      entry.text || "",
-      entry.cardName || "",
-      entry.cardId || ""
+      entry.text || ""
     ].join(":")).join("||")
   ].join("|");
   if (list.dataset.signature === signature) return;
   list.dataset.signature = signature;
   list.replaceChildren();
-  evidenceById = new Map();
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "text-[11px] text-neutral-500 italic py-1";
-    const filtered = state.timelineFilter !== "all" || state.timelineTypeFilter !== "all";
-    empty.textContent = filtered
-      ? "이 조건에 맞는 항목이 없습니다."
-      : "아직 공개된 타임라인이 없습니다.";
+    const filtered = state.timelineFilter !== "all" || state.timelineTypeFilter !== "all" || !!state.timelineTimeFocus;
+    if (state.timelineTimeFocus && state.timelineFilter === "all" && state.timelineTypeFilter === "all") {
+      empty.textContent = "이 시각에 해당하는 진술이 없습니다.";
+    } else {
+      empty.textContent = filtered
+        ? "이 조건에 맞는 항목이 없습니다."
+        : "아직 공개된 타임라인이 없습니다.";
+    }
     list.appendChild(empty);
     return;
   }
 
   entries.forEach(entry => {
     if (entry.kind === "record") list.appendChild(renderRecordRow(entry));
-    else if (entry.kind === "evidence") list.appendChild(renderEvidenceRow(entry, locked));
     else list.appendChild(renderStatementRow(entry, locked));
   });
 }
@@ -1118,6 +1158,13 @@ function renderRecordRow(entry) {
   text.className = "tl-text text-[11px] text-slate-100 leading-relaxed";
   text.textContent = entry.text || "";
   body.appendChild(text);
+  const focusBtn = document.createElement("button");
+  focusBtn.type = "button";
+  focusBtn.dataset.timeFocus = entry.id || "";
+  focusBtn.className = "tl-time-focus";
+  focusBtn.setAttribute("aria-pressed", state.timelineTimeFocus === entry.id ? "true" : "false");
+  focusBtn.textContent = "그 시각 진술 보기";
+  body.appendChild(focusBtn);
   row.appendChild(body);
   return row;
 }
@@ -1164,55 +1211,6 @@ function renderStatementRow(entry, locked) {
   return row;
 }
 
-function renderEvidenceRow(entry, locked) {
-  const poster = state.currentScenario.characters.find(c => c.id === entry.posterCharId);
-  const row = document.createElement("article");
-  row.className = "tl-row tl-evidence";
-  row.dataset.kind = "evidence";
-  row.dataset.id = entry.id || "";
-  row.dataset.charId = entry.charId || "";
-  row.dataset.time = entry.time || "";
-  row.dataset.evidenceId = entry.id || "";
-
-  if (entry.cardImg) {
-    const img = document.createElement("img");
-    img.className = "tl-thumb";
-    img.alt = entry.cardName || "증거";
-    img.src = entry.cardImg;
-    row.appendChild(img);
-  }
-
-  const body = document.createElement("div");
-  body.className = "min-w-0 flex-1";
-  body.appendChild(metaLine(entry, "증거"));
-  const name = document.createElement("div");
-  name.className = "text-[11px] font-bold text-cyan-200";
-  const kindLabel = entry.cardType === "alibi" ? "알리바이" : "현장 증거";
-  name.textContent = entry.cardName || kindLabel;
-  const sub = document.createElement("p");
-  sub.className = "text-[10px] text-cyan-100/80";
-  const who = poster ? poster.name : "플레이어";
-  const subject = entry.cardType === "alibi" && entry.charName ? `${entry.charName} · ` : "";
-  sub.textContent = `${subject}${kindLabel} · ${who}가 고정`;
-  body.append(name, sub);
-  if (entry.text) {
-    const note = document.createElement("p");
-    note.className = "tl-text text-[11px] text-neutral-200 leading-relaxed";
-    note.textContent = entry.text;
-    body.appendChild(note);
-  }
-  row.appendChild(body);
-  if (!locked && entry.pid === state.myPlayerId && entry.id) row.appendChild(removeButton(entry.id, "해제"));
-
-  evidenceById.set(entry.id, {
-    header: `타임라인에 고정된 ${kindLabel}`,
-    title: entry.cardName || kindLabel,
-    desc: entry.cardDesc || "",
-    img: entry.cardImg || ""
-  });
-  return row;
-}
-
 function metaLine(entry, label) {
   const meta = document.createElement("div");
   meta.className = "flex flex-wrap items-center gap-1 mb-0.5";
@@ -1246,9 +1244,23 @@ function closeTimelineModal() {
   document.getElementById("timelinePostModal")?.classList.add("hidden");
 }
 
-function closePinModal() {
-  pinTarget = null;
-  document.getElementById("timelinePinModal")?.classList.add("hidden");
+function applyTimeFocus(nextId) {
+  state.timelineTimeFocus = nextId || null;
+  const host = document.getElementById("timelineFilters");
+  if (host) delete host.dataset.signature;
+  const list = document.getElementById("timelineEntries");
+  if (list) delete list.dataset.signature;
+  const data = actions.getRoomData?.();
+  if (data) renderTimelineBoard(data);
+}
+
+function onTimeFocusClick(event) {
+  const clear = event.target.closest("[data-clear-time-focus]");
+  const btn = event.target.closest("[data-time-focus]");
+  if (!clear && !btn) return false;
+  if (clear || btn.getAttribute("aria-pressed") === "true") applyTimeFocus(null);
+  else applyTimeFocus(btn.dataset.timeFocus || null);
+  return true;
 }
 
 function choiceBlock(label, line, fake) {
@@ -1357,8 +1369,7 @@ function openOwnedCard(payload) {
       `[알리바이] ${owned?.charName || ""}`,
       owned?.title || "알리바이",
       owned?.text || "",
-      owned?.img || "",
-      { cardType: "alibi", charId: payload.charId, cardNum: payload.cardNum }
+      owned?.img || ""
     );
     return;
   }
@@ -1367,65 +1378,15 @@ function openOwnedCard(payload) {
     "[현장 증거]",
     clue?.name || "현장 증거",
     clue?.desc || "",
-    clue?.img || "",
-    { cardType: "clue", cardId: payload.cardId }
+    clue?.img || ""
   );
 }
 
-function syncPinCustomField() {
-  const select = document.getElementById("timelinePinTimeSelect");
-  const wrap = document.getElementById("timelinePinCustomWrap");
-  if (!select || !wrap) return;
-  wrap.classList.toggle("hidden", select.value !== "__custom__");
-}
-
-function openTimelinePinModal(payload) {
-  const data = actions.getRoomData?.();
-  if (!payload || timelinePhaseLocked(data)) return;
-  const modal = document.getElementById("timelinePinModal");
-  const select = document.getElementById("timelinePinTimeSelect");
-  const custom = document.getElementById("timelinePinTimeCustom");
-  const note = document.getElementById("timelinePinNote");
-  const name = document.getElementById("timelinePinCardName");
-  if (!modal || !select) return;
-  pinTarget = {
-    cardType: payload.cardType,
-    charId: payload.charId || "",
-    cardNum: payload.cardNum,
-    cardId: payload.cardId || ""
-  };
-  modal.dataset.owner = state.myPlayerId || "";
-  if (name) name.textContent = payload.preview?.title || payload.preview?.name || "증거 카드";
-  select.replaceChildren();
-  const anchors = Array.isArray(state.currentScenario?.caseTimeline) ? state.currentScenario.caseTimeline : [];
-  anchors.forEach(item => {
-    if (!item?.time) return;
-    const opt = document.createElement("option");
-    opt.value = item.time;
-    opt.textContent = item.place ? `${item.time} · ${item.place}` : item.time;
-    select.appendChild(opt);
-  });
-  const customOpt = document.createElement("option");
-  customOpt.value = "__custom__";
-  customOpt.textContent = "직접 입력 (HH:MM)";
-  select.appendChild(customOpt);
-  if (!anchors.length) select.value = "__custom__";
-  if (custom) custom.value = "";
-  if (note) note.value = "";
-  syncPinCustomField();
-  closeEvidenceModal();
-  modal.classList.remove("hidden");
-}
-
 function onOwnedCardClick(event) {
-  const pin = event.target.closest(".js-pin-card");
   const open = event.target.closest(".js-open-card");
-  const btn = pin || open;
-  if (!btn) return;
-  const payload = cardPayloadFromKey(btn.dataset.card, btn.dataset.key);
-  if (!payload) return;
-  if (pin) openTimelinePinModal(payload);
-  else openOwnedCard(payload);
+  if (!open) return;
+  const payload = cardPayloadFromKey(open.dataset.card, open.dataset.key);
+  if (payload) openOwnedCard(payload);
 }
 
 function initTimelineBoard() {
@@ -1437,6 +1398,7 @@ function initTimelineBoard() {
     else panel.classList.toggle("tl-collapsed", !!state.timelineCollapsed);
   });
   document.getElementById("timelineFilters")?.addEventListener("click", (event) => {
+    if (onTimeFocusClick(event)) return;
     const btn = event.target.closest("[data-filter-kind]");
     if (!btn) return;
     if (btn.dataset.filterKind === "type") state.timelineTypeFilter = btn.dataset.filter || "all";
@@ -1447,15 +1409,9 @@ function initTimelineBoard() {
     if (data) renderTimelineBoard(data);
   });
   document.getElementById("timelineEntries")?.addEventListener("click", (event) => {
+    if (onTimeFocusClick(event)) return;
     const btn = event.target.closest("[data-remove]");
-    if (btn) {
-      actions.removeTimelineEntry?.(btn.dataset.remove);
-      return;
-    }
-    const row = event.target.closest("[data-evidence-id]");
-    if (!row) return;
-    const card = evidenceById.get(row.dataset.evidenceId);
-    if (card) window.showEvidenceModal(card.header, card.title, card.desc, card.img);
+    if (btn) actions.removeTimelineEntry?.(btn.dataset.remove);
   });
   document.getElementById("btnOpenTimelinePost")?.addEventListener("click", () => {
     const data = actions.getRoomData?.();
@@ -1477,24 +1433,6 @@ function initTimelineBoard() {
     if (posted) closeTimelineModal();
   });
 
-  document.getElementById("btnPinFromEvidence")?.addEventListener("click", () => {
-    if (!evidencePinPayload) return;
-    const title = document.getElementById("evidenceModalTitle")?.textContent || "증거 카드";
-    openTimelinePinModal({ ...evidencePinPayload, preview: { title, name: title } });
-  });
-  document.getElementById("timelinePinTimeSelect")?.addEventListener("change", syncPinCustomField);
-  const closePin = () => closePinModal();
-  document.getElementById("btnCloseTimelinePin")?.addEventListener("click", closePin);
-  document.getElementById("btnCancelTimelinePin")?.addEventListener("click", closePin);
-  document.getElementById("btnConfirmTimelinePin")?.addEventListener("click", async () => {
-    if (!pinTarget) return;
-    const select = document.getElementById("timelinePinTimeSelect");
-    const custom = document.getElementById("timelinePinTimeCustom");
-    const note = document.getElementById("timelinePinNote");
-    const time = select?.value === "__custom__" ? (custom?.value || "") : (select?.value || "");
-    const posted = await actions.pinEvidence?.({ ...pinTarget, time, note: note?.value || "" });
-    if (posted) closePinModal();
-  });
   document.getElementById("myAlibiCardsList")?.addEventListener("click", onOwnedCardClick);
   document.getElementById("myClueCardsList")?.addEventListener("click", onOwnedCardClick);
   document.getElementById("whisperCardsList")?.addEventListener("click", onOwnedCardClick);

@@ -26,7 +26,8 @@ async function loadScenarioModule(scenarioId) {
 }
 
 const INGAME_PHASES = ['R1', 'R2', 'R2_WHISPER', 'R3', 'R4', 'R4_WHISPER', 'R5_DEFENSE', 'FINAL_VOTE'];
-const TIMELINE_POST_PHASES = new Set(['PROLOGUE', ...INGAME_PHASES]);
+const TIMELINE_POST_PHASES = new Set(INGAME_PHASES);
+const INVESTIGATE_PHASES = new Set(['R1', 'R2', 'R3', 'R4']);
 const FINAL_VOTE_SECONDS = 120;
 const MAX_PLAYERS = 5;
 
@@ -436,6 +437,9 @@ function handleWhisperNotice(data) {
     return;
   }
 
+  // The host is still assigning rooms. A full-screen notice here covers the second room button.
+  if (state.isCurrentHost) return;
+
   const r1 = data.whisperRooms?.room1 || [];
   const r2 = data.whisperRooms?.room2 || [];
 
@@ -472,47 +476,179 @@ function handleCardShareSync(data) {
   }
 }
 
-async function investigateAlibi(targetCharId, data, isNPC) {
-  const pool = data.alibiPool && data.alibiPool[targetCharId];
-  if (!pool || pool.length === 0) return alert("해당 인물의 알리바이 카드가 모두 소진되었습니다.");
+function investigateLimit(playerCount) {
+  return playerCount === 2 ? 2 : 1;
+}
 
-  const randomIndex = Math.floor(Math.random() * pool.length);
-  const cardNum = pool[randomIndex];
-  const newPool = [...pool];
-  newPool.splice(randomIndex, 1);
-
-  const targetChar = state.currentScenario.characters.find(c => c.id === targetCharId);
-  const cardObj = targetChar.alibiCards[cardNum];
-
-  let cardTitle = cardObj.name || `${targetChar.name}의 알리바이 #${cardNum + 1}`;
-  let cardText = cardObj.desc || "";
-  let cardImg = cardObj.img || "";
-
-  const myInv = (data.playerInventories && data.playerInventories[state.myPlayerId]) || { alibis: [], clues: [] };
-  const updatedAlibis = [...(myInv.alibis || []), {
-    charId: targetCharId,
-    charName: `${targetChar.name}${isNPC ? ' (NPC)' : ''}`,
-    cardNum: cardNum + 1,
-    title: cardTitle,
-    text: cardText,
-    img: cardImg
-  }];
-
-  const doneCount = ((data.roundInvestigateDone && data.roundInvestigateDone[state.myPlayerId]) || 0) + 1;
-
-  await updateDoc(doc(db, "rooms", state.currentRoomCode), {
-    [`alibiPool.${targetCharId}`]: newPool,
-    [`playerInventories.${state.myPlayerId}.alibis`]: updatedAlibis,
-    [`roundInvestigateDone.${state.myPlayerId}`]: doneCount
+function eligibleAlibiTargets(data, pid) {
+  const players = data.players || {};
+  const me = players[pid];
+  if (!me?.charId || !state.currentScenario) return [];
+  const count = Object.keys(players).length;
+  return state.currentScenario.characters.filter(character => {
+    if (character.id === me.charId) return false;
+    if (!character.isDefault && count < 5) return false;
+    const pool = data.alibiPool?.[character.id];
+    return Array.isArray(pool) && pool.length > 0;
   });
+}
 
-  window.showEvidenceModal(
-    `[${targetChar.name}${isNPC ? ' (NPC 용의자)' : ''} 알리바이 카드 확보 (5장 중 #${cardNum + 1})]`,
-    `제목: ${cardTitle}`,
-    `내용: "${cardText}"\n\n내 단서 보관함에 저장되었습니다.`,
-    cardImg,
-    { cardType: "alibi", charId: targetCharId, cardNum: cardNum + 1 }
-  );
+function alibiCardFromPool(target, cardNum, players) {
+  const cardObj = target.alibiCards?.[cardNum];
+  if (!cardObj) return null;
+  const isNPC = !Object.values(players).some(player => player.charId === target.id);
+  return {
+    isNPC,
+    cardNum,
+    card: {
+      charId: target.id,
+      charName: `${target.name}${isNPC ? " (NPC)" : ""}`,
+      cardNum: cardNum + 1,
+      title: cardObj.name || `${target.name}의 알리바이 #${cardNum + 1}`,
+      text: cardObj.desc || "",
+      img: cardObj.img || ""
+    }
+  };
+}
+
+async function commitAlibiDraw(pid, targetCharId) {
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  let drawn = null;
+  let reason = "";
+  await runTransaction(db, async (tx) => {
+    drawn = null;
+    reason = "";
+    const snap = await tx.get(ref);
+    if (!snap.exists()) { reason = "missing"; return; }
+    const fresh = snap.data();
+    if (!INVESTIGATE_PHASES.has(fresh.phase)) { reason = "phase"; return; }
+    const players = fresh.players || {};
+    const me = players[pid];
+    if (!me) { reason = "player"; return; }
+    const count = Object.keys(players).length;
+    const done = Number(fresh.roundInvestigateDone?.[pid] || 0);
+    if (done >= investigateLimit(count)) { reason = "allowance"; return; }
+    const target = state.currentScenario.characters.find(character => character.id === targetCharId);
+    if (!target || target.id === me.charId) { reason = "target"; return; }
+    if (!target.isDefault && count < 5) { reason = "locked"; return; }
+    const pool = fresh.alibiPool?.[targetCharId];
+    if (!Array.isArray(pool) || pool.length === 0) { reason = "empty"; return; }
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const cardNum = pool[randomIndex];
+    const built = alibiCardFromPool(target, cardNum, players);
+    if (!built) { reason = "card"; return; }
+    const inv = fresh.playerInventories?.[pid] || {};
+    tx.update(ref, {
+      [`alibiPool.${targetCharId}`]: pool.filter((_, index) => index !== randomIndex),
+      [`playerInventories.${pid}.alibis`]: [...(inv.alibis || []), built.card],
+      [`roundInvestigateDone.${pid}`]: done + 1
+    });
+    drawn = { ...built, target };
+  });
+  if (reason) throw new Error(reason);
+  return drawn;
+}
+
+async function drawRandomAlibiFor(pid) {
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  let drew = false;
+  await runTransaction(db, async (tx) => {
+    drew = false;
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return;
+    const fresh = snap.data();
+    if (!INVESTIGATE_PHASES.has(fresh.phase)) return;
+    const players = fresh.players || {};
+    const me = players[pid];
+    if (!me?.charId) return;
+    const count = Object.keys(players).length;
+    const done = Number(fresh.roundInvestigateDone?.[pid] || 0);
+    if (done >= investigateLimit(count)) return;
+    const targets = eligibleAlibiTargets(fresh, pid);
+    if (!targets.length) return;
+    const target = targets[Math.floor(Math.random() * targets.length)];
+    const pool = [...(fresh.alibiPool?.[target.id] || [])];
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const cardNum = pool.splice(randomIndex, 1)[0];
+    const built = alibiCardFromPool(target, cardNum, players);
+    if (!built) return;
+    const inv = fresh.playerInventories?.[pid] || {};
+    tx.update(ref, {
+      [`alibiPool.${target.id}`]: pool,
+      [`playerInventories.${pid}.alibis`]: [...(inv.alibis || []), built.card],
+      [`roundInvestigateDone.${pid}`]: done + 1
+    });
+    drew = true;
+  });
+  return drew;
+}
+
+async function commitClueDraw(pid) {
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  let drawn = null;
+  let reason = "";
+  await runTransaction(db, async (tx) => {
+    drawn = null;
+    reason = "";
+    const snap = await tx.get(ref);
+    if (!snap.exists()) { reason = "missing"; return; }
+    const fresh = snap.data();
+    if (!INVESTIGATE_PHASES.has(fresh.phase)) { reason = "phase"; return; }
+    if (fresh.roundClueDone?.[pid]) { reason = "once"; return; }
+    const pool = Array.isArray(fresh.cluePool) ? [...fresh.cluePool] : [];
+    if (!pool.length) { reason = "empty"; return; }
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const clueId = pool.splice(randomIndex, 1)[0];
+    const clue = state.currentScenario.clues.find(item => item.id === clueId);
+    if (!clue) { reason = "card"; return; }
+    const inv = fresh.playerInventories?.[pid] || {};
+    tx.update(ref, {
+      cluePool: pool,
+      [`playerInventories.${pid}.clues`]: [...(inv.clues || []), clueId],
+      [`roundClueDone.${pid}`]: true
+    });
+    drawn = { clueId, clue };
+  });
+  if (reason) throw new Error(reason);
+  return drawn;
+}
+
+async function drawRandomClueFor(pid) {
+  try {
+    return await commitClueDraw(pid);
+  } catch (err) {
+    const message = String(err?.message || "");
+    if (message.includes("once") || message.includes("empty") || message.includes("phase")) return null;
+    console.error(err);
+    return null;
+  }
+}
+
+function explainInvestigateError(err) {
+  const message = String(err?.message || "");
+  if (message.includes("empty")) return "해당 인물의 알리바이 카드가 모두 소진되었습니다.";
+  if (message.includes("phase")) return "현재 단계에서는 조사가 불가능합니다.";
+  if (message.includes("allowance")) return "이번 라운드 조사 횟수를 모두 사용했습니다.";
+  return "";
+}
+
+async function investigateAlibi(targetCharId) {
+  if (!state.currentRoomCode || !state.currentScenario) return;
+  try {
+    const drawn = await commitAlibiDraw(state.myPlayerId, targetCharId);
+    if (!drawn) return;
+    const { card, target, isNPC, cardNum } = drawn;
+    window.showEvidenceModal(
+      `[${target.name}${isNPC ? " (NPC 용의자)" : ""} 알리바이 카드 확보 (5장 중 #${cardNum + 1})]`,
+      `제목: ${card.title}`,
+      `내용: "${card.text}"\n\n내 단서 보관함에 저장되었습니다.`,
+      card.img
+    );
+  } catch (err) {
+    const text = explainInvestigateError(err);
+    if (text) alert(text);
+    else console.error(err);
+  }
 }
 
 async function shareCardToWhisperRoom(roomType, title, desc, img, data) {
@@ -581,62 +717,68 @@ export async function resolveFinalVote(source) {
   }
 }
 
-async function submitVote(targetCharId, data) {
+async function submitVote(targetCharId) {
   const targetChar = state.currentScenario.characters.find(c => c.id === targetCharId);
   const targetName = targetChar ? targetChar.name : targetCharId;
 
   if (!confirm(`정말 '${targetName}'을(를) 사건의 진범으로 지목하시겠습니까?\n한 번 제출하면 변경할 수 없습니다.`)) return;
 
-  const updatedVotes = { ...(data.votes || {}), [state.myPlayerId]: targetCharId };
-  const playerIds = Object.keys(data.players || {});
-  const allVoted = playerIds.every(pid => !!updatedVotes[pid]);
-
-  if (allVoted) {
-    const winner = computeVoteWinner(updatedVotes, data);
-    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
-      votes: updatedVotes,
-      phase: 'ENDING',
-      winner
-    });
-  } else {
-    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
-      votes: updatedVotes
-    });
-  }
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  const pid = state.myPlayerId;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return;
+    const fresh = snap.data();
+    if (fresh.phase !== "FINAL_VOTE") return;
+    if (fresh.votes?.[pid]) return;
+    const votes = { ...(fresh.votes || {}), [pid]: targetCharId };
+    const playerIds = Object.keys(fresh.players || {});
+    const allVoted = playerIds.every(id => !!votes[id]);
+    if (allVoted) {
+      tx.update(ref, {
+        votes,
+        phase: "ENDING",
+        winner: computeVoteWinner(votes, fresh),
+        timerSeconds: 0
+      });
+    } else {
+      tx.update(ref, { votes });
+    }
+  });
 }
 
-async function postTimeline(selections) {
+async function postTimeline(selections, options = {}) {
+  const pid = options.pid || state.myPlayerId;
+  const silent = !!options.silent;
+  const fail = (message) => {
+    if (!silent) alert(message);
+    return false;
+  };
   if (!state.currentRoomCode || !latestRoomData || !state.currentScenario) return false;
   if (!TIMELINE_POST_PHASES.has(latestRoomData.phase)) {
-    alert("지금은 타임라인을 공개할 수 없습니다.");
-    return false;
+    return fail("지금은 타임라인을 공개할 수 없습니다.");
   }
-  const me = latestRoomData.players?.[state.myPlayerId];
+  const me = latestRoomData.players?.[pid];
   const char = state.currentScenario.characters.find(c => c.id === me?.charId);
   if (!char || !Array.isArray(selections) || !selections.length) {
-    alert("공개할 줄을 선택하세요.");
-    return false;
+    return fail("공개할 줄을 선택하세요.");
   }
   const canLie = char.isKiller === true && Array.isArray(char.fakeTimeline);
   const entries = [];
   for (const selection of selections) {
     const index = Number(selection.index);
     const trueLine = char.timeline?.[index];
-    if (typeof trueLine !== "string") {
-      alert("공개할 수 없는 줄입니다.");
-      return false;
-    }
+    if (typeof trueLine !== "string") return fail("공개할 수 없는 줄입니다.");
     const fakeLine = canLie ? char.fakeTimeline[index] : undefined;
     const useFake = !!selection.useFake;
     if (useFake && typeof fakeLine !== "string") {
-      alert("시민은 자신의 타임라인을 그대로만 공개할 수 있습니다.");
-      return false;
+      return fail("시민은 자신의 타임라인을 그대로만 공개할 수 있습니다.");
     }
     const parsed = parseTimelineLine(useFake ? fakeLine : trueLine);
     entries.push({
-      id: `${state.myPlayerId}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`,
+      id: `${pid}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`,
       kind: "statement",
-      pid: state.myPlayerId,
+      pid,
       charId: char.id,
       time: parsed.time,
       text: parsed.text,
@@ -647,24 +789,91 @@ async function postTimeline(selections) {
   }
 
   const ref = doc(db, "rooms", state.currentRoomCode);
-  const pid = state.myPlayerId;
+  let blocked = "";
   try {
     await runTransaction(db, async (tx) => {
+      blocked = "";
       const snap = await tx.get(ref);
-      if (!snap.exists()) return;
+      if (!snap.exists()) { blocked = "missing"; return; }
       const fresh = snap.data();
-      if (!TIMELINE_POST_PHASES.has(fresh.phase)) throw new Error("locked");
+      if (!TIMELINE_POST_PHASES.has(fresh.phase)) { blocked = "locked"; return; }
       const meFresh = fresh.players?.[pid];
-      if (!meFresh || meFresh.charId !== char.id) throw new Error("character");
+      if (!meFresh || meFresh.charId !== char.id) { blocked = "character"; return; }
       const board = Array.isArray(fresh.timelineBoard) ? fresh.timelineBoard : [];
-      tx.update(ref, { timelineBoard: board.concat(entries) });
+      const taken = new Set(
+        board.filter(entry => entry && entry.pid === pid && Number.isInteger(entry.sourceIndex)).map(entry => entry.sourceIndex)
+      );
+      const freshEntries = options.skipPosted ? entries.filter(entry => !taken.has(entry.sourceIndex)) : entries;
+      if (!freshEntries.length) return;
+      tx.update(ref, { timelineBoard: board.concat(freshEntries) });
     });
   } catch (err) {
     console.error(err);
-    alert("타임라인을 공개하지 못했습니다.");
-    return false;
+    return fail("타임라인을 공개하지 못했습니다.");
   }
+  if (blocked === "locked") return fail("지금은 타임라인을 공개할 수 없습니다.");
+  if (blocked) return fail("타임라인을 공개하지 못했습니다.");
   return true;
+}
+
+async function roomSnapshot() {
+  if (!state.currentRoomCode) return null;
+  const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
+  return snap.exists() ? snap.data() : null;
+}
+
+function testBots(data) {
+  if (!data?.test) return [];
+  return Object.entries(data.players || {}).filter(([, player]) => player.isBot && player.charId);
+}
+
+export async function runBotInvestigations() {
+  const result = { investigated: 0, clues: 0, skipped: true };
+  const data = await roomSnapshot();
+  if (!data?.test || !INVESTIGATE_PHASES.has(data.phase) || !state.currentScenario) return result;
+  result.skipped = false;
+  for (const [pid] of testBots(data)) {
+    try {
+      for (let n = 0; n < 5; n += 1) {
+        const drew = await drawRandomAlibiFor(pid);
+        if (!drew) break;
+        result.investigated += 1;
+      }
+      const clue = await drawRandomClueFor(pid);
+      if (clue) result.clues += 1;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  return result;
+}
+
+export async function runBotStatements() {
+  const result = { stated: 0, skipped: true };
+  const data = await roomSnapshot();
+  if (!data?.test || !TIMELINE_POST_PHASES.has(data.phase) || !state.currentScenario) return result;
+  result.skipped = false;
+  const board = Array.isArray(data.timelineBoard) ? data.timelineBoard : [];
+  for (const [pid, player] of testBots(data)) {
+    const char = state.currentScenario.characters.find(item => item.id === player.charId);
+    if (!char || !Array.isArray(char.timeline)) continue;
+    const posted = new Set(
+      board
+        .filter(entry => entry && entry.kind !== "evidence" && entry.pid === pid && Number.isInteger(entry.sourceIndex))
+        .map(entry => entry.sourceIndex)
+    );
+    const canLie = char.isKiller === true && Array.isArray(char.fakeTimeline);
+    const selections = [];
+    char.timeline.forEach((line, index) => {
+      if (typeof line !== "string" || posted.has(index)) return;
+      const fake = canLie && typeof char.fakeTimeline[index] === "string";
+      selections.push({ index, useFake: !!(fake && Math.random() < 0.5) });
+    });
+    if (!selections.length) continue;
+    const postedOk = await postTimeline(selections, { pid, silent: true, skipPosted: true });
+    if (postedOk) result.stated += selections.length;
+  }
+  return result;
 }
 
 async function removeTimelineEntry(id) {
@@ -676,9 +885,9 @@ async function removeTimelineEntry(id) {
       const snap = await tx.get(ref);
       if (!snap.exists()) return;
       const fresh = snap.data();
-      if (fresh.phase === "ENDING" || fresh.phase === "LOBBY") return;
+      if (fresh.phase === "ENDING" || fresh.phase === "LOBBY" || fresh.phase === "PROLOGUE") return;
       const board = Array.isArray(fresh.timelineBoard) ? fresh.timelineBoard : [];
-      const next = board.filter(entry => !(entry.id === id && entry.pid === pid));
+      const next = board.filter(entry => !(entry && entry.id === id && entry.pid === pid));
       if (next.length === board.length) return;
       tx.update(ref, { timelineBoard: next });
     });
@@ -687,130 +896,11 @@ async function removeTimelineEntry(id) {
   }
 }
 
-function normalizePinTime(raw) {
-  const value = String(raw || "").trim();
-  const anchors = Array.isArray(state.currentScenario?.caseTimeline) ? state.currentScenario.caseTimeline : [];
-  if (anchors.some(item => item && item.time === value)) return value;
-  const match = /^(\d{1,2}):(\d{2})$/.exec(value);
-  if (!match) return "";
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) return "";
-  return `${String(hour).padStart(2, "0")}:${match[2]}`;
-}
-
-function resolveOwnedCard(inv, payload) {
-  if (!payload || !state.currentScenario) return null;
-  if (payload.cardType === "clue") {
-    const clues = Array.isArray(inv?.clues) ? inv.clues : [];
-    if (!clues.includes(payload.cardId)) return null;
-    const clue = state.currentScenario.clues.find(c => c.id === payload.cardId);
-    if (!clue) return null;
-    return {
-      cardType: "clue",
-      cardId: clue.id,
-      charId: "",
-      charName: "",
-      name: clue.name,
-      desc: clue.desc,
-      img: clue.img || ""
-    };
-  }
-  if (payload.cardType === "alibi") {
-    const cardNum = Number(payload.cardNum);
-    const alibis = Array.isArray(inv?.alibis) ? inv.alibis : [];
-    const owned = alibis.find(card => card.charId === payload.charId && Number(card.cardNum) === cardNum);
-    if (!owned) return null;
-    const char = state.currentScenario.characters.find(c => c.id === payload.charId);
-    const def = char?.alibiCards?.[cardNum - 1];
-    if (!def) return null;
-    return {
-      cardType: "alibi",
-      cardId: def.id || "",
-      charId: payload.charId,
-      charName: owned.charName || char.name,
-      cardNum,
-      name: def.name,
-      desc: def.desc,
-      img: def.img || owned.img || ""
-    };
-  }
-  return null;
-}
-
-async function pinEvidence(payload) {
-  if (!state.currentRoomCode || !latestRoomData || !state.currentScenario) return false;
-  if (!TIMELINE_POST_PHASES.has(latestRoomData.phase)) {
-    alert("지금은 타임라인에 고정할 수 없습니다.");
-    return false;
-  }
-  const time = normalizePinTime(payload?.time);
-  if (!time) {
-    alert("시각은 사건 기록의 칸이거나 HH:MM 이어야 합니다.");
-    return false;
-  }
-  const note = String(payload?.note || "").trim().slice(0, 80);
-  const me = latestRoomData.players?.[state.myPlayerId];
-  if (!me) {
-    alert("이 방의 플레이어만 고정할 수 있습니다.");
-    return false;
-  }
-  if (!resolveOwnedCard(latestRoomData.playerInventories?.[state.myPlayerId], payload)) {
-    alert("조사해 손에 넣은 카드만 고정할 수 있습니다.");
-    return false;
-  }
-
-  const ref = doc(db, "rooms", state.currentRoomCode);
-  const pid = state.myPlayerId;
-  const entryId = `${pid}_pin_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-  try {
-    await runTransaction(db, async (tx) => {
-      const snap = await tx.get(ref);
-      if (!snap.exists()) throw new Error("missing");
-      const fresh = snap.data();
-      if (!TIMELINE_POST_PHASES.has(fresh.phase)) throw new Error("locked");
-      const meFresh = fresh.players?.[pid];
-      if (!meFresh) throw new Error("character");
-      const owned = resolveOwnedCard(fresh.playerInventories?.[pid], payload);
-      if (!owned) throw new Error("owned");
-      const board = Array.isArray(fresh.timelineBoard) ? fresh.timelineBoard : [];
-      const entry = {
-        id: entryId,
-        kind: "evidence",
-        pid,
-        charId: owned.charId,
-        posterCharId: meFresh.charId || "",
-        time,
-        text: note,
-        ts: Date.now(),
-        falsified: false,
-        cardType: owned.cardType,
-        cardId: owned.cardId,
-        cardName: owned.name,
-        cardDesc: owned.desc,
-        cardImg: owned.img,
-        charName: owned.charName
-      };
-      if (owned.cardNum != null) entry.cardNum = owned.cardNum;
-      tx.update(ref, { timelineBoard: board.concat(entry) });
-    });
-  } catch (err) {
-    console.error(err);
-    const message = String(err?.message || "");
-    if (message.includes("locked")) alert("지금은 타임라인에 고정할 수 없습니다.");
-    else if (message.includes("owned")) alert("조사해 손에 넣은 카드만 고정할 수 있습니다.");
-    else alert("타임라인에 고정하지 못했습니다.");
-    return false;
-  }
-  return true;
-}
-
 actions.assignRandomCharacters = assignRandomCharacters;
 actions.investigateAlibi = investigateAlibi;
 actions.shareCardToWhisperRoom = shareCardToWhisperRoom;
 actions.submitVote = submitVote;
 actions.postTimeline = postTimeline;
-actions.pinEvidence = pinEvidence;
 actions.removeTimelineEntry = removeTimelineEntry;
 actions.getRoomData = () => latestRoomData;
 
@@ -974,40 +1064,24 @@ export function initGame() {
   });
 
   document.getElementById('btnDrawClue').addEventListener('click', async () => {
-    const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
-    if (!snap.exists()) return;
-    const data = snap.data();
-
-    if (data.roundClueDone && data.roundClueDone[state.myPlayerId]) {
-      return alert("현장 증거는 라운드당 1회만 수색할 수 있습니다.");
+    if (!state.currentRoomCode || !state.currentScenario) return;
+    try {
+      const drawn = await commitClueDraw(state.myPlayerId);
+      if (!drawn) return;
+      const clueName = drawn.clue?.name || drawn.clueId;
+      window.showEvidenceModal(
+        `[현장 증거 발견: ${clueName}]`,
+        clueName,
+        `"${drawn.clue?.desc || ""}"\n\n내 단서 보관함에 보관되었습니다.`,
+        drawn.clue?.img || ""
+      );
+    } catch (err) {
+      const message = String(err?.message || "");
+      if (message.includes("once")) alert("현장 증거는 라운드당 1회만 수색할 수 있습니다.");
+      else if (message.includes("empty")) alert("더 이상 수색할 현장 증거가 없습니다.");
+      else if (message.includes("phase")) alert("현재 단계에서는 수색할 수 없습니다.");
+      else console.error(err);
     }
-
-    const pool = data.cluePool || [];
-    if (pool.length === 0) return alert("더 이상 수색할 현장 증거가 없습니다.");
-
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    const clueId = pool[randomIndex];
-    const newPool = [...pool];
-    newPool.splice(randomIndex, 1);
-
-    const clueObj = state.currentScenario.clues.find(c => c.id === clueId);
-    const myInv = (data.playerInventories && data.playerInventories[state.myPlayerId]) || { alibis: [], clues: [] };
-    const updatedClues = [...(myInv.clues || []), clueId];
-
-    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
-      cluePool: newPool,
-      [`playerInventories.${state.myPlayerId}.clues`]: updatedClues,
-      [`roundClueDone.${state.myPlayerId}`]: true
-    });
-
-    const clueName = clueObj ? clueObj.name : clueId;
-    window.showEvidenceModal(
-      `[현장 증거 발견: ${clueName}]`,
-      clueName,
-      `"${clueObj ? clueObj.desc : ''}"\n\n내 단서 보관함에 보관되었습니다.`,
-      clueObj && clueObj.img ? clueObj.img : "",
-      { cardType: "clue", cardId: clueId }
-    );
   });
 
   document.getElementById('btnAssignRoom1').addEventListener('click', async () => {

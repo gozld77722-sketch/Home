@@ -1,6 +1,8 @@
 import { db, doc, updateDoc, getDoc, runTransaction } from "./firebase.js";
 import { state, actions } from "./state.js";
-import { devHooks, forceAdvance, refreshFromLatest, resolveFinalVote } from "./game.js";
+import { computeVoteWinner, devHooks, forceAdvance, refreshFromLatest, runBotInvestigations, runBotStatements } from "./game.js";
+
+const AUTO_PHASE_KEY = "mmDevAutoOnPhase";
 
 const MAX_PLAYERS = 5;
 
@@ -11,7 +13,7 @@ export function initDevMode() {
       return;
     }
     state.devRealPlayerId = state.myPlayerId;
-    window.__mmTest = { state, actions, refresh: refreshFromLatest };
+    window.__mmTest = { state, actions, refresh: refreshFromLatest, lastAuto: null };
     mountPanel();
     devHooks.onRoomUpdate = (data) => {
       refreshViewAsOptions(data);
@@ -31,7 +33,13 @@ function mountPanel() {
     <div class="dev-panel-title">TEST DEV</div>
     <button type="button" id="devAddBot" class="dev-btn">+ 봇 추가</button>
     <button type="button" id="devForceNext" class="dev-btn">다음 단계</button>
+    <button type="button" id="devBotInvestigate" class="dev-btn">봇 자동 조사</button>
+    <button type="button" id="devBotStatement" class="dev-btn">봇 자동 진술</button>
     <button type="button" id="devTimerScale" class="dev-btn" aria-pressed="false">타이머 x10</button>
+    <label class="dev-label dev-check">
+      <input type="checkbox" id="devAutoOnPhase">
+      <span>단계 넘길 때 자동 실행</span>
+    </label>
     <label class="dev-label">view as
       <select id="devViewAs" class="dev-select">
         <option value="">내 계정</option>
@@ -45,6 +53,25 @@ function mountPanel() {
   });
   document.getElementById("devForceNext").addEventListener("click", () => {
     forceAdvance().catch((err) => console.error(err));
+  });
+  document.getElementById("devBotInvestigate").addEventListener("click", () => {
+    runBotInvestigations()
+      .then((result) => {
+        if (result.skipped) alert("지금은 테스트 방에서 조사할 수 없습니다.");
+      })
+      .catch((err) => console.error(err));
+  });
+  document.getElementById("devBotStatement").addEventListener("click", () => {
+    runBotStatements()
+      .then((result) => {
+        if (result.skipped) alert("지금은 테스트 방에서 진술을 공개할 수 없습니다.");
+      })
+      .catch((err) => console.error(err));
+  });
+  const autoBox = document.getElementById("devAutoOnPhase");
+  autoBox.checked = localStorage.getItem(AUTO_PHASE_KEY) === "1";
+  autoBox.addEventListener("change", () => {
+    localStorage.setItem(AUTO_PHASE_KEY, autoBox.checked ? "1" : "0");
   });
   document.getElementById("devTimerScale").addEventListener("click", () => {
     const on = state.devTimerScale !== 10;
@@ -109,11 +136,41 @@ async function addBot() {
   });
 }
 
+let armedPhase = null;
+
+function autoPhaseEnabled() {
+  return document.getElementById("devAutoOnPhase")?.checked === true;
+}
+
+async function maybeAutoPhase(data) {
+  if (!data?.test) return;
+  if (armedPhase === null) {
+    armedPhase = data.phase;
+    return;
+  }
+  if (data.phase === armedPhase) return;
+  const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
+  if (!snap.exists() || snap.data().phase !== data.phase) return;
+  armedPhase = data.phase;
+  if (!autoPhaseEnabled()) return;
+  const investigated = await runBotInvestigations();
+  const stated = await runBotStatements();
+  window.__mmTest.lastAuto = {
+    phase: data.phase,
+    investigated: investigated.investigated,
+    clues: investigated.clues,
+    stated: stated.stated,
+    investigateSkipped: investigated.skipped,
+    statementSkipped: stated.skipped
+  };
+}
+
 async function handleDevRoom(data) {
   if (!data || data.hostId !== state.devRealPlayerId || !state.currentRoomCode) return;
   await assignFreeCharacters(data);
   await autoSkipYes(data);
   await autoBotVotes(data);
+  await maybeAutoPhase(data);
 }
 
 async function assignFreeCharacters(data) {
@@ -164,10 +221,8 @@ function validVoteTargets(player, data) {
 async function autoBotVotes(data) {
   if (data.phase !== "FINAL_VOTE" || !state.currentScenario) return;
   const ref = doc(db, "rooms", state.currentRoomCode);
-  let shouldResolve = false;
 
   await runTransaction(db, async (tx) => {
-    shouldResolve = false;
     const snap = await tx.get(ref);
     if (!snap.exists()) return;
     const fresh = snap.data();
@@ -183,11 +238,16 @@ async function autoBotVotes(data) {
       changed = true;
     });
     if (!changed) return;
-    tx.update(ref, { votes });
-    shouldResolve = Object.keys(fresh.players || {}).every((pid) => !!votes[pid]);
+    const allVoted = Object.keys(fresh.players || {}).every((pid) => !!votes[pid]);
+    if (allVoted) {
+      tx.update(ref, {
+        votes,
+        phase: "ENDING",
+        winner: computeVoteWinner(votes, fresh),
+        timerSeconds: 0
+      });
+    } else {
+      tx.update(ref, { votes });
+    }
   });
-
-  if (!shouldResolve) return;
-  const snap = await getDoc(ref);
-  if (snap.exists()) await resolveFinalVote(snap.data());
 }
