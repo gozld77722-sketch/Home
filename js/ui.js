@@ -78,7 +78,7 @@ function closeEvidenceModal() {
   document.getElementById('evidenceModal').classList.add('hidden');
 }
 
-export const SCENARIOS = ['winchester', 'express', 'hospital', 'glamping'];
+export const SCENARIOS = ['winchester', 'express', 'hospital', 'glamping', 'cruise'];
 
 function renderThemeCard(scenario) {
   const t = scenario.theme.card;
