@@ -18,7 +18,9 @@ export const state = {
   whisperDraft: null,
   hostNoticeDraft: null,
   timelineFilter: "all",
-  timelineCollapsed: null
+  timelineTypeFilter: "all",
+  timelineCollapsed: null,
+  timelineScenarioId: null
 };
 
 // Late-bound game actions so view code can call them without an import cycle.

@@ -1,5 +1,5 @@
 import { db, doc, updateDoc, getDoc, runTransaction } from "./firebase.js";
-import { state } from "./state.js";
+import { state, actions } from "./state.js";
 import { devHooks, forceAdvance, refreshFromLatest, resolveFinalVote } from "./game.js";
 
 const MAX_PLAYERS = 5;
@@ -11,6 +11,7 @@ export function initDevMode() {
       return;
     }
     state.devRealPlayerId = state.myPlayerId;
+    window.__mmTest = { state, actions, refresh: refreshFromLatest };
     mountPanel();
     devHooks.onRoomUpdate = (data) => {
       refreshViewAsOptions(data);
