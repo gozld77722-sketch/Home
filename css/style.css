@@ -60,17 +60,16 @@ body.show-noir-landing .noir-bg {
 }
 .noir-rain {
   position: absolute;
-  inset: -30% 0;
-  opacity: 0.32;
-  background-image: repeating-linear-gradient(
-    108deg,
-    transparent 0,
-    transparent 7px,
-    rgba(230, 236, 245, 0.45) 8px,
-    transparent 9px
-  );
-  background-size: 140px 220px;
-  animation: rain-fall 1.15s linear infinite;
+  inset: -30% -10%;
+  opacity: 0.22;
+  transform: rotate(10deg);
+  background-image:
+    radial-gradient(0.8px 16px at 22px 40px, rgba(230, 236, 245, 0.55), transparent),
+    radial-gradient(0.7px 12px at 95px 150px, rgba(230, 236, 245, 0.45), transparent),
+    radial-gradient(0.6px 10px at 50px 70px, rgba(230, 236, 245, 0.35), transparent);
+  background-size: 130px 200px, 170px 260px, 90px 150px;
+  animation: rain-fall 1.4s linear infinite;
+  will-change: background-position;
 }
 .noir-lightning {
   position: absolute;
@@ -282,8 +281,8 @@ body.show-noir-landing .noir-bg {
   to { transform: translate3d(6%, 3%, 0); }
 }
 @keyframes rain-fall {
-  from { background-position: 0 0; }
-  to { background-position: 48px 220px; }
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 0 200px, 0 260px, 0 150px; }
 }
 @keyframes lightning-flash {
   0%, 91%, 100% { opacity: 0; }
@@ -306,7 +305,7 @@ body.show-noir-landing .noir-bg {
 @media (max-width: 639px) {
   .noir-lightning { display: none; }
   .noir-fog-b { display: none; }
-  .noir-rain { opacity: 0.16; }
+  .noir-rain { opacity: 0.12; }
   .noir-grain { opacity: 0.04; }
   .noir-fog-a { opacity: 0.55; }
   .case-file:hover { transform: none; }
