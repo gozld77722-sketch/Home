@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23110'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="show-noir-landing min-h-screen flex flex-col justify-between selection:bg-amber-600 selection:text-white">
@@ -47,6 +48,9 @@
           <button id="btnOpenRulesModal" class="whitespace-nowrap px-2.5 py-1 rounded bg-amber-950/70 border border-amber-700/80 text-xs text-amber-300 hover:bg-amber-900 transition flex items-center">
             <i class="fa-solid fa-book sm:mr-1.5"></i><span class="hidden sm:inline">룰북</span>
           </button>
+          <button id="btnTestMode" type="button" class="whitespace-nowrap px-2.5 py-1 rounded bg-neutral-900 border border-neutral-700 text-xs text-neutral-300 hover:text-amber-300 transition flex items-center" title="테스트 모드">
+            <span class="sm:mr-1.5" aria-hidden="true">🧪</span><span id="btnTestModeLabel" class="hidden sm:inline">테스트 모드</span>
+          </button>
         </div>
       </div>
     </header>
@@ -68,6 +72,27 @@
 
   <!-- 메인 컨테이너 -->
   <main class="relative z-10 flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-start">
+
+    <section id="timelineBoard" class="timeline-board hidden w-full max-w-5xl mb-4" aria-label="사건 타임라인">
+      <div class="noir-card rounded-xl border border-amber-700/40 shadow">
+        <button type="button" id="btnToggleTimeline" class="w-full flex items-center justify-between gap-2 px-3 py-2 text-left" aria-expanded="true" aria-controls="timelineBoardBody">
+          <span class="text-xs sm:text-sm font-bold text-amber-300">
+            <i class="fa-solid fa-clock mr-1.5"></i>사건 타임라인
+            <span id="timelineCount" class="text-neutral-400 font-normal"></span>
+          </span>
+          <i id="timelineChevron" class="fa-solid fa-chevron-up text-neutral-500 text-xs"></i>
+        </button>
+        <div id="timelineBoardBody" class="px-3 pb-3 space-y-2">
+          <p id="timelineKillerHint" class="hidden text-[11px] text-red-300 bg-red-950/40 border border-red-900/60 rounded px-2 py-1.5 break-keep"></p>
+          <div id="timelineFilters" class="flex flex-wrap gap-1"></div>
+          <div id="timelineEntries" class="timeline-entries space-y-1.5 overflow-y-auto custom-scroll pr-1"></div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <p id="timelineLockNote" class="hidden text-[11px] text-neutral-500 break-keep"></p>
+            <button type="button" id="btnOpenTimelinePost" class="ml-auto px-3 py-1.5 bg-amber-800 hover:bg-amber-700 text-amber-100 text-[11px] font-bold rounded whitespace-nowrap">내 타임라인 공개</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- [VIEW 0: 시나리오 테마 선택 화면 (5개 시나리오)] -->
     <div id="viewThemeSelect" class="w-full space-y-6">
@@ -105,7 +130,7 @@
       <div class="p-3 mb-4 rounded bg-black/40 border border-neutral-800 text-xs text-neutral-400 leading-relaxed space-y-1">
         <p class="font-semibold text-amber-300"><i class="fa-solid fa-headset mr-1"></i> 음성 채널 권장 사항</p>
         <p>• <strong>2인 플레이 시</strong>: 밀담 이동 없이 메인 토론방에서 상호 및 NPC 집중 조사가 진행됩니다.</p>
-        <p>• <strong>3인 이상 플레이 시</strong>: 2R 및 4R에 듀얼 밀담방(1, 2)으로 이동하여 비밀 대화를 나눕니다.</p>
+        <p>• <strong>3인 이상 플레이 시</strong>: 2R 및 4R에 밀담방(1, 2)으로 이동하여 비밀 대화를 나눕니다. 한 방에는 세 명까지 들어갈 수 있습니다.</p>
       </div>
 
       <div class="space-y-4">
@@ -271,7 +296,7 @@
             <div id="alibiInvestigateButtons" class="grid grid-cols-2 gap-2"></div>
           </div>
 
-          <!-- 듀얼 밀담실 (3인 이상 플레이 시에만 활성화) -->
+          <!-- 밀담실 (3인 이상 플레이 시에만 활성화) -->
           <div id="secretMeetingBox" class="hidden p-3 rounded-lg border border-amber-600/50 bg-amber-950/20 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-amber-300"><i class="fa-solid fa-comments mr-1"></i> 밀담 존 (3인 이상 2R, 4R 전용)</span>
@@ -478,6 +503,21 @@
     </div>
   </div>
 
+  <div id="timelinePostModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-lg w-full p-5 rounded-xl border border-amber-600/70 shadow-2xl space-y-3 max-h-[85vh] overflow-y-auto custom-scroll">
+      <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+        <h3 id="timelinePostTitle" class="text-sm font-bold text-amber-200">내 타임라인 공개</h3>
+        <button type="button" id="btnCloseTimelinePost" class="text-neutral-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+      <p id="timelinePostHint" class="text-[11px] text-neutral-300 break-keep"></p>
+      <div id="timelinePostLines" class="space-y-2"></div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" id="btnCancelTimelinePost" class="px-3 py-1.5 bg-neutral-800 text-neutral-300 rounded text-xs">취소</button>
+        <button type="button" id="btnConfirmTimelinePost" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded text-xs font-bold">선택한 줄 공개</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 룰북 모달 -->
   <div id="rulesModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="noir-card max-w-2xl w-full p-5 sm:p-7 rounded-xl border border-amber-600/70 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
@@ -619,6 +659,16 @@
           </span>
           <p>• 진범만 행적과 범행에 대해 거짓말을 할 수 있습니다.</p>
           <p>• 시민은 비밀을 숨길 수 있지만, 없는 사실을 만들어 말하면 안 됩니다.</p>
+        </div>
+
+        <div class="p-3.5 bg-neutral-900/90 border border-neutral-800 rounded-lg space-y-2">
+          <span class="text-amber-300 font-bold text-sm block flex items-center">
+            <i class="fa-solid fa-clock mr-1.5 text-amber-400"></i> 7. 사건 타임라인
+          </span>
+          <p>프롤로그부터 최종 투표까지 모두가 '사건 타임라인' 보드를 봅니다. 자기 타임라인에서 고른 줄을 올리면 캐릭터 이름과 함께 시간순으로 모입니다.</p>
+          <p>시민은 카드에 적힌 줄을 그대로만 올릴 수 있습니다. 고치거나 새 줄을 만들 수 없습니다.</p>
+          <p>진범은 줄마다 진실과, 시나리오에 준비된 거짓 행적 중 하나를 고를 수 있습니다. 올린 뒤에는 다른 사람에게 진실과 같은 모양으로 보입니다. 엔딩에서 거짓으로 올린 줄만 표시됩니다. 준비된 거짓이 없는 시나리오에서는 진범도 진실만 올립니다.</p>
+          <p>자신이 올린 줄은 내릴 수 있습니다. 엔딩에서는 더 이상 올리거나 내리지 못합니다.</p>
         </div>
 
       </div>

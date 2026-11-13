@@ -169,7 +169,7 @@ export function updateSystemDiscordGuide(data) {
       timeTag.innerText = "15분 토론";
       break;
     case 'R2_WHISPER':
-      guideText.innerHTML = `🤫 <strong>[디스코드 밀담방 1 & 2]</strong> 1차 듀얼 밀담 진행 중! 배정된 플레이어는 지정된 밀담방으로 이동하세요.`;
+      guideText.innerHTML = `🤫 <strong>[디스코드 밀담방 1 & 2]</strong> 1차 밀담 진행 중! 배정된 플레이어는 지정된 밀담방으로 이동하세요.`;
       timeTag.innerText = "5분 밀담";
       break;
     case 'R3':
@@ -185,7 +185,7 @@ export function updateSystemDiscordGuide(data) {
       timeTag.innerText = "15분 토론";
       break;
     case 'R4_WHISPER':
-      guideText.innerHTML = `🤫 <strong>[디스코드 밀담방 1 & 2]</strong> 2차 듀얼 밀담 진행 중! 최종 비밀 연대 및 물증을 실물 공유하세요.`;
+      guideText.innerHTML = `🤫 <strong>[디스코드 밀담방 1 & 2]</strong> 2차 밀담 진행 중! 최종 비밀 연대 및 물증을 실물 공유하세요.`;
       timeTag.innerText = "5분 밀담";
       break;
     case 'R5_DEFENSE':
@@ -328,10 +328,10 @@ export function renderInGameDashboard(data) {
   const phaseTitles = {
     R1: "1라운드: 사건 발생 & 상호 알리바이",
     R2: "2라운드: 현장 조사 토론",
-    R2_WHISPER: "2라운드: 1차 듀얼 밀담",
+    R2_WHISPER: "2라운드: 1차 밀담",
     R3: "3라운드: 알리바이 균열 & 심층 추궁",
     R4: "4라운드: 마지막 물증 토론",
-    R4_WHISPER: "4라운드: 2차 듀얼 밀담",
+    R4_WHISPER: "4라운드: 2차 밀담",
     R5_DEFENSE: "5라운드: 최후의 무죄 변론",
     FINAL_VOTE: "5라운드: 최후의 지목 투표"
   };
@@ -535,43 +535,94 @@ function renderWhisperSection(data) {
   }
 }
 
-function renderWhisperCheckboxes(data) {
-  const c1 = document.getElementById('whisperRoom1Checkboxes');
-  const c2 = document.getElementById('whisperRoom2Checkboxes');
-  c1.innerHTML = "";
-  c2.innerHTML = "";
-
+function whisperRoster(data) {
+  const people = [];
   state.currentScenario.characters.forEach(charDef => {
-    const entry = Object.entries(data.players).find(([pid, p]) => p.charId === charDef.id);
+    const entry = Object.entries(data.players).find(([, p]) => p.charId === charDef.id);
     if (!entry) return;
     const [pid, p] = entry;
+    people.push({ pid, nickname: p.nickname || pid, charName: charDef.name });
+  });
+  return people;
+}
 
-    const isR1 = (data.whisperRooms?.room1 || []).includes(pid);
-    const isR2 = (data.whisperRooms?.room2 || []).includes(pid);
+function sameIdSet(a, b) {
+  if (a.length !== b.length) return false;
+  const set = new Set(a);
+  return b.every(id => set.has(id));
+}
 
-    c1.innerHTML += `
-      <label class="flex items-center space-x-1.5 text-xs text-neutral-200">
-        <input type="checkbox" value="${pid}" ${isR1 ? 'checked' : ''} onchange="window.handleWhisperCheckboxChange('${pid}', 1)" class="chk-whisper-1 chk-w1-${pid} rounded bg-neutral-800 border-neutral-600">
-        <span class="truncate">${charDef.name} (${p.nickname})</span>
-      </label>
-    `;
-    c2.innerHTML += `
-      <label class="flex items-center space-x-1.5 text-xs text-neutral-200">
-        <input type="checkbox" value="${pid}" ${isR2 ? 'checked' : ''} onchange="window.handleWhisperCheckboxChange('${pid}', 2)" class="chk-whisper-2 chk-w2-${pid} rounded bg-neutral-800 border-neutral-600">
-        <span class="truncate">${charDef.name} (${p.nickname})</span>
-      </label>
-    `;
+function whisperSelection(roomKey, data) {
+  const stored = [...(data.whisperRooms?.[roomKey] || [])];
+  const draft = state.whisperDraft;
+  if (!draft || draft.phase !== data.phase || !Array.isArray(draft[roomKey])) return stored;
+  if (sameIdSet(draft[roomKey], stored)) {
+    draft[roomKey] = null;
+    return stored;
+  }
+  return draft[roomKey];
+}
+
+function readChecked(className) {
+  return [...document.querySelectorAll(`input.${className}`)].filter(el => el.checked).map(el => el.value);
+}
+
+function syncWhisperChecked(className, selected) {
+  document.querySelectorAll(`input.${className}`).forEach(input => {
+    const on = selected.includes(input.value);
+    if (input.checked !== on) input.checked = on;
   });
 }
 
-window.handleWhisperCheckboxChange = function(pid, roomNum) {
-  if (roomNum === 1) {
-    const other = document.querySelector(`.chk-w2-${pid}`);
-    if (other && other.checked) other.checked = false;
-  } else {
-    const other = document.querySelector(`.chk-w1-${pid}`);
-    if (other && other.checked) other.checked = false;
+function fillWhisperBox(container, roomNum, people, selected) {
+  container.replaceChildren();
+  people.forEach(person => {
+    const label = document.createElement("label");
+    label.className = "flex items-center space-x-1.5 text-xs text-neutral-200";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = person.pid;
+    input.checked = selected.includes(person.pid);
+    input.className = `chk-whisper-${roomNum} chk-w${roomNum}-${person.pid} rounded bg-neutral-800 border-neutral-600`;
+    input.addEventListener("change", () => window.handleWhisperCheckboxChange(person.pid, roomNum));
+    const span = document.createElement("span");
+    span.className = "truncate";
+    span.textContent = `${person.charName} (${person.nickname})`;
+    label.append(input, span);
+    container.appendChild(label);
+  });
+}
+
+function renderWhisperCheckboxes(data) {
+  const c1 = document.getElementById('whisperRoom1Checkboxes');
+  const c2 = document.getElementById('whisperRoom2Checkboxes');
+  const people = whisperRoster(data);
+  const rosterKey = people.map(person => `${person.pid}\t${person.charName}\t${person.nickname}`).join("\n");
+  const room1 = whisperSelection("room1", data);
+  const room2 = whisperSelection("room2", data);
+  const sameRoster = c1.dataset.roster === rosterKey && c1.childElementCount > 0 && c2.childElementCount > 0;
+
+  if (!sameRoster) {
+    fillWhisperBox(c1, 1, people, room1);
+    fillWhisperBox(c2, 2, people, room2);
+    c1.dataset.roster = rosterKey;
+    c2.dataset.roster = rosterKey;
+    return;
   }
+  syncWhisperChecked("chk-whisper-1", room1);
+  syncWhisperChecked("chk-whisper-2", room2);
+}
+
+window.handleWhisperCheckboxChange = function(pid, roomNum) {
+  const otherClass = roomNum === 1 ? "chk-whisper-2" : "chk-whisper-1";
+  document.querySelectorAll(`input.${otherClass}`).forEach(input => {
+    if (input.value === pid && input.checked) input.checked = false;
+  });
+  state.whisperDraft = {
+    phase: state.currentPhase,
+    room1: readChecked("chk-whisper-1"),
+    room2: readChecked("chk-whisper-2")
+  };
 };
 
 function renderWhisperCards(data, myRoomType) {
@@ -606,11 +657,23 @@ function renderWhisperCards(data, myRoomType) {
   });
 }
 
+function voteCandidateKey(data) {
+  const myVote = (data.votes && data.votes[state.myPlayerId]) || "";
+  const pCount = Object.keys(data.players || {}).length;
+  const parts = [`me:${state.myPlayerId}`, `voted:${myVote ? "1" : "0"}`, `n:${pCount}`];
+  state.currentScenario.characters.forEach(charDef => {
+    if (charDef.id === data.players[state.myPlayerId]?.charId) return;
+    if (!charDef.isDefault && pCount < 5) return;
+    const playerEntry = Object.entries(data.players).find(([, p]) => p.charId === charDef.id);
+    parts.push(`${charDef.id}:${playerEntry ? playerEntry[1].nickname : "npc"}`);
+  });
+  return parts.join("|");
+}
+
 function renderFinalVoteSection(data) {
   const grid = document.getElementById('voteButtonsGrid');
   const board = document.getElementById('liveVoteBoard');
   const waitingText = document.getElementById('voteWaitingText');
-  grid.innerHTML = "";
   board.innerHTML = "";
 
   const myVote = data.votes && data.votes[state.myPlayerId];
@@ -622,31 +685,36 @@ function renderFinalVoteSection(data) {
 
   const pCount = Object.keys(data.players || {}).length;
   const pickedCharIds = Object.values(data.players || {}).map(p => p.charId).filter(Boolean);
+  const candidateKey = voteCandidateKey(data);
 
-  state.currentScenario.characters.forEach(charDef => {
-    const isMyChar = (charDef.id === data.players[state.myPlayerId]?.charId);
-    if (isMyChar) return;
-    if (!charDef.isDefault && pCount < 5) return;
+  if (grid.dataset.candidateKey !== candidateKey) {
+    grid.innerHTML = "";
+    grid.dataset.candidateKey = candidateKey;
+    state.currentScenario.characters.forEach(charDef => {
+      const isMyChar = (charDef.id === data.players[state.myPlayerId]?.charId);
+      if (isMyChar) return;
+      if (!charDef.isDefault && pCount < 5) return;
 
-    const isPlayer = pickedCharIds.includes(charDef.id);
-    const playerEntry = Object.entries(data.players).find(([pid, p]) => p.charId === charDef.id);
-    const playerNick = playerEntry ? playerEntry[1].nickname : null;
+      const isPlayer = pickedCharIds.includes(charDef.id);
+      const playerEntry = Object.entries(data.players).find(([pid, p]) => p.charId === charDef.id);
+      const playerNick = playerEntry ? playerEntry[1].nickname : null;
 
-    if (!myVote) {
-      const btn = document.createElement('button');
-      btn.className = `px-3.5 py-2 border text-xs font-bold rounded flex items-center space-x-2 transition cursor-pointer ${
-        isPlayer 
-          ? 'bg-red-950 hover:bg-red-900 border-red-700 text-red-200' 
-          : 'bg-indigo-950 hover:bg-indigo-900 border-indigo-700 text-indigo-200'
-      }`;
-      btn.innerHTML = `
-        <img src="${charDef.avatarImg}" loading="lazy" class="w-5 h-5 rounded-full object-cover">
-        <span>${charDef.name} ${isPlayer ? `(${playerNick})` : '<span class="text-[10px] text-indigo-400">[NPC 진범 지목]</span>'}</span>
-      `;
-      btn.addEventListener('click', () => actions.submitVote(charDef.id, data));
-      grid.appendChild(btn);
-    }
-  });
+      if (!myVote) {
+        const btn = document.createElement('button');
+        btn.className = `px-3.5 py-2 border text-xs font-bold rounded flex items-center space-x-2 transition cursor-pointer ${
+          isPlayer 
+            ? 'bg-red-950 hover:bg-red-900 border-red-700 text-red-200' 
+            : 'bg-indigo-950 hover:bg-indigo-900 border-indigo-700 text-indigo-200'
+        }`;
+        btn.innerHTML = `
+          <img src="${charDef.avatarImg}" loading="lazy" class="w-5 h-5 rounded-full object-cover">
+          <span>${charDef.name} ${isPlayer ? `(${playerNick})` : '<span class="text-[10px] text-indigo-400">[NPC 진범 지목]</span>'}</span>
+        `;
+        btn.addEventListener('click', () => actions.submitVote(charDef.id, actions.getRoomData?.() || data));
+        grid.appendChild(btn);
+      }
+    });
+  }
 
   Object.entries(data.players).forEach(([pid, p]) => {
     const charDef = state.currentScenario.characters.find(c => c.id === p.charId);
@@ -719,9 +787,346 @@ export function renderEnding(data) {
   }).join('');
 }
 
+const TIMELINE_VISIBLE = new Set([
+  "PROLOGUE", "R1", "R2", "R2_WHISPER", "R3", "R4", "R4_WHISPER", "R5_DEFENSE", "FINAL_VOTE", "ENDING"
+]);
+
+export function parseTimelineLine(line) {
+  const raw = String(line ?? "").trim();
+  const match = raw.match(/^(\d{1,2}):(\d{2})\s*[-–—]\s*(.*)$/);
+  if (!match) return { time: "", text: raw };
+  return {
+    time: `${String(match[1]).padStart(2, "0")}:${match[2]}`,
+    text: match[3].trim()
+  };
+}
+
+function timelineTimeKey(time) {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(String(time || "").trim());
+  if (!match) return Number.POSITIVE_INFINITY;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function sortTimelineEntries(entries) {
+  return entries.slice().sort((a, b) => {
+    const diff = timelineTimeKey(a.time) - timelineTimeKey(b.time);
+    if (diff !== 0) return diff;
+    return (a.ts || 0) - (b.ts || 0);
+  });
+}
+
+function formatTimelineEntry(entry) {
+  if (entry.time && entry.text) return `${entry.time} - ${entry.text}`;
+  return entry.text || entry.time || "";
+}
+
+function myCharacter(data) {
+  const me = data.players?.[state.myPlayerId];
+  if (!me?.charId || !state.currentScenario) return null;
+  return state.currentScenario.characters.find(c => c.id === me.charId) || null;
+}
+
+function killerCanChooseLie(char) {
+  return !!(char && char.isKiller === true && Array.isArray(char.fakeTimeline) && char.fakeTimeline.length);
+}
+
+export function renderTimelineBoard(data) {
+  const panel = document.getElementById("timelineBoard");
+  if (!panel) return;
+  const postModal = document.getElementById("timelinePostModal");
+  if (postModal && !postModal.classList.contains("hidden")) {
+    const ownerGone = postModal.dataset.owner !== state.myPlayerId;
+    const phaseLocked = !data || data.phase === "ENDING" || data.phase === "LOBBY";
+    if (ownerGone || phaseLocked) postModal.classList.add("hidden");
+  }
+  const visible = !!(data && state.currentScenario && TIMELINE_VISIBLE.has(data.phase));
+  panel.classList.toggle("hidden", !visible);
+  if (!visible) return;
+
+  if (state.timelineCollapsed == null) {
+    state.timelineCollapsed = window.matchMedia("(max-width: 639px)").matches;
+  }
+  panel.classList.toggle("tl-collapsed", !!state.timelineCollapsed);
+  const chevron = document.getElementById("timelineChevron");
+  if (chevron) {
+    chevron.className = `fa-solid ${state.timelineCollapsed ? "fa-chevron-down" : "fa-chevron-up"} text-neutral-500 text-xs`;
+  }
+  const toggle = document.getElementById("btnToggleTimeline");
+  if (toggle) toggle.setAttribute("aria-expanded", state.timelineCollapsed ? "false" : "true");
+
+  const entries = sortTimelineEntries(Array.isArray(data.timelineBoard) ? data.timelineBoard : []);
+  const count = document.getElementById("timelineCount");
+  if (count) count.textContent = entries.length ? `(${entries.length})` : "";
+
+  const mine = myCharacter(data);
+  const locked = data.phase === "ENDING";
+  const hint = document.getElementById("timelineKillerHint");
+  if (hint) {
+    if (!locked && killerCanChooseLie(mine)) {
+      hint.textContent = "진범 전용: 공개할 때 줄마다 진실과 준비된 거짓 중 하나를 고를 수 있습니다. 다른 사람에게는 같은 모양으로 보입니다.";
+      hint.classList.remove("hidden");
+    } else {
+      hint.textContent = "";
+      hint.classList.add("hidden");
+    }
+  }
+
+  const postBtn = document.getElementById("btnOpenTimelinePost");
+  if (postBtn) postBtn.classList.toggle("hidden", locked || !mine);
+  const lockNote = document.getElementById("timelineLockNote");
+  if (lockNote) {
+    lockNote.classList.toggle("hidden", !locked);
+    if (locked) lockNote.textContent = "엔딩: 더 이상 올리거나 내릴 수 없습니다. 거짓으로 공개된 줄이 표시됩니다.";
+  }
+
+  if (state.timelineFilter !== "all" && !entries.some(entry => entry.charId === state.timelineFilter)) {
+    state.timelineFilter = "all";
+  }
+  renderTimelineFilters(entries);
+  renderTimelineEntries(entries.filter(entry => state.timelineFilter === "all" || entry.charId === state.timelineFilter), data, locked);
+}
+
+function renderTimelineFilters(entries) {
+  const host = document.getElementById("timelineFilters");
+  if (!host) return;
+  const seen = [];
+  entries.forEach(entry => {
+    if (entry.charId && !seen.includes(entry.charId)) seen.push(entry.charId);
+  });
+  const chips = [{ id: "all", name: "전체" }];
+  state.currentScenario.characters.forEach(char => {
+    if (seen.includes(char.id)) chips.push({ id: char.id, name: char.name });
+  });
+  const signature = `${state.timelineFilter}|${chips.map(chip => chip.id).join(",")}`;
+  if (host.dataset.signature === signature) return;
+  host.dataset.signature = signature;
+  host.replaceChildren();
+  chips.forEach(chip => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.filter = chip.id;
+    btn.className = `timeline-filter px-2 py-0.5 rounded border text-[10px] font-bold ${
+      state.timelineFilter === chip.id
+        ? "bg-amber-900 border-amber-600 text-amber-100"
+        : "bg-neutral-900 border-neutral-700 text-neutral-300"
+    }`;
+    btn.textContent = chip.name;
+    host.appendChild(btn);
+  });
+}
+
+function renderTimelineEntries(entries, data, locked) {
+  const list = document.getElementById("timelineEntries");
+  if (!list) return;
+  const signature = [
+    state.timelineFilter,
+    locked ? "1" : "0",
+    state.myPlayerId || "",
+    entries.map(entry => `${entry.id || ""}:${entry.falsified ? "1" : "0"}:${entry.time}:${entry.text}`).join("||")
+  ].join("|");
+  if (list.dataset.signature === signature) return;
+  list.dataset.signature = signature;
+  list.replaceChildren();
+  if (!entries.length) {
+    const empty = document.createElement("p");
+    empty.className = "text-[11px] text-neutral-500 italic py-1";
+    empty.textContent = state.timelineFilter === "all"
+      ? "아직 공개된 타임라인이 없습니다."
+      : "이 인물로 공개된 줄이 없습니다.";
+    list.appendChild(empty);
+    return;
+  }
+
+  entries.forEach(entry => {
+    const char = state.currentScenario.characters.find(c => c.id === entry.charId);
+    const row = document.createElement("article");
+    row.className = "timeline-entry flex items-start gap-2 p-2 rounded border border-neutral-800 bg-black/40";
+    row.dataset.id = entry.id || "";
+    row.dataset.charId = entry.charId || "";
+
+    const img = document.createElement("img");
+    img.className = "w-7 h-7 rounded-full object-cover border border-amber-700/60 shrink-0";
+    img.alt = char ? char.name : "인물";
+    if (char?.avatarImg) img.src = char.avatarImg;
+
+    const body = document.createElement("div");
+    body.className = "min-w-0 flex-1";
+    const name = document.createElement("div");
+    name.className = "text-[11px] font-bold text-amber-300";
+    name.textContent = char ? char.name : (entry.charId || "인물");
+    const line = document.createElement("p");
+    line.className = "timeline-line text-[11px] text-neutral-200 leading-relaxed break-keep";
+    line.textContent = formatTimelineEntry(entry);
+    body.append(name, line);
+
+    if (locked && entry.falsified) {
+      const badge = document.createElement("p");
+      badge.className = "timeline-false text-[10px] font-bold text-red-400 mt-0.5";
+      const trueLine = char?.timeline?.[entry.sourceIndex];
+      badge.textContent = trueLine
+        ? `거짓으로 밝혀짐 · 실제: ${trueLine}`
+        : "거짓으로 밝혀짐";
+      body.appendChild(badge);
+    }
+
+    row.append(img, body);
+    if (!locked && entry.pid === state.myPlayerId && entry.id) {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.dataset.remove = entry.id;
+      remove.className = "shrink-0 px-1.5 py-0.5 text-[10px] text-neutral-400 hover:text-red-300 border border-neutral-700 rounded";
+      remove.textContent = "내리기";
+      row.appendChild(remove);
+    }
+    list.appendChild(row);
+  });
+}
+
+function closeTimelineModal() {
+  document.getElementById("timelinePostModal")?.classList.add("hidden");
+}
+
+function choiceBlock(label, line, fake) {
+  const box = document.createElement("div");
+  box.className = "tl-pick" + (fake ? "" : " on");
+  const tag = document.createElement("span");
+  tag.className = `block text-[10px] font-bold ${fake ? "text-red-300" : "text-emerald-300"}`;
+  tag.textContent = label;
+  const body = document.createElement("span");
+  body.className = "block text-[11px] text-neutral-200 break-keep mt-0.5";
+  body.textContent = line;
+  box.append(tag, body);
+  return box;
+}
+
+export function openTimelinePostModal(data) {
+  const modal = document.getElementById("timelinePostModal");
+  const lines = document.getElementById("timelinePostLines");
+  const hint = document.getElementById("timelinePostHint");
+  if (!modal || !lines || !data) return;
+  const mine = myCharacter(data);
+  if (!mine || data.phase === "ENDING" || data.phase === "LOBBY") return;
+  modal.dataset.owner = state.myPlayerId || "";
+
+  const canLie = killerCanChooseLie(mine);
+  lines.replaceChildren();
+  if (hint) {
+    hint.textContent = canLie
+      ? "줄마다 진실과 거짓 중 하나를 고르세요. 거짓은 이 시나리오에 준비된 행적이며, 올린 뒤에는 다른 사람에게 진실과 구분되지 않습니다."
+      : "고른 줄이 적힌 그대로 모두에게 공개됩니다. 내용은 고칠 수 없습니다.";
+  }
+
+  (mine.timeline || []).forEach((trueLine, index) => {
+    const fakeLine = canLie ? mine.fakeTimeline[index] : null;
+    const row = document.createElement("div");
+    row.dataset.index = String(index);
+    row.dataset.useFake = "0";
+    row.className = "p-2 rounded border border-neutral-800 bg-black/40 space-y-1.5";
+
+    const head = document.createElement("label");
+    head.className = "flex items-center gap-2 text-xs text-neutral-100";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.className = "rounded bg-neutral-800 border-neutral-600";
+    const caption = document.createElement("span");
+    caption.textContent = "이 줄 공개";
+    head.append(box, caption);
+    row.appendChild(head);
+
+    if (typeof fakeLine === "string" && fakeLine.trim()) {
+      const trueBox = choiceBlock("진실", trueLine, false);
+      const fakeBox = choiceBlock("거짓", fakeLine, true);
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "timeline-lie-toggle px-2 py-0.5 text-[10px] font-bold rounded border border-amber-700 text-amber-100";
+      toggle.textContent = "진실";
+      toggle.setAttribute("aria-pressed", "false");
+      const apply = (useFake) => {
+        row.dataset.useFake = useFake ? "1" : "0";
+        toggle.textContent = useFake ? "거짓" : "진실";
+        toggle.setAttribute("aria-pressed", useFake ? "true" : "false");
+        trueBox.classList.toggle("on", !useFake);
+        fakeBox.classList.toggle("on", useFake);
+      };
+      toggle.addEventListener("click", () => apply(row.dataset.useFake !== "1"));
+      row.append(toggle, trueBox, fakeBox);
+    } else {
+      const text = document.createElement("p");
+      text.className = "text-[11px] text-neutral-300 break-keep";
+      text.textContent = trueLine;
+      row.appendChild(text);
+    }
+    lines.appendChild(row);
+  });
+
+  modal.classList.remove("hidden");
+}
+
+function initTimelineBoard() {
+  document.getElementById("btnToggleTimeline")?.addEventListener("click", () => {
+    const panel = document.getElementById("timelineBoard");
+    state.timelineCollapsed = !panel.classList.contains("tl-collapsed");
+    const data = actions.getRoomData?.();
+    if (data) renderTimelineBoard(data);
+    else panel.classList.toggle("tl-collapsed", !!state.timelineCollapsed);
+  });
+  document.getElementById("timelineFilters")?.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-filter]");
+    if (!btn) return;
+    state.timelineFilter = btn.dataset.filter || "all";
+    const host = document.getElementById("timelineFilters");
+    if (host) delete host.dataset.signature;
+    const data = actions.getRoomData?.();
+    if (data) renderTimelineBoard(data);
+  });
+  document.getElementById("timelineEntries")?.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-remove]");
+    if (!btn) return;
+    actions.removeTimelineEntry?.(btn.dataset.remove);
+  });
+  document.getElementById("btnOpenTimelinePost")?.addEventListener("click", () => {
+    const data = actions.getRoomData?.();
+    if (data) openTimelinePostModal(data);
+  });
+  const close = () => closeTimelineModal();
+  document.getElementById("btnCloseTimelinePost")?.addEventListener("click", close);
+  document.getElementById("btnCancelTimelinePost")?.addEventListener("click", close);
+  document.getElementById("btnConfirmTimelinePost")?.addEventListener("click", async () => {
+    const rows = [...document.querySelectorAll("#timelinePostLines [data-index]")];
+    const selections = rows
+      .filter(row => row.querySelector('input[type="checkbox"]')?.checked)
+      .map(row => ({ index: Number(row.dataset.index), useFake: row.dataset.useFake === "1" }));
+    if (!selections.length) {
+      alert("공개할 줄을 선택하세요.");
+      return;
+    }
+    const posted = await actions.postTimeline?.(selections);
+    if (posted) closeTimelineModal();
+  });
+}
+
+function initTestModeButton() {
+  const btn = document.getElementById("btnTestMode");
+  const label = document.getElementById("btnTestModeLabel");
+  if (!btn || !label) return;
+  const on = new URLSearchParams(location.search).get("test") === "1";
+  label.textContent = on ? "테스트 종료" : "테스트 모드";
+  btn.title = on ? "테스트 종료" : "테스트 모드";
+  btn.setAttribute("aria-label", on ? "테스트 종료" : "테스트 모드");
+  if (on) btn.classList.add("bg-amber-900", "text-amber-200", "border-amber-700");
+  btn.addEventListener("click", () => {
+    const url = new URL(location.href);
+    if (url.searchParams.get("test") === "1") url.searchParams.delete("test");
+    else url.searchParams.set("test", "1");
+    location.assign(`${url.pathname}${url.search}${url.hash}`);
+  });
+}
+
 export function initUi() {
   document.getElementById('btnToggleBGM').addEventListener('click', toggleRainBGM);
   document.getElementById('btnBackToThemeSelect').addEventListener('click', () => switchView('viewThemeSelect'));
+  initTestModeButton();
+  initTimelineBoard();
 
   const rulesModal = document.getElementById('rulesModal');
   document.getElementById('btnOpenRulesModal').addEventListener('click', () => rulesModal.classList.remove('hidden'));
