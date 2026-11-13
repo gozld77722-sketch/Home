@@ -1,0 +1,17 @@
+export const state = {
+  currentUser: null,
+  currentRoomCode: null,
+  roomUnsubscribe: null,
+  currentScenario: null,
+  currentThemeId: "winchester",
+  myPlayerId: null,
+  timerInterval: null,
+  localTimerSeconds: 900,
+  currentPhase: null,
+  isCurrentHost: false,
+  lastHandledShareTimestamp: 0,
+  lastNotifiedWhisperPhase: null
+};
+
+// Late-bound game actions so view code can call them without an import cycle.
+export const actions = {};
