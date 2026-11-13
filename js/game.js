@@ -23,6 +23,24 @@ async function loadScenarioModule(scenarioId) {
   }
 }
 
+const INGAME_PHASES = ['R1', 'R2', 'R2_WHISPER', 'R3', 'R4', 'R4_WHISPER', 'R5_DEFENSE', 'FINAL_VOTE'];
+const FINAL_VOTE_SECONDS = 120;
+const MAX_PLAYERS = 5;
+
+export const devHooks = { onRoomUpdate: null };
+
+let latestRoomData = null;
+let phaseAdvancing = false;
+let resolvingVote = false;
+let timerFiredPhase = null;
+
+function isActingHost(data) {
+  const room = data || latestRoomData;
+  if (!room) return false;
+  if (state.devRealPlayerId) return room.hostId === state.devRealPlayerId;
+  return room.hostId === state.myPlayerId;
+}
+
 window.selectThemeAndGoToLobby = async function(themeId) {
   state.currentThemeId = themeId;
   const loaded = await loadScenarioModule(themeId);
@@ -45,41 +63,68 @@ function setupTimer(data) {
   updateTimerDisplay(state.localTimerSeconds);
 
   if (state.timerInterval) clearInterval(state.timerInterval);
+  state.timerInterval = null;
 
-  const isIngame = ['R1', 'R2', 'R2_WHISPER', 'R3', 'R4', 'R4_WHISPER', 'R5_DEFENSE'].includes(data.phase);
-  if (isIngame) {
-    state.timerInterval = setInterval(() => {
-      if (state.localTimerSeconds > 0) {
-        state.localTimerSeconds--;
-        updateTimerDisplay(state.localTimerSeconds);
-        if (state.isCurrentHost && state.localTimerSeconds % 5 === 0) {
-          updateDoc(doc(db, "rooms", state.currentRoomCode), { timerSeconds: state.localTimerSeconds });
-        }
-      } else {
-        clearInterval(state.timerInterval);
-        if (state.isCurrentHost) {
-          proceedNextPhase(data);
-        }
+  if (!INGAME_PHASES.includes(data.phase)) return;
+
+  if (state.localTimerSeconds <= 0) {
+    if (isActingHost(data) && timerFiredPhase !== data.phase) {
+      timerFiredPhase = data.phase;
+      onTimerExpired(data);
+    }
+    return;
+  }
+  timerFiredPhase = null;
+
+  state.timerInterval = setInterval(() => {
+    if (state.localTimerSeconds <= 0) return;
+    const scale = state.devTimerScale || 1;
+    state.localTimerSeconds = Math.max(0, state.localTimerSeconds - scale);
+    updateTimerDisplay(state.localTimerSeconds);
+    const shouldSync = isActingHost(data) && (
+      state.localTimerSeconds === 0 || scale > 1 || state.localTimerSeconds % 5 === 0
+    );
+    if (shouldSync && state.currentRoomCode) {
+      updateDoc(doc(db, "rooms", state.currentRoomCode), { timerSeconds: state.localTimerSeconds }).catch(() => {});
+    }
+    if (state.localTimerSeconds === 0) {
+      clearInterval(state.timerInterval);
+      state.timerInterval = null;
+      if (isActingHost(data) && timerFiredPhase !== data.phase) {
+        timerFiredPhase = data.phase;
+        onTimerExpired(data);
       }
-    }, 1000);
+    }
+  }, 1000);
+}
+
+async function onTimerExpired(data) {
+  if (!isActingHost(data) || phaseAdvancing) return;
+  phaseAdvancing = true;
+  try {
+    const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
+    if (!snap.exists()) return;
+    const fresh = snap.data();
+    if (fresh.phase !== data.phase) return;
+    if (fresh.phase === 'FINAL_VOTE') await resolveFinalVote(fresh);
+    else await proceedNextPhase(fresh);
+  } finally {
+    phaseAdvancing = false;
   }
 }
 
-function handleStateUpdate(data) {
+function handleStateUpdate(data, notifyDev = true) {
+  latestRoomData = data;
   state.currentPhase = data.phase;
   state.isCurrentHost = (data.hostId === state.myPlayerId);
+  document.body.dataset.phase = data.phase || "";
 
   const pCount = Object.keys(data.players || {}).length;
   document.getElementById('displayRoomCode').innerText = data.roomCode;
   document.getElementById('playerCount').innerText = pCount;
 
-  const banner = document.getElementById('hostAnnouncementBanner');
-  if (data.announcement) {
-    document.getElementById('hostAnnouncementText').innerText = data.announcement;
-    banner.classList.remove('hidden');
-  } else {
-    banner.classList.add('hidden');
-  }
+  syncHostNotice(data);
+  syncSystemNotice(data);
 
   const hostInputArea = document.getElementById('hostAnnouncementInputBox');
   if (state.isCurrentHost && !['LOBBY', 'ENDING'].includes(data.phase)) {
@@ -102,6 +147,14 @@ function handleStateUpdate(data) {
   handleSkipVoteModal(data);
   handleCardShareSync(data);
 
+  if (notifyDev) {
+    try {
+      if (typeof devHooks.onRoomUpdate === "function") devHooks.onRoomUpdate(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   if (data.phase === 'LOBBY') {
     switchView('viewCharacterSelect');
     renderCharacterSelection(data);
@@ -122,6 +175,51 @@ function handleStateUpdate(data) {
 
   switchView('viewGame');
   renderInGameDashboard(data);
+}
+
+function syncHostNotice(data) {
+  const modal = document.getElementById('hostNoticeModal');
+  const bar = document.getElementById('hostNoticeReopenBar');
+  const textEl = document.getElementById('hostNoticeModalText');
+  if (!modal || !bar) return;
+
+  const text = data.announcement || "";
+  const at = Number(data.announcementAt) || 0;
+  if (!text || !at) {
+    modal.classList.add('hidden');
+    bar.classList.add('hidden');
+    return;
+  }
+
+  if (textEl) textEl.innerText = text;
+  if (at > state.lastSeenAnnouncementAt) {
+    state.lastSeenAnnouncementAt = at;
+    state.hostNoticeDismissed = false;
+  }
+
+  if (state.hostNoticeDismissed) {
+    modal.classList.add('hidden');
+    bar.classList.remove('hidden');
+  } else {
+    modal.classList.remove('hidden');
+    bar.classList.add('hidden');
+  }
+}
+
+function syncSystemNotice(data) {
+  const line = document.getElementById('systemNoticeLine');
+  if (!line) return;
+  if (data.systemNotice) {
+    line.textContent = data.systemNotice;
+    line.classList.remove('hidden');
+  } else {
+    line.textContent = "";
+    line.classList.add('hidden');
+  }
+}
+
+export function refreshFromLatest() {
+  if (latestRoomData) handleStateUpdate(latestRoomData, false);
 }
 
 async function assignRandomCharacters(data) {
@@ -172,12 +270,20 @@ function handleSkipVoteModal(data) {
 
     const hasNo = Object.values(votes).some(v => v === false);
     if (hasNo) {
+      const msg = "다음 단계 스킵 요청이 부결되었습니다. (반대 표 발생)";
       updateDoc(doc(db, "rooms", state.currentRoomCode), {
         skipVote: null,
-        announcement: "다음 단계 스킵 요청이 부결되었습니다. (반대 표 발생)"
+        systemNotice: msg
       });
-      setTimeout(() => {
-        updateDoc(doc(db, "rooms", state.currentRoomCode), { announcement: "" });
+      setTimeout(async () => {
+        try {
+          const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
+          if (snap.exists() && snap.data().systemNotice === msg) {
+            await updateDoc(doc(db, "rooms", state.currentRoomCode), { systemNotice: "" });
+          }
+        } catch (err) {
+          console.error(err);
+        }
       }, 4000);
       return;
     }
@@ -242,7 +348,7 @@ async function proceedNextPhase(data) {
     case 'R5_DEFENSE':
       nextPhase = 'FINAL_VOTE';
       nextRound = 5;
-      nextTimer = 0;
+      nextTimer = FINAL_VOTE_SECONDS;
       break;
     default:
       return;
@@ -258,8 +364,52 @@ async function proceedNextPhase(data) {
     roundClueDone: {},
     skipVote: null,
     whisperRooms: { room1: [], room2: [] },
-    announcement: ""
+    announcement: "",
+    systemNotice: ""
   });
+}
+
+async function beginRound1() {
+  await updateDoc(doc(db, "rooms", state.currentRoomCode), {
+    phase: 'R1',
+    round: 1,
+    timerSeconds: 900,
+    roundInvestigateDone: {},
+    roundClueDone: {},
+    skipVote: null,
+    announcement: "",
+    systemNotice: ""
+  });
+}
+
+export async function forceAdvance() {
+  if (!state.currentRoomCode) return;
+  const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
+  if (!snap.exists()) return;
+  const data = snap.data();
+  if (!isActingHost(data) || data.phase === 'ENDING') return;
+
+  if (data.phase === 'LOBBY') {
+    const players = Object.values(data.players || {});
+    if (players.length < 2 || players.some(p => !p.charId)) {
+      alert("모든 플레이어가 역할을 고른 뒤에 다음 단계로 갈 수 있습니다.");
+      return;
+    }
+    await updateDoc(doc(db, "rooms", state.currentRoomCode), { phase: 'PROLOGUE' });
+    return;
+  }
+
+  if (data.phase === 'PROLOGUE') {
+    await beginRound1();
+    return;
+  }
+
+  if (data.phase === 'FINAL_VOTE') {
+    await resolveFinalVote(data);
+    return;
+  }
+
+  await proceedNextPhase(data);
 }
 
 function handleWhisperNotice(data) {
@@ -371,6 +521,52 @@ async function shareCardToWhisperRoom(roomType, title, desc, img, data) {
   alert(`[${title}] 증거를 밀담룸 플레이어들에게 실물로 공개했습니다!`);
 }
 
+export function computeVoteWinner(votes, data) {
+  const killerId = state.currentScenario.killerId;
+  const killerPid = Object.entries(data.players || {}).find(([, p]) => p.charId === killerId)?.[0] || null;
+  const tally = {};
+
+  Object.entries(votes || {}).forEach(([pid, cid]) => {
+    if (!cid) return;
+    if (killerPid && pid === killerPid) return;
+    tally[cid] = (tally[cid] || 0) + 1;
+  });
+
+  let maxCount = 0;
+  const topCandidates = [];
+  Object.entries(tally).forEach(([cid, cnt]) => {
+    if (cnt > maxCount) {
+      maxCount = cnt;
+      topCandidates.length = 0;
+      topCandidates.push(cid);
+    } else if (cnt === maxCount) {
+      topCandidates.push(cid);
+    }
+  });
+
+  return topCandidates.includes(killerId) ? 'CITIZEN' : 'KILLER';
+}
+
+export async function resolveFinalVote(source) {
+  if (resolvingVote || !state.currentRoomCode) return;
+  if (!isActingHost(source)) return;
+  resolvingVote = true;
+  try {
+    const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
+    if (!snap.exists()) return;
+    const fresh = snap.data();
+    if (fresh.phase !== 'FINAL_VOTE') return;
+    const winner = computeVoteWinner(fresh.votes || {}, fresh);
+    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
+      phase: 'ENDING',
+      winner,
+      timerSeconds: 0
+    });
+  } finally {
+    resolvingVote = false;
+  }
+}
+
 async function submitVote(targetCharId, data) {
   const targetChar = state.currentScenario.characters.find(c => c.id === targetCharId);
   const targetName = targetChar ? targetChar.name : targetCharId;
@@ -382,35 +578,11 @@ async function submitVote(targetCharId, data) {
   const allVoted = playerIds.every(pid => !!updatedVotes[pid]);
 
   if (allVoted) {
-    const tally = {};
-    Object.values(updatedVotes).forEach(cid => {
-      tally[cid] = (tally[cid] || 0) + 1;
-    });
-
-    let maxCount = -1;
-    let topCandidates = [];
-    Object.entries(tally).forEach(([cid, cnt]) => {
-      if (cnt > maxCount) {
-        maxCount = cnt;
-        topCandidates = [cid];
-      } else if (cnt === maxCount) {
-        topCandidates.push(cid);
-      }
-    });
-
-    const killerId = state.currentScenario.killerId;
-    let winner = 'KILLER';
-
-    if (topCandidates.length === 1 && topCandidates[0] === killerId) {
-      winner = 'CITIZEN';
-    } else {
-      winner = 'KILLER';
-    }
-
+    const winner = computeVoteWinner(updatedVotes, data);
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       votes: updatedVotes,
       phase: 'ENDING',
-      winner: winner
+      winner
     });
   } else {
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
@@ -436,12 +608,31 @@ export function initGame() {
 
   document.getElementById('btnSendHostNotice').addEventListener('click', async () => {
     const val = document.getElementById('inputHostNotice').value.trim();
-    if (!val) return;
-    await updateDoc(doc(db, "rooms", state.currentRoomCode), { announcement: val });
+    if (!val || !state.currentRoomCode) return;
+    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
+      announcement: val,
+      announcementAt: Date.now()
+    });
   });
   document.getElementById('btnClearHostNotice').addEventListener('click', async () => {
     document.getElementById('inputHostNotice').value = "";
+    if (!state.currentRoomCode) return;
     await updateDoc(doc(db, "rooms", state.currentRoomCode), { announcement: "" });
+  });
+
+  const dismissHostNotice = () => {
+    state.hostNoticeDismissed = true;
+    document.getElementById('hostNoticeModal').classList.add('hidden');
+    if (document.getElementById('hostNoticeModalText').innerText.trim()) {
+      document.getElementById('hostNoticeReopenBar').classList.remove('hidden');
+    }
+  };
+  document.getElementById('btnDismissHostNotice').addEventListener('click', dismissHostNotice);
+  document.getElementById('btnCloseHostNoticeModal').addEventListener('click', dismissHostNotice);
+  document.getElementById('hostNoticeReopenBar').addEventListener('click', () => {
+    state.hostNoticeDismissed = false;
+    document.getElementById('hostNoticeModal').classList.remove('hidden');
+    document.getElementById('hostNoticeReopenBar').classList.add('hidden');
   });
 
   // 방 생성
@@ -478,8 +669,10 @@ export function initGame() {
       whisperRooms: { room1: [], room2: [] },
       sharedCard: null,
       votes: {},
-      announcement: ""
+      announcement: "",
+      systemNotice: ""
     };
+    if (new URLSearchParams(location.search).get("test") === "1") roomData.test = true;
 
     await setDoc(doc(db, "rooms", roomCode), roomData);
     listenToRoom(roomCode);
@@ -496,6 +689,14 @@ export function initGame() {
     if (!snap.exists()) return alert("해당 방이 존재하지 않습니다.");
 
     const rData = snap.data();
+    const players = rData.players || {};
+    const alreadyIn = !!players[state.myPlayerId];
+    if (rData.phase !== 'LOBBY') {
+      return alert("이미 시작된 방에는 참가할 수 없습니다.");
+    }
+    if (!alreadyIn && Object.keys(players).length >= MAX_PLAYERS) {
+      return alert("이 방은 최대 5명까지 참가할 수 있습니다.");
+    }
     if (rData.themeId !== state.currentThemeId) {
       state.currentThemeId = rData.themeId;
       await loadScenarioModule(state.currentThemeId);
@@ -513,15 +714,7 @@ export function initGame() {
   });
 
   document.getElementById('btnProceedToRound1').addEventListener('click', async () => {
-    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
-      phase: 'R1',
-      round: 1,
-      timerSeconds: 900,
-      roundInvestigateDone: {},
-      roundClueDone: {},
-      skipVote: null,
-      announcement: ""
-    });
+    await beginRound1();
   });
 
   document.getElementById('btnRequestNextPhase').addEventListener('click', async () => {
@@ -603,7 +796,7 @@ export function initGame() {
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       'whisperRooms.room1': selected,
       'whisperRooms.room2': cleanedRoom2,
-      announcement: "밀담룸 1 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 1로 이동하세요!"
+      systemNotice: "밀담룸 1 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 1로 이동하세요!"
     });
   });
 
@@ -618,7 +811,7 @@ export function initGame() {
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       'whisperRooms.room2': selected,
       'whisperRooms.room1': cleanedRoom1,
-      announcement: "밀담룸 2 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 2로 이동하세요!"
+      systemNotice: "밀담룸 2 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 2로 이동하세요!"
     });
   });
 }

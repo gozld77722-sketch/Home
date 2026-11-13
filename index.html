@@ -16,53 +16,70 @@
 
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-amber-600 selection:text-white">
+<body class="show-noir-landing min-h-screen flex flex-col justify-between selection:bg-amber-600 selection:text-white">
 
-  <!-- 글로벌 상단 헤더 -->
-  <header class="w-full border-b border-neutral-800 bg-[#0b0c10]/90 backdrop-blur sticky top-0 z-40 px-4 py-3">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <div id="btnHeaderHome" class="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition group" title="시나리오 선택 화면으로 돌아가기">
-        <i class="fa-solid fa-fingerprint text-amber-500 text-xl group-hover:scale-110 transition"></i>
-        <span class="font-title font-bold text-sm sm:text-base tracking-wider text-neutral-100 group-hover:text-amber-300 transition">MURDER MYSTERY SUITE</span>
-      </div>
-      <div class="flex items-center space-x-2">
-        <button id="btnToggleBGM" class="px-2.5 py-1 rounded bg-neutral-900 border border-neutral-700 text-xs text-neutral-300 hover:text-amber-300 transition flex items-center">
-          <i class="fa-solid fa-cloud-rain mr-1.5 text-neutral-400"></i> BGM 토글
-        </button>
-        <button id="btnOpenRulesModal" class="px-2.5 py-1 rounded bg-amber-950/70 border border-amber-700/80 text-xs text-amber-300 hover:bg-amber-900 transition flex items-center">
-          <i class="fa-solid fa-book mr-1.5"></i> 룰북
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- 방장 수동 공지 배너 -->
-  <div id="hostAnnouncementBanner" class="hidden w-full bg-amber-900/90 text-amber-100 text-xs sm:text-sm py-2 px-4 border-b border-amber-600 text-center font-bold sticky top-[53px] z-30 transition-all">
-    <span id="hostAnnouncementText">긴급 공지사항이 여기에 표시됩니다.</span>
+  <div class="noir-bg" aria-hidden="true">
+    <div class="noir-vignette"></div>
+    <svg class="noir-grain" xmlns="http://www.w3.org/2000/svg">
+      <filter id="filmGrain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/>
+      </filter>
+      <rect width="100%" height="100%" filter="url(#filmGrain)"/>
+    </svg>
+    <div class="noir-fog noir-fog-a"></div>
+    <div class="noir-fog noir-fog-b"></div>
+    <div class="noir-rain"></div>
+    <div class="noir-lightning"></div>
   </div>
 
-  <!-- 방장 공지 전송 컨트롤 -->
-  <div id="hostAnnouncementInputBox" class="hidden w-full bg-neutral-900 border-b border-neutral-800 py-1.5 px-4 text-xs">
-    <div class="max-w-6xl mx-auto flex items-center space-x-2">
-      <span class="text-amber-400 font-bold whitespace-nowrap"><i class="fa-solid fa-bullhorn mr-1"></i> 방장 긴급공지:</span>
-      <input type="text" id="inputHostNotice" placeholder="전체 플레이어 화면 상단에 띄울 공지사항 입력..." class="flex-1 bg-black border border-neutral-700 rounded px-2.5 py-1 text-neutral-100 focus:outline-none focus:border-amber-500">
-      <button id="btnSendHostNotice" class="px-3 py-1 bg-amber-700 hover:bg-amber-600 text-white rounded font-bold">전송</button>
-      <button id="btnClearHostNotice" class="px-2 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 rounded">지우기</button>
+  <div class="sticky top-0 z-40">
+    <!-- 글로벌 상단 헤더 -->
+    <header class="w-full border-b border-neutral-800 bg-[#0b0c10]/90 backdrop-blur px-4 py-3">
+      <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+        <div id="btnHeaderHome" class="flex items-center space-x-2 min-w-0 cursor-pointer hover:opacity-80 transition group" title="시나리오 선택 화면으로 돌아가기">
+          <i class="fa-solid fa-fingerprint text-amber-500 text-xl shrink-0 group-hover:scale-110 transition"></i>
+          <span class="font-title font-bold text-sm sm:text-base tracking-wider text-neutral-100 group-hover:text-amber-300 transition truncate">MURDER MYSTERY SUITE</span>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <button id="btnToggleBGM" class="whitespace-nowrap px-2.5 py-1 rounded bg-neutral-900 border border-neutral-700 text-xs text-neutral-300 hover:text-amber-300 transition flex items-center">
+            <i class="fa-solid fa-cloud-rain sm:mr-1.5 text-neutral-400"></i><span class="hidden sm:inline">BGM 토글</span>
+          </button>
+          <button id="btnOpenRulesModal" class="whitespace-nowrap px-2.5 py-1 rounded bg-amber-950/70 border border-amber-700/80 text-xs text-amber-300 hover:bg-amber-900 transition flex items-center">
+            <i class="fa-solid fa-book sm:mr-1.5"></i><span class="hidden sm:inline">룰북</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <button type="button" id="hostNoticeReopenBar" class="hidden w-full bg-amber-900/95 text-amber-100 text-xs py-1.5 px-4 border-b border-amber-600 text-center font-bold">
+      📢 방장 공지 · 다시 보기
+    </button>
+
+    <!-- 방장 공지 전송 컨트롤 -->
+    <div id="hostAnnouncementInputBox" class="hidden w-full bg-neutral-900 border-b border-neutral-800 py-1.5 px-4 text-xs">
+      <div class="max-w-6xl mx-auto flex items-center space-x-2">
+        <span class="text-amber-400 font-bold whitespace-nowrap"><i class="fa-solid fa-bullhorn mr-1"></i> 방장 긴급공지:</span>
+        <input type="text" id="inputHostNotice" placeholder="전체 플레이어에게 띄울 공지..." class="flex-1 min-w-0 bg-black border border-neutral-700 rounded px-2.5 py-1 text-neutral-100 focus:outline-none focus:border-amber-500">
+        <button id="btnSendHostNotice" class="px-3 py-1 bg-amber-700 hover:bg-amber-600 text-white rounded font-bold whitespace-nowrap">전송</button>
+        <button id="btnClearHostNotice" class="px-2 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 rounded whitespace-nowrap">지우기</button>
+      </div>
     </div>
   </div>
 
   <!-- 메인 컨테이너 -->
-  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-center">
+  <main class="relative z-10 flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-start">
 
-    <!-- [VIEW 0: 시나리오 테마 선택 화면 (4개 시나리오 그리드)] -->
+    <!-- [VIEW 0: 시나리오 테마 선택 화면 (5개 시나리오)] -->
     <div id="viewThemeSelect" class="w-full space-y-6">
-      <div class="text-center space-y-2">
-        <span class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-700">Scenario Selection</span>
-        <h2 class="text-2xl sm:text-3xl font-bold font-title text-amber-100">머더 미스터리 시나리오 선택</h2>
-        <p class="text-xs sm:text-sm text-neutral-400">플레이할 사건 시나리오를 선택한 뒤 로비로 입장하세요.</p>
+      <div class="landing-hero">
+        <div class="candle-glow" aria-hidden="true"></div>
+        <h1 class="landing-title font-title">MURDER MYSTERY</h1>
+        <p class="landing-subtitle">오늘 밤, 누군가 거짓말을 하고 있다</p>
+        <div class="art-deco" aria-hidden="true"><span></span><i></i><span></span></div>
+        <div class="case-open-stamp">CASE FILES OPEN</div>
       </div>
 
-      <div id="themeCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2"></div>
+      <div id="themeCardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-3"></div>
     </div>
 
     <!-- [VIEW 1: 로비 화면] -->
@@ -134,7 +151,7 @@
 
       <div class="bg-amber-950/20 border border-amber-700/40 rounded-lg p-3 flex items-center justify-between">
         <div class="text-xs text-amber-200 break-keep">
-          <i class="fa-solid fa-circle-info mr-1 text-amber-400"></i> 2~3인 플레이 시 미선택 캐릭터는 <strong>[NPC 용의자]</strong>로 조사 대상이 되며, NPC가 진범일 수도 있습니다!
+          <i class="fa-solid fa-circle-info mr-1 text-amber-400"></i> 2인은 NPC 2명, 3인은 NPC 1명입니다. 4인은 NPC가 없고, 5인일 때만 5번째 인물이 열립니다. NPC가 진범일 수도 있습니다.
         </div>
         <button id="btnReadRulesQuick" class="text-xs text-amber-400 underline hover:text-amber-300 ml-2 whitespace-nowrap">규칙 보기</button>
       </div>
@@ -181,12 +198,15 @@
     <div id="viewGame" class="w-full max-w-5xl hidden flex-col space-y-3">
       
       <!-- 상단 상황 가이드 배너 -->
-      <div id="systemDiscordGuideBanner" class="w-full p-2.5 rounded-lg border border-amber-600/70 bg-gradient-to-r from-amber-950/80 via-neutral-900 to-amber-950/80 flex items-center justify-between text-xs shadow-md">
-        <div class="flex items-center space-x-2">
-          <span class="px-2 py-0.5 rounded bg-amber-600 text-black font-bold text-[10px] tracking-wide uppercase"><i class="fa-brands fa-discord mr-1"></i>안내</span>
-          <span id="systemDiscordGuideText" class="text-amber-200 font-semibold">디스코드 메인 토론방에서 상호 알리바이 및 현장 증거 수색을 진행하세요.</span>
+      <div id="systemDiscordGuideBanner" class="w-full p-2.5 rounded-lg border border-amber-600/70 bg-gradient-to-r from-amber-950/80 via-neutral-900 to-amber-950/80 flex flex-col gap-1 text-xs shadow-md">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center space-x-2 min-w-0">
+            <span class="px-2 py-0.5 rounded bg-amber-600 text-black font-bold text-[10px] tracking-wide uppercase shrink-0"><i class="fa-brands fa-discord mr-1"></i>안내</span>
+            <span id="systemDiscordGuideText" class="text-amber-200 font-semibold">디스코드 메인 토론방에서 상호 알리바이 및 현장 증거 수색을 진행하세요.</span>
+          </div>
+          <span id="systemPhaseTimeTag" class="text-[11px] text-neutral-400 font-mono hidden sm:inline shrink-0">15분 토론</span>
         </div>
-        <span id="systemPhaseTimeTag" class="text-[11px] text-neutral-400 font-mono hidden sm:inline">15분 토론</span>
+        <p id="systemNoticeLine" class="hidden text-[11px] text-amber-50 font-bold"></p>
       </div>
 
       <!-- 3단 대시보드 요약 -->
@@ -333,7 +353,7 @@
         <div>
           <h3 class="text-xl sm:text-2xl font-bold text-red-500 tracking-wider">THE FINAL ACCUSATION</h3>
           <p id="finalVoteSubtitle" class="text-xs text-neutral-300 mt-1">
-            변론이 종료되었습니다. 사건을 일으킨 진범은 누구입니까? (자신 제외 / 2~3인 모드에서는 부재중인 NPC 용의자도 지목 가능)
+            변론이 종료되었습니다. 2분 안에 진범을 지목하세요. 자신의 인물은 고를 수 없습니다. NPC 지목은 2·3인만 가능하고, 4·5인에는 NPC가 없습니다.
           </p>
         </div>
         
@@ -397,6 +417,18 @@
   </div>
 
 
+  <!-- 방장 공지 팝업. 시스템 메시지(밀담 배정, 스킵 부결)는 이 모달을 쓰지 않는다. -->
+  <div id="hostNoticeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="noir-card max-w-sm w-full p-5 rounded-xl border border-amber-500 shadow-2xl space-y-3 text-center">
+      <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+        <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-bullhorn mr-1"></i> 방장 공지</span>
+        <button id="btnCloseHostNoticeModal" type="button" class="text-neutral-400 hover:text-white">&times;</button>
+      </div>
+      <p id="hostNoticeModalText" class="text-sm text-neutral-100 text-left bg-black/50 p-2.5 rounded border border-neutral-800 leading-relaxed break-keep whitespace-pre-line"></p>
+      <button id="btnDismissHostNotice" type="button" class="w-full py-2 bg-amber-700 hover:bg-amber-600 text-white rounded text-xs font-bold">확인</button>
+    </div>
+  </div>
+
   <!-- 조사로 확보한 증거 팝업 (밀담 실물 공유 모달과 분리) -->
   <div id="evidenceModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="noir-card max-w-sm w-full p-5 rounded-xl border border-amber-500 shadow-2xl space-y-3 text-center">
@@ -446,92 +478,147 @@
     </div>
   </div>
 
-  <!-- 룰북 모달 (상세 타임라인 & 가변 인원 룰 탑재 개정본) -->
+  <!-- 룰북 모달 -->
   <div id="rulesModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="noir-card max-w-2xl w-full p-5 sm:p-7 rounded-xl border border-amber-600/70 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto custom-scroll">
-      
-      <!-- 헤더 -->
+
       <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
         <div class="flex items-center space-x-2">
           <i class="fa-solid fa-scroll text-amber-400 text-lg"></i>
-          <h3 class="text-base sm:text-lg font-bold text-amber-200 font-title tracking-wide">머더 미스터리 공식 수사 지침서 (Rulebook)</h3>
+          <h3 class="text-base sm:text-lg font-bold text-amber-200 font-title tracking-wide">머더 미스터리 룰북</h3>
         </div>
         <button id="btnCloseRulesModal" class="text-neutral-400 hover:text-white text-xl transition leading-none px-2 py-1">&times;</button>
       </div>
 
       <div class="text-xs text-neutral-300 space-y-4 leading-relaxed break-keep">
-        
-        <!-- 1. 승리 목표 & 진영 -->
-        <div class="p-3.5 bg-amber-950/30 border border-amber-800/60 rounded-lg space-y-2">
-          <span class="text-amber-300 font-bold text-sm block flex items-center">
-            <i class="fa-solid fa-bullseye mr-1.5 text-amber-400"></i> 1. 게임 목표 및 진영 구조
-          </span>
-          <p>• <strong>일반 플레이어 (시민 진영)</strong>: 피해자의 사망 시각, 알리바이의 모순점, 현장 물증을 종합하여 <strong>사건을 일으킨 진짜 범인을 찾아내고 최종 투표에서 최다 득표로 지목</strong>해야 승리합니다.</p>
-          <p>• <strong>진범 플레이어 (범인)</strong>: 자신의 정체와 범행 수법을 끝까지 은폐하고, <strong>다른 무고한 플레이어 또는 NPC 용의자에게 혐의를 덮어씌워 최다 득표를 피해야</strong> 단독 승리합니다. (동률 득표 발생 시에도 진범이 승리합니다)</p>
+
+        <div class="p-3.5 bg-amber-950/30 border border-amber-800/60 rounded-lg">
+          <span class="text-amber-300 font-bold text-sm block mb-1">흐름</span>
+          <p>로비에서 역할을 고르고 프롤로그를 읽은 뒤, 1~4라운드 조사·토론(3인 이상은 2·4라운드 뒤에 밀담) → 5라운드 변론(조사 중단) → 2분 최종 투표 → 엔딩.</p>
         </div>
 
-        <!-- 2. 라운드별 전체 진행 타임라인 -->
+        <div class="p-3.5 bg-amber-950/30 border border-amber-800/60 rounded-lg space-y-2">
+          <span class="text-amber-300 font-bold text-sm block flex items-center">
+            <i class="fa-solid fa-bullseye mr-1.5 text-amber-400"></i> 1. 승리
+          </span>
+          <p>• 시민은 진범을 <strong>단독 최다 득표</strong>로 지목하면 이깁니다. 최다 득표가 동률이어도 그 안에 진범이 있으면 시민이 이깁니다.</p>
+          <p>• 진범 플레이어가 낸 표는 집계에서 뺍니다. 진범이 최다 득표 안에 없으면 진범이 이깁니다.</p>
+          <p>• 최종 투표는 2분입니다. 방장 화면의 타이머가 시간을 줄이고, 끝나면 그때까지 제출된 표만으로 집계합니다. 접속이 끊긴 사람은 게임을 멈추지 못합니다.</p>
+        </div>
+
         <div class="p-3.5 bg-neutral-900/90 border border-neutral-800 rounded-lg space-y-2.5">
           <span class="text-amber-300 font-bold text-sm block flex items-center">
-            <i class="fa-solid fa-timeline mr-1.5 text-amber-400"></i> 2. 전체 수사 진행 타임라인
+            <i class="fa-solid fa-timeline mr-1.5 text-amber-400"></i> 2. 라운드
           </span>
           <div class="space-y-2 text-[11px] sm:text-xs">
             <div class="p-2 bg-black/40 rounded border border-neutral-800/80">
-              <strong class="text-amber-400 block mb-0.5">• 1라운드: 사건 발생 & 상호 알리바이 (15분)</strong>
-              사건 현장에 도착한 인물들이 본인의 당일 행적과 기초 알리바이를 구두로 공개합니다. 각 플레이어는 첫 번째 알리바이 조사와 현장 증거 수색 1회를 개시합니다.
+              <strong class="text-amber-400 block mb-0.5">1라운드 (15분)</strong>
+              알리바이와 현장 증거를 조사합니다.
             </div>
             <div class="p-2 bg-black/40 rounded border border-neutral-800/80">
-              <strong class="text-amber-400 block mb-0.5">• 2라운드: 현장 조사 & [1차 밀담] (15분 + 5분)</strong>
-              초기 증거를 토대로 알리바이의 시간대별 모순점을 추궁합니다. 3인 이상 플레이 시 라운드 종료 후 <strong>5분간 디스코드 듀얼 밀담방(1, 2)</strong>으로 분리되어 물증 실물 공유 및 비밀 회담을 갖습니다. (2인 모드는 밀담 자동 생략)
+              <strong class="text-amber-400 block mb-0.5">2라운드 (15분) + 밀담 (5분, 3인 이상)</strong>
+              토론 후 밀담룸 1·2로 나뉩니다. 2인은 밀담 없이 3라운드로 갑니다.
             </div>
             <div class="p-2 bg-black/40 rounded border border-neutral-800/80">
-              <strong class="text-amber-400 block mb-0.5">• 3라운드: 알리바이 균열 & 심층 추궁 (15분)</strong>
-              밀담에서 오간 정보와 추가 수색 단서를 교차 검증합니다. 거짓 진술과 숨겨진 동기를 집중적으로 파고듭니다.
+              <strong class="text-amber-400 block mb-0.5">3라운드 (15분)</strong>
+              다시 모여 조사와 토론을 합니다.
             </div>
             <div class="p-2 bg-black/40 rounded border border-neutral-800/80">
-              <strong class="text-amber-400 block mb-0.5">• 4라운드: 마지막 물증 토론 & [2차 밀담] (15분 + 5분)</strong>
-              치명적인 결정적 물증을 대조하는 최종 수색 단계입니다. 마지막 5분간 2차 밀담을 통해 최종 연대 형성 및 범인 압축을 진행합니다. (2인 모드는 밀담 자동 생략)
+              <strong class="text-amber-400 block mb-0.5">4라운드 (15분) + 밀담 (5분, 3인 이상)</strong>
+              마지막 조사입니다. 2인은 밀담 없이 변론으로 갑니다.
             </div>
             <div class="p-2 bg-black/40 rounded border border-neutral-800/80">
-              <strong class="text-amber-400 block mb-0.5">• 5라운드: 최후의 무죄 변론 (10분)</strong>
-              추가 증거 수색이 중단되며, 모든 인원이 메인 토론방에 모여 각자 확보한 단서를 기반으로 자신의 결백을 변론하고 범인을 공표합니다.
+              <strong class="text-amber-400 block mb-0.5">5라운드 변론 (10분)</strong>
+              알리바이 조사와 현장 증거 뽑기가 멈춥니다. 결백을 말합니다.
             </div>
             <div class="p-2 bg-red-950/30 rounded border border-red-900/50">
-              <strong class="text-red-400 block mb-0.5">• 최종 단계: 최후의 지목 투표 (THE FINAL ACCUSATION)</strong>
-              변론 종료 즉시 시스템을 통해 각자 범인이라고 확신하는 1명을 화면에서 직접 지목 투표합니다. (부재중인 NPC 용의자도 투표 가능하며, 자신은 지목 불가)
+              <strong class="text-red-400 block mb-0.5">최종 투표 (2분)</strong>
+              자신은 지목할 수 없습니다. 2·3인만 남은 NPC를 지목할 수 있습니다.
             </div>
           </div>
         </div>
 
-        <!-- 3. 인원수별 특화 시스템 -->
         <div class="p-3.5 bg-neutral-900/90 border border-neutral-800 rounded-lg space-y-2">
           <span class="text-amber-300 font-bold text-sm block flex items-center">
-            <i class="fa-solid fa-users-gear mr-1.5 text-amber-400"></i> 3. 참가 인원별 맞춤 시스템
+            <i class="fa-solid fa-users-gear mr-1.5 text-amber-400"></i> 3. 인원별 규칙
           </span>
-          <ul class="list-disc pl-4 space-y-1 text-[11px] sm:text-xs">
-            <li><strong>2인 전용 모드</strong>: 디스코드 음성 이동의 어색함을 없애기 위해 <strong>밀담 단계(2R/4R Whisper)를 자동으로 건너뛰고</strong> 메인 토론방에서 상시 조사를 진행합니다. 부족한 정보량은 <strong>라운드당 2회의 알리바이 조사권</strong>과 <strong>미선택 NPC 용의자 조사</strong>를 통해 완벽히 보완됩니다.</li>
-            <li><strong>3~4인 NPC 모드</strong>: 플레이어가 선택하지 않은 인물은 <strong>[NPC 용의자]</strong>로 자동 전환됩니다. NPC 역시 범행 동기와 알리바이 단서를 가지고 있으며, <strong>시나리오에 따라 NPC가 진범일 수도 있으므로</strong> NPC도 철저하게 조사해야 합니다.</li>
-            <li><strong>5인 완전 범죄 모드</strong>: 5인이 모두 접속하면 숨겨진 전용 5번째 인물이 해금되며, 모든 등장인물이 살아있는 플레이어로 채워진 완전 범죄 심리전이 펼쳐집니다.</li>
-          </ul>
+          <div class="overflow-x-auto">
+            <table class="w-full text-[11px] sm:text-xs border-collapse text-center">
+              <thead>
+                <tr class="text-amber-300">
+                  <th class="border border-neutral-700 px-2 py-1">인원</th>
+                  <th class="border border-neutral-700 px-2 py-1">NPC</th>
+                  <th class="border border-neutral-700 px-2 py-1">밀담</th>
+                  <th class="border border-neutral-700 px-2 py-1">알리바이 조사/라운드</th>
+                  <th class="border border-neutral-700 px-2 py-1">5번째 인물</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-neutral-700 px-2 py-1">2</td>
+                  <td class="border border-neutral-700 px-2 py-1">2</td>
+                  <td class="border border-neutral-700 px-2 py-1">없음</td>
+                  <td class="border border-neutral-700 px-2 py-1">2</td>
+                  <td class="border border-neutral-700 px-2 py-1">잠김</td>
+                </tr>
+                <tr>
+                  <td class="border border-neutral-700 px-2 py-1">3</td>
+                  <td class="border border-neutral-700 px-2 py-1">1</td>
+                  <td class="border border-neutral-700 px-2 py-1">있음</td>
+                  <td class="border border-neutral-700 px-2 py-1">1</td>
+                  <td class="border border-neutral-700 px-2 py-1">잠김</td>
+                </tr>
+                <tr>
+                  <td class="border border-neutral-700 px-2 py-1">4</td>
+                  <td class="border border-neutral-700 px-2 py-1">0</td>
+                  <td class="border border-neutral-700 px-2 py-1">있음</td>
+                  <td class="border border-neutral-700 px-2 py-1">1</td>
+                  <td class="border border-neutral-700 px-2 py-1">잠김</td>
+                </tr>
+                <tr>
+                  <td class="border border-neutral-700 px-2 py-1">5</td>
+                  <td class="border border-neutral-700 px-2 py-1">0</td>
+                  <td class="border border-neutral-700 px-2 py-1">있음</td>
+                  <td class="border border-neutral-700 px-2 py-1">1</td>
+                  <td class="border border-neutral-700 px-2 py-1">해금</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>4인은 NPC가 없습니다. 기본 인물 4명을 모두 플레이어가 맡기 때문입니다. 5번째 인물은 5인이 모일 때만 열립니다. 최대 인원은 5명이고, 로비를 벗어나면 새 참가는 막힙니다.</p>
         </div>
 
-        <!-- 4. 조사 및 증거 수색 메커니즘 -->
         <div class="p-3.5 bg-neutral-900/90 border border-neutral-800 rounded-lg space-y-2">
           <span class="text-amber-300 font-bold text-sm block flex items-center">
-            <i class="fa-solid fa-magnifying-glass-arrow-right mr-1.5 text-amber-400"></i> 4. 증거 조사 & 수색 규칙
+            <i class="fa-solid fa-magnifying-glass-arrow-right mr-1.5 text-amber-400"></i> 4. 조사, 밀담, 투표, 진범
           </span>
-          <p>• <strong>알리바이 조사</strong>: 라운드마다 주어지는 조사 횟수(일반 1회 / 2인 모드 2회)를 소모하여 다른 플레이어나 NPC의 알리바이 카드(총 5장) 중 1장을 무작위로 열람합니다.</p>
-          <p>• <strong>현장 증거 수색</strong>: 각 라운드당 <strong>1회만</strong> 현장 증거를 뽑을 수 있습니다. 확보한 물증은 '내 단서 보관함'에 보관되며, 클릭 시 상세 텍스트와 이미지를 확인할 수 있습니다.</p>
-          <p>• <strong>밀담 실물 공개</strong>: 3인 이상 밀담 단계에서는 자신이 획득한 증거물품을 같은 방에 있는 파트너에게 <strong>화면 팝업으로 실물 공개</strong>할 수 있습니다. (알리바이 카드는 구두로만 전달)</p>
+          <p>• 인물마다 알리바이 카드 5장이 <strong>방 전체의 공유 풀</strong>입니다. 누가 조사해도 그 카드는 풀에서 사라집니다.</p>
+          <p>• 현장 증거는 라운드당 1장입니다. 알리바이 조사와 현장 증거 뽑기는 밀담 중과 5라운드(변론·투표)에 멈춥니다.</p>
+          <p>• 밀담은 3인 이상의 2라운드·4라운드 뒤에만 있습니다. 방장이 룸을 지정하면 배정된 사람은 그 룸의 현장 증거를 화면에 공개할 수 있습니다. 알리바이는 말로만 전합니다.</p>
+          <p>• 진범은 시나리오마다 미리 정해져 있고, 그 인물을 맡은 사람의 비밀에 표시됩니다. 방마다 다시 뽑히지 않습니다.</p>
         </div>
 
-        <!-- 5. 거짓말 제한 룰 (필독) -->
+        <div class="p-3.5 bg-neutral-900/90 border border-neutral-800 rounded-lg space-y-2">
+          <span class="text-amber-300 font-bold text-sm block flex items-center">
+            <i class="fa-solid fa-user-gear mr-1.5 text-amber-400"></i> 5. 방장
+          </span>
+          <p>• 역할을 무작위로 나눌 수 있습니다. 5인 미만이면 5번째 인물은 배정하지 않습니다.</p>
+          <p>• 밀담 인원은 방장이 룸 1·룸 2에 직접 넣습니다.</p>
+          <p>• 다음 단계로 건너뛰려면 스킵 투표가 필요합니다. <strong>전원이 찬성</strong>해야 넘어가고, <strong>반대가 한 표라도 있으면 취소</strong>됩니다. 방장은 요청과 함께 찬성으로 계산됩니다.</p>
+          <p>• 방장이 긴급 공지를 보내면 모두에게 한 번씩 팝업이 뜹니다. 타이머는 방장 화면이 줄이면서 방에 반영합니다.</p>
+        </div>
+
+        <div class="p-3.5 bg-neutral-900/90 border border-cyan-900/60 rounded-lg space-y-2">
+          <span class="text-cyan-300 font-bold text-sm block">NPC 용의자란?</span>
+          <p>플레이어가 고르지 않은 기본 인물입니다. 2인에서는 2명, 3인에서는 1명, 4인 이상에서는 0명입니다. 조사와 최종 투표의 대상이 될 수 있고, 그 인물이 시나리오의 진범이면 시민은 그 NPC를 지목해야 합니다.</p>
+        </div>
+
         <div class="p-3.5 bg-red-950/25 border border-red-800/60 rounded-lg space-y-2">
           <span class="text-red-400 font-bold text-sm block flex items-center">
-            <i class="fa-solid fa-triangle-exclamation mr-1.5 text-red-500"></i> 5. [필독] 거짓말에 관한 엄격한 룰
+            <i class="fa-solid fa-triangle-exclamation mr-1.5 text-red-500"></i> 6. 거짓말
           </span>
-          <p>• <strong>진범 플레이어</strong>: 자신의 범행 사실, 사건 당일 타임라인, 이동 경로, 범행 도구에 대해 <strong>완전한 거짓말과 적극적인 날조 진술이 허용</strong>됩니다.</p>
-          <p>• <strong>일반 플레이어 (시민 진영)</strong>: 수치스러운 개인적 비밀이나 불리한 행적을 <strong>침묵하거나 숨길 수는 있으나, 사실과 다른 거짓말을 지어내거나 허위 증언을 하는 행위는 엄격히 금지</strong>됩니다.</p>
+          <p>• 진범만 행적과 범행에 대해 거짓말을 할 수 있습니다.</p>
+          <p>• 시민은 비밀을 숨길 수 있지만, 없는 사실을 만들어 말하면 안 됩니다.</p>
         </div>
 
       </div>
@@ -545,7 +632,7 @@
     </div>
   </div>
 
-  <footer class="w-full border-t border-neutral-800/80 bg-[#0b0c10] py-3 text-center text-[11px] text-neutral-500">
+  <footer class="relative z-10 w-full border-t border-neutral-800/80 bg-[#0b0c10] py-3 text-center text-[11px] text-neutral-500">
     <p>Murder Mystery Web Engine &bull; Serverless Realtime Multiplayer Suite</p>
   </footer>
 
