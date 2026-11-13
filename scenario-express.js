@@ -27,7 +27,7 @@ export default {
       role: "은퇴한 연방 보안관 (승객)",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80",
+      avatarImg: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/avatar-jack.jpg",
       description: "오랫동안 서부 개척지를 누비다 은퇴한 전직 연방 보안관. 날카로운 직관과 사격 실력을 지녔습니다.",
       secret: "당신은 과거 패트릭 밴더빌트가 고용한 용병단에 의해 고향 마을과 가족을 잃었습니다. 이번 열차에 탄 목적도 그에게 복수하기 위함이었습니다. 22:40경 특실 문앞까지 찾아가 권총을 꺼내 들었으나, 안에서 들린 의문의 둔탁한 소리에 놀라 복도 구석으로 몸을 숨겼을 뿐 살해하지는 못했습니다.",
       timeline: [
@@ -49,7 +49,7 @@ export default {
       role: "살롱 여주인 / 피해자의 동행인",
       isKiller: true, // ★ 진범
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
+      avatarImg: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/avatar-vivian.jpg",
       description: "클론다이크 사교계를 주름잡는 매혹적인 살롱 여주인. 패트릭의 연인으로 위장해 동행했습니다.",
       secret: "★ 당신이 진범입니다! 패트릭은 당신의 가문을 파멸시키고 아버지를 탄광에 매몰되게 만든 원수였습니다. 오늘 밤 그가 술에 취해 금광 증서를 침대에 던져두자, 22:30경 소음기 역할을 하는 두꺼운 깃털 베개로 얼굴을 누르고 순금 탄환을 장전한 소형 데린저 권총으로 이마를 쐈습니다. 이후 증서를 훔쳐 코르셋 속에 숨기고 탄피를 난로 불 속에 던졌습니다.",
       timeline: [
@@ -71,7 +71,7 @@ export default {
       role: "열차 촉탁 의사",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      avatarImg: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/avatar-samuel.jpg",
       description: "혹한기 열차 승객들의 건강을 전담하는 신경질적이지만 실력 있는 의사.",
       secret: "당신은 도박 빚으로 인해 패트릭에게 거액의 채무를 지고 있었으며, 패트릭은 당신의 의사 면허를 위조된 것이라며 협박하고 있었습니다. 오늘 밤 그의 차용증을 훔치기 위해 약물 가방을 들고 특실에 몰래 잠입했으나, 이미 패트릭이 침대에 피를 흘리며 숨져 있는 것을 보고 기겁하여 도망쳤습니다.",
       timeline: [
@@ -93,7 +93,7 @@ export default {
       role: "패트릭의 조카 / 재산 상속녀",
       isKiller: false,
       isDefault: true,
-      avatarImg: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+      avatarImg: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/avatar-clara.jpg",
       description: "삼촌 패트릭의 횡포에 불만을 품고 있던 젊고 도도한 귀족 아가씨.",
       secret: "당신은 삼촌 패트릭이 당신의 정당한 유산을 가로채고 나이 많은 탐욕스러운 광산주와 정략결혼을 시키려 한다는 사실을 알고 있었습니다. 결혼 계약서를 훔쳐 찢어버리기 위해 특실 열쇠를 복제했으나, 22:45경 방 근처에서 수상한 그림자가 빠져나가는 것을 보고 겁에 질려 자기 방으로 돌아왔습니다.",
       timeline: [
@@ -115,7 +115,7 @@ export default {
       role: "러시아 귀족 출신 경호원 (5인 전용)",
       isKiller: false,
       isDefault: false,
-      avatarImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+      avatarImg: "https://raw.githubusercontent.com/gozld77722-sketch/Home/main/images/express/avatar-alexander.jpg",
       description: "패트릭이 거액을 주고 고용한 과묵하고 거구의 제정 러시아 출신 보디가드.",
       secret: "당신은 사실 러시아 황실 정보부의 비밀 요원이며, 패트릭이 알래스카에서 밀반출하려던 황실 보물 목록을 감시하고 있었습니다. 사건 당시 복도 환풍구를 통해 경호 동선을 점검 중이었으며 살인과는 무관합니다.",
       timeline: [
