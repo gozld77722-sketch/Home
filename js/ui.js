@@ -3,9 +3,134 @@ import { state, actions } from "./state.js";
 let audioCtx = null;
 let isBgmPlaying = false;
 let noiseNode = null;
+let alertsUnlocked = false;
+let alertMuted = false;
+let chimePlays = 0;
+let chimeSuppressed = 0;
+let reconnectToken = 0;
+
+export const PHASE_LABELS = {
+  LOBBY: "로비",
+  PROLOGUE: "프롤로그",
+  R1: "1라운드: 사건 발생 & 상호 알리바이",
+  R2: "2라운드: 현장 조사 토론",
+  R2_WHISPER: "2라운드: 1차 밀담",
+  R3: "3라운드: 알리바이 균열 & 심층 추궁",
+  R4: "4라운드: 마지막 물증 토론",
+  R4_WHISPER: "4라운드: 2차 밀담",
+  R5_DEFENSE: "5라운드: 최후의 무죄 변론",
+  FINAL_VOTE: "5라운드: 최후의 지목 투표",
+  ENDING: "엔딩"
+};
+
+const ALERT_MUTE_KEY = "mmAlertMuted";
 
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function armAlerts() {
+  alertsUnlocked = true;
+}
+
+function playPhaseChime() {
+  if (!alertsUnlocked || alertMuted) return false;
+  try {
+    initAudio();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.035, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.28);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function syncAlertButton() {
+  const btn = document.getElementById("btnToggleAlert");
+  const icon = document.getElementById("alertMuteIcon");
+  if (!btn) return;
+  btn.setAttribute("aria-pressed", alertMuted ? "true" : "false");
+  btn.title = alertMuted ? "단계 알림 켜기" : "단계 알림 끄기";
+  btn.classList.toggle("bg-amber-900", alertMuted);
+  btn.classList.toggle("text-amber-200", alertMuted);
+  btn.classList.toggle("border-amber-700", alertMuted);
+  if (icon) icon.className = `fa-solid ${alertMuted ? "fa-bell-slash" : "fa-bell"} sm:mr-1.5`;
+}
+
+export function toggleAlertMute() {
+  alertMuted = !alertMuted;
+  try { localStorage.setItem(ALERT_MUTE_KEY, alertMuted ? "1" : "0"); } catch (err) { /* ignore */ }
+  syncAlertButton();
+}
+
+export function alertStats() {
+  return { plays: chimePlays, suppressed: chimeSuppressed, unlocked: alertsUnlocked, muted: alertMuted };
+}
+
+export function notifyPhase(phase) {
+  const banner = document.getElementById("phaseAlertBanner");
+  const label = PHASE_LABELS[phase] || phase || "";
+  if (banner) {
+    banner.textContent = label;
+    banner.dataset.phase = phase || "";
+    banner.classList.remove("hidden");
+    clearTimeout(notifyPhase.hideTimer);
+    notifyPhase.hideTimer = setTimeout(() => banner.classList.add("hidden"), 8000);
+  }
+  if (alertMuted) {
+    chimeSuppressed += 1;
+    return;
+  }
+  if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+    try { navigator.vibrate(60); } catch (err) { /* unsupported */ }
+  }
+  if (!alertsUnlocked) {
+    chimeSuppressed += 1;
+    return;
+  }
+  if (playPhaseChime()) chimePlays += 1;
+  else chimeSuppressed += 1;
+}
+
+export function showHostChange(text) {
+  const banner = document.getElementById("hostChangeBanner");
+  if (!banner) return;
+  banner.textContent = text;
+  banner.dataset.notice = text;
+  banner.classList.remove("hidden");
+  clearTimeout(showHostChange.hideTimer);
+  showHostChange.hideTimer = setTimeout(() => banner.classList.add("hidden"), 8000);
+}
+
+export function showReconnect(on) {
+  const el = document.getElementById("reconnectIndicator");
+  if (!el) return;
+  reconnectToken += 1;
+  const token = reconnectToken;
+  if (on) {
+    el.classList.remove("hidden");
+    el.dataset.state = "on";
+    el.dataset.seen = "1";
+    return;
+  }
+  if (el.classList.contains("hidden") && el.dataset.state !== "on") return;
+  setTimeout(() => {
+    if (token !== reconnectToken) return;
+    el.classList.add("hidden");
+    el.dataset.state = "off";
+  }, 600);
 }
 
 export function toggleRainBGM() {
@@ -356,17 +481,7 @@ export function renderInGameDashboard(data) {
     `;
   }
 
-  const phaseTitles = {
-    R1: "1라운드: 사건 발생 & 상호 알리바이",
-    R2: "2라운드: 현장 조사 토론",
-    R2_WHISPER: "2라운드: 1차 밀담",
-    R3: "3라운드: 알리바이 균열 & 심층 추궁",
-    R4: "4라운드: 마지막 물증 토론",
-    R4_WHISPER: "4라운드: 2차 밀담",
-    R5_DEFENSE: "5라운드: 최후의 무죄 변론",
-    FINAL_VOTE: "5라운드: 최후의 지목 투표"
-  };
-  document.getElementById('gameRoundLabel').innerText = phaseTitles[data.phase] || `${data.round}라운드 진행 중`;
+  document.getElementById('gameRoundLabel').innerText = PHASE_LABELS[data.phase] || `${data.round}라운드 진행 중`;
   document.getElementById('gamePhaseBadge').innerText = data.phase.includes('WHISPER') ? '비밀 밀담' : (data.phase === 'FINAL_VOTE' ? '최종 투표' : '토론 & 수색');
 
   if (data.phase === 'R5_DEFENSE') {
@@ -824,6 +939,152 @@ export function renderEnding(data) {
       </div>
     `;
   }).join('');
+
+  renderEndingRecap(data);
+}
+
+function charactersInPlay(data) {
+  const count = Object.keys(data.players || {}).length;
+  return state.currentScenario.characters.filter(character => {
+    if (character.isDefault || count >= 5) return true;
+    return Object.values(data.players || {}).some(player => player.charId === character.id);
+  });
+}
+
+function explicitDecisiveList(scenario, killer) {
+  const raw = scenario?.decisiveClues || scenario?.killerDecisiveClues || killer?.decisiveClues;
+  if (!Array.isArray(raw) || !raw.length) return null;
+  return raw.map(item => {
+    if (typeof item === "string") {
+      const clue = scenario.clues?.find(entry => entry.id === item);
+      if (clue) return { title: clue.name || clue.id, text: clue.desc || "" };
+      return { title: "", text: item };
+    }
+    if (item && typeof item === "object") {
+      return {
+        title: item.name || item.title || "",
+        text: item.desc || item.text || ""
+      };
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function appendLine(parent, className, text) {
+  const p = document.createElement("p");
+  p.className = className;
+  p.textContent = text;
+  parent.appendChild(p);
+  return p;
+}
+
+function renderEndingRecap(data) {
+  const root = document.getElementById("endingRecap");
+  const statements = document.getElementById("endingRecapStatements");
+  const clues = document.getElementById("endingRecapClues");
+  const votes = document.getElementById("endingRecapVotes");
+  if (!root || !statements || !clues || !votes || !state.currentScenario) return;
+
+  const scenario = state.currentScenario;
+  const killer = scenario.characters.find(character => character.id === scenario.killerId) || null;
+  const board = Array.isArray(data.timelineBoard) ? data.timelineBoard : [];
+
+  statements.replaceChildren();
+  charactersInPlay(data).forEach(character => {
+    const block = document.createElement("div");
+    block.className = "p-3 bg-black/50 border border-neutral-800 rounded-lg space-y-1.5";
+    block.dataset.charId = character.id;
+    const player = Object.values(data.players || {}).find(entry => entry.charId === character.id);
+    const title = document.createElement("div");
+    title.className = "text-amber-300 font-bold";
+    title.textContent = `${character.name}${character.id === scenario.killerId ? " · 진범" : ""}${player ? ` (${player.nickname})` : " [NPC]"}`;
+    block.appendChild(title);
+
+    const mine = board
+      .filter(entry => entry && entry.kind !== "evidence" && entry.charId === character.id)
+      .slice()
+      .sort((a, b) => (a.sourceIndex ?? 0) - (b.sourceIndex ?? 0) || (a.ts || 0) - (b.ts || 0));
+    if (!mine.length) {
+      appendLine(block, "text-[11px] text-neutral-500 italic", "공개한 진술 없음");
+    }
+    mine.forEach(entry => {
+      const row = document.createElement("div");
+      row.className = "text-[11px] leading-relaxed break-keep border-l-2 pl-2 " + (entry.falsified ? "border-red-700" : "border-neutral-700");
+      if (entry.falsified) row.dataset.lie = "1";
+      const published = formatTimelineEntry(entry);
+      const trueLine = character.timeline?.[entry.sourceIndex];
+      if (entry.falsified) {
+        appendLine(row, "text-red-300 font-bold", `거짓 · ${published}`);
+        if (trueLine) appendLine(row, "text-emerald-300/90", `진실 · ${trueLine}`);
+      } else if (character.id === scenario.killerId) {
+        appendLine(row, "text-neutral-200", `진실 · ${published}`);
+      } else {
+        appendLine(row, "text-neutral-200", published);
+      }
+      block.appendChild(row);
+    });
+    statements.appendChild(block);
+  });
+
+  clues.replaceChildren();
+  const decisive = explicitDecisiveList(scenario, killer);
+  if (decisive) {
+    decisive.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "p-2.5 bg-black/40 border border-amber-900/50 rounded";
+      row.dataset.decisive = "1";
+      if (item.title) appendLine(row, "text-amber-200 font-bold", item.title);
+      if (item.text) appendLine(row, "text-neutral-300 leading-relaxed break-keep", item.text);
+      clues.appendChild(row);
+    });
+  } else if (killer) {
+    appendLine(
+      clues,
+      "text-[11px] text-neutral-400 break-keep",
+      "이 시나리오에는 따로 적힌 결정적 단서 목록이 없습니다. 진범이 준비한 거짓 행적과 진실 타임라인, 사건의 진실을 나란히 둡니다."
+    );
+    const lines = Math.max(killer.timeline?.length || 0, killer.fakeTimeline?.length || 0);
+    for (let index = 0; index < lines; index += 1) {
+      const row = document.createElement("div");
+      row.className = "p-2.5 bg-black/40 border border-neutral-800 rounded space-y-1";
+      row.dataset.timelineCompare = String(index);
+      if (killer.timeline?.[index]) appendLine(row, "text-emerald-300/90 break-keep", `진실 · ${killer.timeline[index]}`);
+      if (killer.fakeTimeline?.[index]) appendLine(row, "text-red-300 break-keep", `거짓 · ${killer.fakeTimeline[index]}`);
+      clues.appendChild(row);
+    }
+    const truth = document.createElement("div");
+    truth.className = "p-2.5 bg-black/40 border border-amber-900/50 rounded";
+    appendLine(truth, "text-amber-200 font-bold", "사건의 진실");
+    appendLine(truth, "text-neutral-200 leading-relaxed break-keep", scenario.endings?.truth || "");
+    clues.appendChild(truth);
+  }
+
+  votes.replaceChildren();
+  const tally = {};
+  Object.entries(data.players || {}).forEach(([pid, player]) => {
+    const char = scenario.characters.find(entry => entry.id === player.charId);
+    const targetId = data.votes?.[pid];
+    const target = targetId ? scenario.characters.find(entry => entry.id === targetId) : null;
+    const row = document.createElement("div");
+    row.className = "p-2 bg-neutral-900/80 rounded border border-neutral-800 flex flex-wrap justify-between gap-1";
+    row.dataset.voter = pid;
+    const who = document.createElement("span");
+    who.textContent = `${char ? char.name : "미배정"} (${player.nickname || pid})`;
+    const choice = document.createElement("span");
+    choice.className = target ? "text-red-300 font-bold" : "text-neutral-500 italic";
+    choice.textContent = target ? `→ ${target.name}` : "→ 미투표";
+    row.append(who, choice);
+    votes.appendChild(row);
+    if (targetId) tally[targetId] = (tally[targetId] || 0) + 1;
+  });
+  const summary = document.createElement("div");
+  summary.className = "text-[11px] text-neutral-400 pt-1";
+  const parts = Object.entries(tally).map(([cid, count]) => {
+    const char = scenario.characters.find(entry => entry.id === cid);
+    return `${char ? char.name : cid} ${count}표`;
+  });
+  summary.textContent = parts.length ? `득표: ${parts.join(" · ")}` : "제출된 표가 없습니다.";
+  votes.appendChild(summary);
 }
 
 const TIMELINE_VISIBLE = new Set([
@@ -1456,7 +1717,12 @@ function initTestModeButton() {
 }
 
 export function initUi() {
+  try { alertMuted = localStorage.getItem(ALERT_MUTE_KEY) === "1"; } catch (err) { alertMuted = false; }
+  syncAlertButton();
+  window.addEventListener("pointerdown", armAlerts, { once: true });
+  window.addEventListener("keydown", armAlerts, { once: true });
   document.getElementById('btnToggleBGM').addEventListener('click', toggleRainBGM);
+  document.getElementById('btnToggleAlert')?.addEventListener('click', toggleAlertMute);
   document.getElementById('btnBackToThemeSelect').addEventListener('click', () => switchView('viewThemeSelect'));
   initTestModeButton();
   initTimelineBoard();

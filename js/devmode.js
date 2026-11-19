@@ -1,5 +1,6 @@
-import { db, doc, updateDoc, getDoc, runTransaction } from "./firebase.js";
+import { db, doc, updateDoc, getDoc, deleteDoc, runTransaction } from "./firebase.js";
 import { state, actions } from "./state.js";
+import { alertStats } from "./ui.js";
 import { computeVoteWinner, devHooks, forceAdvance, refreshFromLatest, runBotInvestigations, runBotStatements } from "./game.js";
 
 const AUTO_PHASE_KEY = "mmDevAutoOnPhase";
@@ -13,7 +14,16 @@ export function initDevMode() {
       return;
     }
     state.devRealPlayerId = state.myPlayerId;
-    window.__mmTest = { state, actions, refresh: refreshFromLatest, lastAuto: null };
+    window.__mmTest = {
+      state,
+      actions,
+      refresh: refreshFromLatest,
+      lastAuto: null,
+      forceAdvance,
+      deleteRoom,
+      roomExists,
+      alertStats
+    };
     mountPanel();
     devHooks.onRoomUpdate = (data) => {
       refreshViewAsOptions(data);
@@ -24,6 +34,20 @@ export function initDevMode() {
 }
 
 let queue = Promise.resolve();
+
+async function deleteRoom(code) {
+  const room = String(code || state.currentRoomCode || "").trim().toUpperCase();
+  if (!room) return false;
+  await deleteDoc(doc(db, "rooms", room));
+  return true;
+}
+
+async function roomExists(code) {
+  const room = String(code || state.currentRoomCode || "").trim().toUpperCase();
+  if (!room) return false;
+  const snap = await getDoc(doc(db, "rooms", room));
+  return snap.exists();
+}
 
 function mountPanel() {
   const panel = document.createElement("aside");
@@ -244,7 +268,8 @@ async function autoBotVotes(data) {
         votes,
         phase: "ENDING",
         winner: computeVoteWinner(votes, fresh),
-        timerSeconds: 0
+        timerSeconds: 0,
+        timerEndsAt: Date.now()
       });
     } else {
       tx.update(ref, { votes });
