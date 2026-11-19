@@ -21,7 +21,12 @@ export const state = {
   timelineTypeFilter: "all",
   timelineTimeFocus: null,
   timelineCollapsed: null,
-  timelineScenarioId: null
+  timelineScenarioId: null,
+  authUid: null,
+  phaseAlertReady: false,
+  lastAlertedPhase: null,
+  hostChangeReady: false,
+  lastHostChangeAt: 0
 };
 
 // Late-bound game actions so view code can call them without an import cycle.

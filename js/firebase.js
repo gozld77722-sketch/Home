@@ -17,9 +17,20 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export { doc, setDoc, getDoc, updateDoc, onSnapshot, deleteDoc, runTransaction };
 
+let authReady;
+
+export function whenAuthReady() {
+  return authReady;
+}
+
 export function initAuth() {
-  signInAnonymously(auth).then(cred => {
+  authReady = signInAnonymously(auth).then(cred => {
     state.currentUser = cred.user;
-    state.myPlayerId = cred.user.uid;
-  }).catch(err => console.error("Firebase 로그인 오류:", err));
+    state.authUid = cred.user.uid;
+    if (!state.myPlayerId) state.myPlayerId = cred.user.uid;
+    return cred.user;
+  }).catch(err => {
+    console.error("Firebase 로그인 오류:", err);
+    throw err;
+  });
 }

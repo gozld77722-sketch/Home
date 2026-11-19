@@ -1,4 +1,4 @@
-import { db, doc, setDoc, getDoc, updateDoc, onSnapshot, runTransaction } from "./firebase.js";
+import { db, doc, setDoc, getDoc, updateDoc, onSnapshot, runTransaction, whenAuthReady } from "./firebase.js";
 import { state, actions } from "./state.js";
 import {
   switchView,
@@ -10,7 +10,10 @@ import {
   renderInGameDashboard,
   renderEnding,
   renderTimelineBoard,
-  parseTimelineLine
+  parseTimelineLine,
+  notifyPhase,
+  showHostChange,
+  showReconnect
 } from "./ui.js";
 
 async function loadScenarioModule(scenarioId) {
@@ -30,6 +33,10 @@ const TIMELINE_POST_PHASES = new Set(INGAME_PHASES);
 const INVESTIGATE_PHASES = new Set(['R1', 'R2', 'R3', 'R4']);
 const FINAL_VOTE_SECONDS = 120;
 const MAX_PLAYERS = 5;
+const SESSION_KEY = "mmSession";
+const HEARTBEAT_MS = 10000;
+const HOST_STALE_MS = 30000;
+const HOST_CHECK_MS = 5000;
 
 export const devHooks = { onRoomUpdate: null };
 
@@ -37,12 +44,121 @@ let latestRoomData = null;
 let phaseAdvancing = false;
 let resolvingVote = false;
 let timerFiredPhase = null;
+let lastHeartbeatAt = 0;
+let scaleWritePending = false;
+let lastScaleAt = 0;
+let assumingHost = false;
+let handingHost = false;
+let presenceStarted = false;
+
+function seatId() {
+  return state.devRealPlayerId || state.myPlayerId;
+}
 
 function isActingHost(data) {
   const room = data || latestRoomData;
   if (!room) return false;
-  if (state.devRealPlayerId) return room.hostId === state.devRealPlayerId;
-  return room.hostId === state.myPlayerId;
+  return room.hostId === seatId();
+}
+
+function readSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.roomCode || !parsed.playerId) return null;
+    return { roomCode: String(parsed.roomCode).toUpperCase(), playerId: String(parsed.playerId) };
+  } catch (err) {
+    return null;
+  }
+}
+
+function saveSession() {
+  const pid = seatId();
+  if (!state.currentRoomCode || !pid) return;
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      roomCode: state.currentRoomCode,
+      playerId: pid
+    }));
+  } catch (err) { /* ignore */ }
+}
+
+function clearSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch (err) { /* ignore */ }
+}
+
+async function ensureIdentity() {
+  await whenAuthReady();
+  if (!state.myPlayerId) state.myPlayerId = state.authUid || state.currentUser?.uid || null;
+  if (!state.myPlayerId) throw new Error("로그인 정보가 없습니다.");
+}
+
+function orderedHumans(data) {
+  return Object.entries(data?.players || {})
+    .filter(([, player]) => player && !player.isBot)
+    .map(([pid, player]) => ({
+      pid,
+      nickname: player.nickname || "플레이어",
+      joinedAt: Number(player.joinedAt) || 0,
+      lastSeen: Number(player.lastSeen) || 0
+    }))
+    .sort((a, b) => (a.joinedAt - b.joinedAt) || (a.pid < b.pid ? -1 : a.pid > b.pid ? 1 : 0));
+}
+
+function nextHostCandidate(data, now) {
+  const humans = orderedHumans(data);
+  if (humans.length < 2) return null;
+  const hostIdx = humans.findIndex(player => player.pid === data.hostId);
+  const start = hostIdx === -1 ? 0 : hostIdx + 1;
+  for (let i = 0; i < humans.length; i += 1) {
+    const player = humans[(start + i) % humans.length];
+    if (player.pid === data.hostId) continue;
+    if (player.lastSeen && now - player.lastSeen < HOST_STALE_MS) return player;
+  }
+  return null;
+}
+
+function nextHumanForManual(data) {
+  const fresh = nextHostCandidate(data, Date.now());
+  if (fresh) return fresh;
+  const humans = orderedHumans(data);
+  if (humans.length < 2) return null;
+  const hostIdx = humans.findIndex(player => player.pid === data.hostId);
+  const start = hostIdx === -1 ? 0 : hostIdx + 1;
+  for (let i = 0; i < humans.length; i += 1) {
+    const player = humans[(start + i) % humans.length];
+    if (player.pid !== data.hostId) return player;
+  }
+  return null;
+}
+
+function otherHumanExists(data) {
+  const me = seatId();
+  return orderedHumans(data).some(player => player.pid !== me);
+}
+
+function syncHandoffButtons(data) {
+  const show = !!(data && isActingHost(data) && otherHumanExists(data) && data.phase !== "ENDING");
+  document.querySelectorAll(".js-handoff-host").forEach(btn => {
+    btn.classList.toggle("hidden", !show);
+  });
+}
+
+function timerFields(seconds) {
+  const safe = Math.max(0, Math.round(Number(seconds) || 0));
+  return {
+    timerSeconds: safe,
+    timerEndsAt: Date.now() + safe * 1000
+  };
+}
+
+function remainingSeconds(data, now = Date.now()) {
+  if (!data) return 0;
+  if (Number.isFinite(data.timerEndsAt)) {
+    return Math.max(0, Math.ceil((data.timerEndsAt - now) / 1000));
+  }
+  return Math.max(0, Number(data.timerSeconds) || 0);
 }
 
 window.selectThemeAndGoToLobby = async function(themeId) {
@@ -56,50 +172,207 @@ window.selectThemeAndGoToLobby = async function(themeId) {
 function listenToRoom(roomCode) {
   if (state.roomUnsubscribe) state.roomUnsubscribe();
   state.roomUnsubscribe = onSnapshot(doc(db, "rooms", roomCode), (snapshot) => {
-    if (!snapshot.exists()) return;
-    const data = snapshot.data();
-    handleStateUpdate(data);
+    showReconnect(false);
+    if (!snapshot.exists()) {
+      leaveRoom();
+      switchView("viewThemeSelect");
+      return;
+    }
+    handleStateUpdate(snapshot.data());
+  }, (err) => {
+    console.error(err);
+    showReconnect(true);
+    setTimeout(() => {
+      if (state.currentRoomCode === roomCode) listenToRoom(roomCode);
+    }, 1500);
   });
 }
 
 function setupTimer(data) {
-  state.localTimerSeconds = data.timerSeconds ?? 900;
-  updateTimerDisplay(state.localTimerSeconds);
-
   if (state.timerInterval) clearInterval(state.timerInterval);
   state.timerInterval = null;
 
-  if (!INGAME_PHASES.includes(data.phase)) return;
+  const tick = () => {
+    const room = latestRoomData || data;
+    if (!room) return;
+    const scale = state.devTimerScale || 1;
+    let remaining = remainingSeconds(room);
+    const ingame = INGAME_PHASES.includes(room.phase);
 
-  if (state.localTimerSeconds <= 0) {
-    if (isActingHost(data) && timerFiredPhase !== data.phase) {
-      timerFiredPhase = data.phase;
-      onTimerExpired(data);
+    if (Number.isFinite(room.timerEndsAt)) {
+      state.localTimerSeconds = remaining;
+      updateTimerDisplay(remaining);
+      if (isActingHost(room) && scale > 1 && remaining > 0 && ingame && state.currentRoomCode) {
+        const now = Date.now();
+        if (!scaleWritePending && now - lastScaleAt >= 900) {
+          lastScaleAt = now;
+          scaleWritePending = true;
+          const shifted = room.timerEndsAt - (scale - 1) * 1000;
+          const nextRemaining = Math.max(0, Math.ceil((shifted - now) / 1000));
+          room.timerEndsAt = shifted;
+          room.timerSeconds = nextRemaining;
+          remaining = nextRemaining;
+          state.localTimerSeconds = remaining;
+          updateTimerDisplay(remaining);
+          updateDoc(doc(db, "rooms", state.currentRoomCode), {
+            timerEndsAt: shifted,
+            timerSeconds: nextRemaining
+          }).catch(() => {}).finally(() => { scaleWritePending = false; });
+        }
+      }
+    } else if (isActingHost(room) && ingame) {
+      if (!tick.started) tick.started = true;
+      else state.localTimerSeconds = Math.max(0, (state.localTimerSeconds ?? remaining) - scale);
+      remaining = state.localTimerSeconds ?? remaining;
+      updateTimerDisplay(remaining);
+      if (state.currentRoomCode && (remaining === 0 || scale > 1 || remaining % 5 === 0)) {
+        updateDoc(doc(db, "rooms", state.currentRoomCode), { timerSeconds: remaining }).catch(() => {});
+      }
+    } else {
+      state.localTimerSeconds = remaining;
+      updateTimerDisplay(remaining);
     }
+
+    if (ingame && remaining <= 0 && isActingHost(room) && timerFiredPhase !== room.phase) {
+      timerFiredPhase = room.phase;
+      onTimerExpired(room);
+    } else if (remaining > 0 && timerFiredPhase === room.phase) {
+      timerFiredPhase = null;
+    }
+  };
+
+  tick();
+  if (!INGAME_PHASES.includes(data.phase)) return;
+  state.timerInterval = setInterval(tick, 1000);
+}
+
+async function touchPresence(force = false) {
+  const pid = seatId();
+  if (!state.currentRoomCode || !pid) return;
+  if (!force && !latestRoomData?.players?.[pid]) return;
+  if (document.visibilityState === "hidden" && !force) return;
+  const now = Date.now();
+  if (!force && now - lastHeartbeatAt < HEARTBEAT_MS - 500) return;
+  lastHeartbeatAt = now;
+  try {
+    await updateDoc(doc(db, "rooms", state.currentRoomCode), {
+      [`players.${pid}.lastSeen`]: now
+    });
+  } catch (err) { /* offline or room gone */ }
+}
+
+async function transferHost(nextPid, mode) {
+  if (!state.currentRoomCode || !nextPid) return;
+  const ref = doc(db, "rooms", state.currentRoomCode);
+  const me = seatId();
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return;
+    const fresh = snap.data();
+    const players = fresh.players || {};
+    const target = players[nextPid];
+    if (!target || target.isBot) return;
+    if (fresh.hostId === nextPid) return;
+    if (mode === "auto") {
+      const now = Date.now();
+      const host = players[fresh.hostId];
+      const stale = !host?.lastSeen || now - Number(host.lastSeen) >= HOST_STALE_MS;
+      if (!stale) return;
+      const candidate = nextHostCandidate(fresh, now);
+      if (!candidate || candidate.pid !== nextPid || nextPid !== me) return;
+    } else if (fresh.hostId !== me) {
+      return;
+    }
+    const fromId = fresh.hostId;
+    const patch = {
+      hostId: nextPid,
+      [`players.${nextPid}.isHost`]: true,
+      hostChange: {
+        at: Date.now(),
+        fromId,
+        toId: nextPid,
+        toName: target.nickname || "플레이어"
+      }
+    };
+    if (fromId && players[fromId]) patch[`players.${fromId}.isHost`] = false;
+    tx.update(ref, patch);
+  });
+}
+
+async function maybeAssumeHost() {
+  if (assumingHost || !latestRoomData || !state.currentRoomCode) return;
+  const data = latestRoomData;
+  const me = seatId();
+  if (!me || !data.players?.[me] || data.players[me].isBot) return;
+  if (data.hostId === me) return;
+  const now = Date.now();
+  const host = data.players?.[data.hostId];
+  if (host?.lastSeen && now - Number(host.lastSeen) < HOST_STALE_MS) return;
+  const next = nextHostCandidate(data, now);
+  if (!next || next.pid !== me) return;
+  assumingHost = true;
+  try {
+    await transferHost(me, "auto");
+  } catch (err) {
+    console.error(err);
+  } finally {
+    assumingHost = false;
+  }
+}
+
+async function handOffHostManual() {
+  if (handingHost) return;
+  const data = latestRoomData;
+  if (!data || !isActingHost(data)) return;
+  const next = nextHumanForManual(data);
+  if (!next) {
+    alert("넘길 다른 플레이어가 없습니다.");
     return;
   }
-  timerFiredPhase = null;
+  handingHost = true;
+  try {
+    await transferHost(next.pid, "manual");
+  } catch (err) {
+    console.error(err);
+    alert("호스트를 넘기지 못했습니다.");
+  } finally {
+    handingHost = false;
+  }
+}
 
-  state.timerInterval = setInterval(() => {
-    if (state.localTimerSeconds <= 0) return;
-    const scale = state.devTimerScale || 1;
-    state.localTimerSeconds = Math.max(0, state.localTimerSeconds - scale);
-    updateTimerDisplay(state.localTimerSeconds);
-    const shouldSync = isActingHost(data) && (
-      state.localTimerSeconds === 0 || scale > 1 || state.localTimerSeconds % 5 === 0
-    );
-    if (shouldSync && state.currentRoomCode) {
-      updateDoc(doc(db, "rooms", state.currentRoomCode), { timerSeconds: state.localTimerSeconds }).catch(() => {});
-    }
-    if (state.localTimerSeconds === 0) {
-      clearInterval(state.timerInterval);
-      state.timerInterval = null;
-      if (isActingHost(data) && timerFiredPhase !== data.phase) {
-        timerFiredPhase = data.phase;
-        onTimerExpired(data);
-      }
-    }
-  }, 1000);
+function leaveRoom() {
+  if (state.roomUnsubscribe) {
+    state.roomUnsubscribe();
+    state.roomUnsubscribe = null;
+  }
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+  state.currentRoomCode = null;
+  latestRoomData = null;
+  clearSession();
+}
+
+function resumeRoom() {
+  if (!state.currentRoomCode) return;
+  showReconnect(true);
+  listenToRoom(state.currentRoomCode);
+  touchPresence(true);
+}
+
+function startPresenceLoops() {
+  if (presenceStarted) return;
+  presenceStarted = true;
+  setInterval(() => { touchPresence(false); }, HEARTBEAT_MS);
+  setInterval(() => { maybeAssumeHost(); }, HOST_CHECK_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") resumeRoom();
+  });
+  window.addEventListener("online", resumeRoom);
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) resumeRoom();
+  });
 }
 
 async function onTimerExpired(data) {
@@ -109,7 +382,7 @@ async function onTimerExpired(data) {
     const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
     if (!snap.exists()) return;
     const fresh = snap.data();
-    if (fresh.phase !== data.phase) return;
+    if (!isActingHost(fresh) || fresh.phase !== data.phase) return;
     if (fresh.phase === 'FINAL_VOTE') await resolveFinalVote(fresh);
     else await proceedNextPhase(fresh);
   } finally {
@@ -124,13 +397,44 @@ function restoreHostNoticeDraft() {
   if (input.value !== state.hostNoticeDraft) input.value = state.hostNoticeDraft;
 }
 
+function syncPhaseAlert(data) {
+  if (!state.phaseAlertReady) {
+    state.phaseAlertReady = true;
+    state.lastAlertedPhase = data.phase;
+    return;
+  }
+  if (data.phase && data.phase !== state.lastAlertedPhase) {
+    state.lastAlertedPhase = data.phase;
+    notifyPhase(data.phase);
+  }
+}
+
+function syncHostChange(data) {
+  const at = Number(data.hostChange?.at) || 0;
+  if (!state.hostChangeReady) {
+    state.hostChangeReady = true;
+    state.lastHostChangeAt = at;
+    return;
+  }
+  if (at > state.lastHostChangeAt) {
+    state.lastHostChangeAt = at;
+    const name = data.hostChange?.toName || "다른 플레이어";
+    showHostChange(`호스트가 ${name}에게 넘어갔습니다.`);
+  }
+}
+
 function handleStateUpdate(data, notifyDev = true) {
   latestRoomData = data;
   state.currentPhase = data.phase;
   state.isCurrentHost = (data.hostId === state.myPlayerId);
   document.body.dataset.phase = data.phase || "";
+  document.body.dataset.host = isActingHost(data) ? "1" : "0";
   if (state.whisperDraft && state.whisperDraft.phase !== data.phase) state.whisperDraft = null;
   restoreHostNoticeDraft();
+  syncPhaseAlert(data);
+  syncHostChange(data);
+  syncHandoffButtons(data);
+  maybeAssumeHost();
 
   const pCount = Object.keys(data.players || {}).length;
   document.getElementById('displayRoomCode').innerText = data.roomCode;
@@ -373,7 +677,7 @@ async function proceedNextPhase(data) {
   await updateDoc(doc(db, "rooms", state.currentRoomCode), {
     phase: nextPhase,
     round: nextRound,
-    timerSeconds: nextTimer,
+    ...timerFields(nextTimer),
     roundInvestigateDone: {},
     roundClueDone: {},
     skipVote: null,
@@ -387,7 +691,7 @@ async function beginRound1() {
   await updateDoc(doc(db, "rooms", state.currentRoomCode), {
     phase: 'R1',
     round: 1,
-    timerSeconds: 900,
+    ...timerFields(900),
     roundInvestigateDone: {},
     roundClueDone: {},
     skipVote: null,
@@ -710,7 +1014,7 @@ export async function resolveFinalVote(source) {
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       phase: 'ENDING',
       winner,
-      timerSeconds: 0
+      ...timerFields(0)
     });
   } finally {
     resolvingVote = false;
@@ -739,7 +1043,7 @@ async function submitVote(targetCharId) {
         votes,
         phase: "ENDING",
         winner: computeVoteWinner(votes, fresh),
-        timerSeconds: 0
+        ...timerFields(0)
       });
     } else {
       tx.update(ref, { votes });
@@ -908,10 +1212,20 @@ export function initGame() {
   document.getElementById('btnHeaderHome').addEventListener('click', () => {
     if (state.currentRoomCode) {
       if (!confirm("현재 진행 중인 방에서 나가고 시나리오 선택 화면으로 이동하시겠습니까?")) return;
-      if (state.roomUnsubscribe) { state.roomUnsubscribe(); state.roomUnsubscribe = null; }
-      state.currentRoomCode = null;
+      leaveRoom();
     }
     switchView('viewThemeSelect');
+  });
+
+  document.querySelectorAll('.js-handoff-host').forEach(btn => {
+    btn.addEventListener('click', () => {
+      handOffHostManual().catch(err => console.error(err));
+    });
+  });
+
+  document.getElementById('btnEndingHome')?.addEventListener('click', () => {
+    leaveRoom();
+    location.reload();
   });
 
   const hostNoticeInput = document.getElementById('inputHostNotice');
@@ -952,10 +1266,12 @@ export function initGame() {
   document.getElementById('btnCreateRoom').addEventListener('click', async () => {
     const nick = document.getElementById('inputNickname').value.trim();
     if (!nick) return alert("닉네임을 입력해 주세요.");
+    await ensureIdentity();
     if (!state.currentScenario) await loadScenarioModule(state.currentThemeId);
 
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     state.currentRoomCode = roomCode;
+    const now = Date.now();
 
     const initialAlibiPool = {};
     state.currentScenario.characters.forEach(c => {
@@ -965,12 +1281,12 @@ export function initGame() {
     const roomData = {
       roomCode: roomCode,
       themeId: state.currentThemeId,
-      hostId: state.myPlayerId,
+      hostId: seatId(),
       phase: 'LOBBY',
       round: 1,
       timerSeconds: 900,
       players: {
-        [state.myPlayerId]: { nickname: nick, charId: null, isHost: true }
+        [seatId()]: { nickname: nick, charId: null, isHost: true, joinedAt: now, lastSeen: now }
       },
       alibiPool: initialAlibiPool,
       cluePool: state.currentScenario.clues.map(c => c.id),
@@ -989,14 +1305,16 @@ export function initGame() {
     if (new URLSearchParams(location.search).get("test") === "1") roomData.test = true;
 
     await setDoc(doc(db, "rooms", roomCode), roomData);
+    saveSession();
     listenToRoom(roomCode);
   });
 
-  // 방 참가
+  // 방 참가. 이미 방에 있는 플레이어는 진행 중이어도 같은 자리로 돌아온다.
   document.getElementById('btnJoinRoom').addEventListener('click', async () => {
     const nick = document.getElementById('inputNickname').value.trim();
     const code = document.getElementById('inputRoomCode').value.trim().toUpperCase();
     if (!nick || !code) return alert("닉네임과 방 코드를 모두 입력해 주세요.");
+    await ensureIdentity();
 
     const roomRef = doc(db, "rooms", code);
     const snap = await getDoc(roomRef);
@@ -1004,8 +1322,9 @@ export function initGame() {
 
     const rData = snap.data();
     const players = rData.players || {};
-    const alreadyIn = !!players[state.myPlayerId];
-    if (rData.phase !== 'LOBBY') {
+    const pid = state.myPlayerId;
+    const alreadyIn = !!players[pid];
+    if (!alreadyIn && rData.phase !== 'LOBBY') {
       return alert("이미 시작된 방에는 참가할 수 없습니다.");
     }
     if (!alreadyIn && Object.keys(players).length >= MAX_PLAYERS) {
@@ -1016,10 +1335,19 @@ export function initGame() {
       await loadScenarioModule(state.currentThemeId);
     }
 
-    await updateDoc(roomRef, {
-      [`players.${state.myPlayerId}`]: { nickname: nick, charId: null, isHost: false }
-    });
+    if (alreadyIn) {
+      await updateDoc(roomRef, {
+        [`players.${pid}.lastSeen`]: Date.now(),
+        [`players.${pid}.nickname`]: nick || players[pid].nickname
+      });
+    } else {
+      const now = Date.now();
+      await updateDoc(roomRef, {
+        [`players.${pid}`]: { nickname: nick, charId: null, isHost: false, joinedAt: now, lastSeen: now }
+      });
+    }
     state.currentRoomCode = code;
+    saveSession();
     listenToRoom(code);
   });
 
@@ -1113,4 +1441,41 @@ export function initGame() {
       systemNotice: "밀담룸 2 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 2로 이동하세요!"
     });
   });
+
+  const saved = readSession();
+  if (saved?.playerId) state.myPlayerId = saved.playerId;
+  startPresenceLoops();
+  whenAuthReady()
+    .then(() => attemptReconnect(saved))
+    .catch(err => console.error(err));
+}
+
+async function attemptReconnect(saved) {
+  if (!saved?.roomCode || !saved?.playerId) return;
+  showReconnect(true);
+  state.myPlayerId = saved.playerId;
+  try {
+    await ensureIdentity();
+    const snap = await getDoc(doc(db, "rooms", saved.roomCode));
+    if (!snap.exists() || !snap.data().players?.[saved.playerId]) {
+      clearSession();
+      showReconnect(false);
+      return;
+    }
+    const data = snap.data();
+    state.currentThemeId = data.themeId || state.currentThemeId;
+    const loaded = await loadScenarioModule(state.currentThemeId);
+    if (!loaded) {
+      showReconnect(false);
+      return;
+    }
+    state.currentRoomCode = saved.roomCode;
+    state.myPlayerId = saved.playerId;
+    saveSession();
+    listenToRoom(saved.roomCode);
+    touchPresence(true);
+  } catch (err) {
+    console.error(err);
+    showReconnect(false);
+  }
 }
