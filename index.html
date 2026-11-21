@@ -334,12 +334,13 @@
             
             <div id="hostWhisperAssignArea" class="hidden space-y-2 pt-1 border-t border-amber-800/40">
               <p class="text-[11px] text-neutral-300 leading-tight">
-                <strong>[방장 전용]</strong> 밀담 인원을 체크 후 배정하세요.
+                <strong>[방장 전용]</strong> 밀담 인원을 체크 후 배정하세요. 한 곳에는 최대 3명입니다.
               </p>
+              <p id="whisperAssignError" class="hidden text-[11px] font-bold text-red-200 bg-red-950/70 border border-red-700 rounded px-2 py-1.5 break-keep" role="alert"></p>
               
               <div class="grid grid-cols-2 gap-2">
                 <div class="p-2 bg-neutral-900/90 rounded border border-neutral-700">
-                  <span class="text-[11px] font-bold text-amber-400 block mb-1">밀담룸 1 배정</span>
+                  <span id="whisperRoom1AssignLabel" class="text-[11px] font-bold text-amber-400 block mb-1">밀담룸 1 (0/3)</span>
                   <div id="whisperRoom1Checkboxes" class="space-y-1"></div>
                   <button id="btnAssignRoom1" class="w-full mt-2 py-1 bg-amber-800 hover:bg-amber-700 text-[10px] font-bold text-white rounded">
                     룸 1 배정 완료
@@ -347,7 +348,7 @@
                 </div>
 
                 <div class="p-2 bg-neutral-900/90 rounded border border-indigo-700">
-                  <span class="text-[11px] font-bold text-indigo-400 block mb-1">밀담룸 2 배정</span>
+                  <span id="whisperRoom2AssignLabel" class="text-[11px] font-bold text-indigo-400 block mb-1">밀담룸 2 (0/3)</span>
                   <div id="whisperRoom2Checkboxes" class="space-y-1"></div>
                   <button id="btnAssignRoom2" class="w-full mt-2 py-1 bg-indigo-800 hover:bg-indigo-700 text-[10px] font-bold text-white rounded">
                     룸 2 배정 완료
