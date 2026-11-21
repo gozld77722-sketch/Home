@@ -1208,6 +1208,32 @@ actions.postTimeline = postTimeline;
 actions.removeTimelineEntry = removeTimelineEntry;
 actions.getRoomData = () => latestRoomData;
 
+const WHISPER_ROOM_CAP = 3;
+const WHISPER_CAP_MESSAGE = "밀담룸 한 곳에는 최대 3명까지 배정할 수 있어요.";
+
+function whisperCheckedCount(className) {
+  return document.querySelectorAll(`input.${className}:checked`).length;
+}
+
+function clearWhisperAssignError() {
+  const el = document.getElementById("whisperAssignError");
+  if (!el) return;
+  el.textContent = "";
+  el.classList.add("hidden");
+}
+
+function rejectOversizedWhisperRooms() {
+  const room1 = whisperCheckedCount("chk-whisper-1");
+  const room2 = whisperCheckedCount("chk-whisper-2");
+  if (room1 <= WHISPER_ROOM_CAP && room2 <= WHISPER_ROOM_CAP) return false;
+  const el = document.getElementById("whisperAssignError");
+  if (el) {
+    el.textContent = WHISPER_CAP_MESSAGE;
+    el.classList.remove("hidden");
+  }
+  return true;
+}
+
 export function initGame() {
   document.getElementById('btnHeaderHome').addEventListener('click', () => {
     if (state.currentRoomCode) {
@@ -1413,6 +1439,8 @@ export function initGame() {
   });
 
   document.getElementById('btnAssignRoom1').addEventListener('click', async () => {
+    if (rejectOversizedWhisperRooms()) return;
+    clearWhisperAssignError();
     const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
     if (!snap.exists()) return;
     const data = snap.data();
@@ -1428,6 +1456,8 @@ export function initGame() {
   });
 
   document.getElementById('btnAssignRoom2').addEventListener('click', async () => {
+    if (rejectOversizedWhisperRooms()) return;
+    clearWhisperAssignError();
     const snap = await getDoc(doc(db, "rooms", state.currentRoomCode));
     if (!snap.exists()) return;
     const data = snap.data();

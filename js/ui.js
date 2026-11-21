@@ -759,10 +759,34 @@ function renderWhisperCheckboxes(data) {
     fillWhisperBox(c2, 2, people, room2);
     c1.dataset.roster = rosterKey;
     c2.dataset.roster = rosterKey;
-    return;
+  } else {
+    syncWhisperChecked("chk-whisper-1", room1);
+    syncWhisperChecked("chk-whisper-2", room2);
   }
-  syncWhisperChecked("chk-whisper-1", room1);
-  syncWhisperChecked("chk-whisper-2", room2);
+  updateWhisperRoomCountLabels();
+}
+
+const WHISPER_ROOM_CAP = 3;
+
+function updateWhisperRoomCountLabels() {
+  const n1 = document.querySelectorAll("input.chk-whisper-1:checked").length;
+  const n2 = document.querySelectorAll("input.chk-whisper-2:checked").length;
+  paintWhisperCount(document.getElementById("whisperRoom1AssignLabel"), "밀담룸 1", n1, "text-amber-400");
+  paintWhisperCount(document.getElementById("whisperRoom2AssignLabel"), "밀담룸 2", n2, "text-indigo-400");
+  if (n1 <= WHISPER_ROOM_CAP && n2 <= WHISPER_ROOM_CAP) {
+    const err = document.getElementById("whisperAssignError");
+    if (err && !err.classList.contains("hidden")) {
+      err.textContent = "";
+      err.classList.add("hidden");
+    }
+  }
+}
+
+function paintWhisperCount(el, name, count, okClass) {
+  if (!el) return;
+  el.textContent = `${name} (${count}/${WHISPER_ROOM_CAP})`;
+  el.classList.remove("text-red-400", "text-amber-400", "text-indigo-400");
+  el.classList.add(count > WHISPER_ROOM_CAP ? "text-red-400" : okClass);
 }
 
 window.handleWhisperCheckboxChange = function(pid, roomNum) {
@@ -775,6 +799,7 @@ window.handleWhisperCheckboxChange = function(pid, roomNum) {
     room1: readChecked("chk-whisper-1"),
     room2: readChecked("chk-whisper-2")
   };
+  updateWhisperRoomCountLabels();
 };
 
 function renderWhisperCards(data, myRoomType) {
