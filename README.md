@@ -2,7 +2,7 @@
 
 브라우저에서 여는 정적 머더 미스터리입니다. 2~5명이 같은 방에 모여 역할을 고르고, 알리바이와 현장 증거를 조사한 뒤 진범을 지목합니다. 방 상태(인원, 카드, 단계, 투표, 타임라인)는 Firebase Firestore `rooms` 문서에 실시간으로 저장되고, 회원 가입 화면 없이 Firebase 익명 인증으로 들어갑니다. 게임은 디스코드에 접속하지 않고, 어느 음성방으로 이동할지만 안내합니다. 시나리오마다 진범은 미리 정해져 있으며 방을 만들 때 다시 뽑히지 않습니다.
 
-플레이: [https://gozld77722-sketch.github.io/Home/](https://gozld77722-sketch.github.io/Home/)
+플레이: [게임 바로가기](https://bit.ly/4i6nEcs)
 
 ## 주요 기능
 
@@ -194,4 +194,4 @@ python3 -m http.server 8080
 
 브라우저에서 `http://localhost:8080/` 을 엽니다. 테스트 모드는 `http://localhost:8080/?test=1` 입니다. Firestore에 접속하므로 네트워크가 필요합니다. 별도 빌드나 패키지 설치는 없습니다.
 
-배포는 GitHub Pages로, 소스는 `main` 브랜치 루트입니다. 워크플로 빌드나 `gh-pages` 브랜치는 없습니다. `main`에 반영되면 [https://gozld77722-sketch.github.io/Home/](https://gozld77722-sketch.github.io/Home/) 에서 같은 정적 파일을 제공합니다. 경로가 상대 경로이므로 저장소 이름 `Home` 아래에서도 그대로 열립니다.
+배포는 GitHub Pages로, 소스는 `main` 브랜치 루트입니다. 워크플로 빌드나 `gh-pages` 브랜치는 없습니다. `main`에 반영되면 [게임 주소](https://bit.ly/4i6nEcs) 에서 같은 정적 파일을 제공합니다. 경로가 상대 경로이므로 저장소 이름 `Home` 아래에서도 그대로 열립니다.
