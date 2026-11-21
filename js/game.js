@@ -990,7 +990,7 @@ async function shareCardToWhisperRoom(roomType, title, desc, img, data) {
     }
   });
 
-  showToast(`[${title}] 증거를 밀담룸 플레이어들에게 실물로 공개했습니다!`);
+  showToast(`${title} — 밀담룸 플레이어들에게 공개했습니다!`);
 }
 
 export function computeVoteWinner(votes, data) {
