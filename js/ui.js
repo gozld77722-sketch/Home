@@ -114,6 +114,15 @@ export function showHostChange(text) {
   showHostChange.hideTimer = setTimeout(() => banner.classList.add("hidden"), 8000);
 }
 
+export function showToast(text, ms = 2500) {
+  const el = document.getElementById("shareToast");
+  if (!el) return;
+  el.textContent = text || "";
+  el.classList.remove("hidden");
+  clearTimeout(showToast.hideTimer);
+  showToast.hideTimer = setTimeout(() => el.classList.add("hidden"), ms);
+}
+
 export function showReconnect(on) {
   const el = document.getElementById("reconnectIndicator");
   if (!el) return;
@@ -343,6 +352,13 @@ export function renderCharacterSelection(data) {
 
   document.getElementById('scenarioModeBadge').innerText = playerModeLabel(pCount);
 
+  const guide = document.getElementById('characterSelectGuide');
+  if (guide) {
+    guide.textContent = is5P
+      ? "플레이할 인물을 선택하세요. (5번째 캐릭터가 해금되었습니다)"
+      : "플레이할 인물을 선택하세요. (5번째 캐릭터는 5명이 모여야 해금됩니다)";
+  }
+
   const myInfo = data.players[state.myPlayerId];
   const randomBtn = document.getElementById('btnRandomAssign');
 
@@ -395,9 +411,11 @@ export function renderCharacterSelection(data) {
     startBtn.classList.remove('hidden');
     if (pCount >= 2 && allSelected) {
       startBtn.disabled = false;
+      startBtn.textContent = "스토리 프롤로그 읽기";
       startBtn.className = "w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-amber-100 text-sm font-bold rounded shadow transition cursor-pointer";
     } else {
       startBtn.disabled = true;
+      startBtn.textContent = "스토리 프롤로그 읽기 (최소 2인 이상 선택 필요)";
       startBtn.className = "w-full sm:w-auto px-6 py-2.5 bg-neutral-800 text-neutral-500 text-sm font-bold rounded cursor-not-allowed";
     }
   } else {
