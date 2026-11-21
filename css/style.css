@@ -467,3 +467,24 @@ body.show-noir-landing .noir-bg {
   background: rgba(6, 78, 59, 0.95);
   border: 1px solid rgba(52, 211, 153, 0.8);
 }
+.share-toast {
+  top: auto;
+  bottom: max(0.85rem, env(safe-area-inset-bottom));
+  z-index: 75;
+  color: #fff7ed;
+  background: rgba(69, 26, 3, 0.96);
+  border: 1px solid rgba(251, 191, 36, 0.9);
+  border-radius: 0.9rem;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 0.7rem 1rem;
+  text-align: center;
+}
+@media (max-width: 639px) {
+  .share-toast {
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    font-size: 14px;
+    line-height: 1.45;
+    padding: 0.8rem 0.95rem;
+  }
+}

@@ -13,7 +13,8 @@ import {
   parseTimelineLine,
   notifyPhase,
   showHostChange,
-  showReconnect
+  showReconnect,
+  showToast
 } from "./ui.js";
 
 async function loadScenarioModule(scenarioId) {
@@ -524,11 +525,28 @@ function syncHostNotice(data) {
   }
 }
 
+function whisperAssignmentBanner(data) {
+  if (!String(data.phase || "").includes("WHISPER")) return "";
+  const room1 = data.whisperRooms?.room1 || [];
+  const room2 = data.whisperRooms?.room2 || [];
+  if (!room1.length && !room2.length) return "";
+  const me = state.myPlayerId;
+  if (!state.isCurrentHost && room1.includes(me)) return "디스코드 밀담방 1로 이동하세요!";
+  if (!state.isCurrentHost && room2.includes(me)) return "디스코드 밀담방 2로 이동하세요!";
+  const players = Object.keys(data.players || {});
+  const assigned = new Set([...room1, ...room2]);
+  const complete = players.length > 0 && players.every((pid) => assigned.has(pid));
+  const title = complete ? "밀담룸 배정 완료" : "밀담룸 배정";
+  return `${title}: 룸1 ${room1.length}명 · 룸2 ${room2.length}명`;
+}
+
 function syncSystemNotice(data) {
   const line = document.getElementById('systemNoticeLine');
   if (!line) return;
-  if (data.systemNotice) {
-    line.textContent = data.systemNotice;
+  const stored = (data.systemNotice || "").trim();
+  const text = stored || whisperAssignmentBanner(data);
+  if (text) {
+    line.textContent = text;
     line.classList.remove('hidden');
   } else {
     line.textContent = "";
@@ -972,7 +990,7 @@ async function shareCardToWhisperRoom(roomType, title, desc, img, data) {
     }
   });
 
-  alert(`[${title}] 증거를 밀담룸 플레이어들에게 실물로 공개했습니다!`);
+  showToast(`[${title}] 증거를 밀담룸 플레이어들에게 실물로 공개했습니다!`);
 }
 
 export function computeVoteWinner(votes, data) {
@@ -1451,7 +1469,7 @@ export function initGame() {
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       'whisperRooms.room1': selected,
       'whisperRooms.room2': cleanedRoom2,
-      systemNotice: "밀담룸 1 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 1로 이동하세요!"
+      systemNotice: ""
     });
   });
 
@@ -1468,7 +1486,7 @@ export function initGame() {
     await updateDoc(doc(db, "rooms", state.currentRoomCode), {
       'whisperRooms.room2': selected,
       'whisperRooms.room1': cleanedRoom1,
-      systemNotice: "밀담룸 2 배정이 확정되었습니다. 배정된 인원은 디스코드 밀담방 2로 이동하세요!"
+      systemNotice: ""
     });
   });
 
